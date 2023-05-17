@@ -1,0 +1,14 @@
+.svn/
+.vs/
+Library/
+obj/
+Temp/
+Build/
+.gradle/
+*.csproj
+*.sln
+Logs/
+AddressableAssetsData/
+AddressableAssetsData.meta
+UserSettings/
+UIElementsSchema/
