@@ -1,0 +1,3 @@
+[submodule "StableDiffUnity/Assets/UCL"]
+	path = StableDiffUnity/Assets/UCL
+	url = https://github.com/tim099/UCL
