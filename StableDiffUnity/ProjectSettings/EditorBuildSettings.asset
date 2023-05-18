@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/StableDiffUnity/SDU.unity
+    guid: 1ba0aab7472902741b73622f8974497a
   m_configObjects: {}

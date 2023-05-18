@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UCL.Core.EditorLib.Page;
+using UCL.Core.Game;
 using UCL.Core.LocalizeLib;
 using UnityEngine;
 
@@ -10,10 +11,16 @@ namespace SDU
 {
     public class SDU_EditorMenuPage : UCL_EditorPage
     {
-        public override string WindowName => "SDU_EditorMenu";
+        public const string SDU_Version = "1.0.0";
+        public override string WindowName => $"SDU_EditorMenu {SDU_Version}";
+
         protected override bool ShowCloseButton => false;
         protected override bool ShowBackButton => false;
 
+        protected override void TopBar()
+        {
+            //base.TopBar();
+        }
         //UCL.Core.UCL_ObjectDictionary m_Dic = new UCL.Core.UCL_ObjectDictionary();
 
         /// <summary>
@@ -25,8 +32,16 @@ namespace SDU
             {
                 if (GUILayout.Button("Install StableDiffusion"))
                 {
-                    UCL_EditorPage.Create<UCL_LocalizeEditPage>();
+                    SDU_StableDiffusionPage.Create();
                 }
+
+#if !UNITY_EDITOR
+                GUILayout.Space(30);
+                if (GUILayout.Button("Exit SDU"))
+                {
+                    UCL_GameManager.Instance.ExitGame();
+                }
+#endif
             }
         }
     }
