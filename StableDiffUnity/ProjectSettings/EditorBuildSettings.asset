@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/StableDiffUnity/SDU.unity
-    guid: 1ba0aab7472902741b73622f8974497a
+    path: Assets/SDU_URP/SDU_URP.unity
+    guid: 37111521abe374e459de84c98b0ecff2
   m_configObjects: {}
