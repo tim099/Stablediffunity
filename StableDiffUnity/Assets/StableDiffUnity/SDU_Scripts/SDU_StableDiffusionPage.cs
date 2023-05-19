@@ -39,23 +39,23 @@ namespace SDU
             }
             set
             {
-                if (PlayerPrefs.HasKey(ConfigFilePathKey))//Old Path
-                {
-                    try
-                    {
-                        string aOldPath = PlayerPrefs.GetString(ConfigFilePathKey);
+                //if (PlayerPrefs.HasKey(ConfigFilePathKey))//Old Path
+                //{
+                //    try
+                //    {
+                //        string aOldPath = PlayerPrefs.GetString(ConfigFilePathKey);
 
-                        if (File.Exists(aOldPath))
-                        {
-                            //File.Move(aOldPath, value);
-                            File.Delete(aOldPath);
-                        }
-                    }
-                    catch(Exception e)
-                    {
-                        Debug.LogException(e);
-                    }
-                }
+                //        if (File.Exists(aOldPath))
+                //        {
+                //            //File.Move(aOldPath, value);
+                //            File.Delete(aOldPath);
+                //        }
+                //    }
+                //    catch(Exception e)
+                //    {
+                //        Debug.LogException(e);
+                //    }
+                //}
                 PlayerPrefs.SetString(ConfigFilePathKey, value);
 
             }
@@ -148,6 +148,23 @@ namespace SDU
             public List<SDU_WebUIClient.Get.SdApi.V1.SdModels.Responses> m_Models = new();
             public SDU_WebUIClient.Get.SdApi.V1.CmdFlags.Responses m_CmdFlags = new();
         }
+
+        [UCL.Core.ATTR.EnableUCLEditor]
+        [System.Serializable]
+        public class ResolutionSettings
+        {
+            public int m_Width = 1920;
+            public int m_Height = 1080;
+            public FullScreenMode m_FullScreenMode = FullScreenMode.Windowed;
+
+            [UCL.Core.ATTR.UCL_FunctionButton]
+            public void ApplyResolutionSetting()
+            {
+                Screen.SetResolution(m_Width, m_Height, m_FullScreenMode);
+            }
+        }
+        //Screen.SetResolution(resolution.x, resolution.y, Screen.fullScreenMode);
+
         [UCL.Core.ATTR.EnableUCLEditor]
         [System.Serializable]
         public class Tex2ImgSettings
@@ -190,10 +207,13 @@ namespace SDU
         public class RunTimeData : UCL.Core.JsonLib.UnityJsonSerializable
         {
             public InstallSetting m_InstallSetting = new InstallSetting();
+            public ResolutionSettings m_ResolutionSettings = new ResolutionSettings();
             public StableDiffusionAPI m_StableDiffusionAPI = new StableDiffusionAPI();
             public WebUISettings m_WebUISettings = new WebUISettings();
             public Tex2ImgSettings m_Tex2ImgSettings = new Tex2ImgSettings();
             public Tex2ImgResults m_Tex2ImgResults = new Tex2ImgResults();
+
+
 
             public bool m_RedirectStandardOutput = false;
             public bool m_AutoOpenWeb = true;
@@ -513,12 +533,27 @@ namespace SDU
             //{
             //    System.Diagnostics.Process.Start(Data.m_WebURL);
             //}
-            var aConfigFilePath = ConfigFilePath;
-            var aNewConfigFilePath = UCL_GUILayout.TextField("ConfigFilePath", aConfigFilePath);
-            if(aNewConfigFilePath != aConfigFilePath)
+            using(var aScope = new GUILayout.HorizontalScope("box"))
             {
-                ConfigFilePath = aNewConfigFilePath;
+                if (GUILayout.Button("Save", GUILayout.ExpandWidth(false)))
+                {
+                    SaveRunTimeData();
+                }
+                if (GUILayout.Button("Load", GUILayout.ExpandWidth(false)))
+                {
+                    if (File.Exists(ConfigFilePath))
+                    {
+                        s_RunTimeData = LoadRunTimeData();
+                    }
+                }
+                var aConfigFilePath = ConfigFilePath;
+                var aNewConfigFilePath = UCL_GUILayout.TextField("ConfigFilePath", aConfigFilePath);
+                if (aNewConfigFilePath != aConfigFilePath)
+                {
+                    ConfigFilePath = aNewConfigFilePath;
+                }
             }
+
             UCL.Core.UI.UCL_GUILayout.DrawObjectData(Data, m_Dic.GetSubDic("RunTimeData"), "Configs", true);
 
             if (!m_GeneratingImage && !m_StartGenerating)
@@ -563,10 +598,10 @@ namespace SDU
             {
                 UnityChan.IdleChanger.s_Ins.CustomOnGUI();
             }
-            if (UnityChan.FaceUpdate.s_Ins != null)
-            {
-                UnityChan.FaceUpdate.s_Ins.CustomOnGUI();
-            }
+            //if (UnityChan.FaceUpdate.s_Ins != null)
+            //{
+            //    UnityChan.FaceUpdate.s_Ins.CustomOnGUI();
+            //}
 
         }
         public void StartServer()
