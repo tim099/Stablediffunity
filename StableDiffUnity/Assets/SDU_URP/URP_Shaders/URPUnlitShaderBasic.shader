@@ -13,6 +13,9 @@ Shader "Example/URPUnlitShaderBasic"
         // a pass is executed.
         Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" }
 
+        // Disable culling for this Pass.
+        // You would typically do this for special effects, such as transparent objects or double-sided walls.
+        Cull Off
         Pass
         {
             // The HLSL code block. Unity SRP uses the HLSL language.
@@ -67,18 +70,20 @@ Shader "Example/URPUnlitShaderBasic"
         // Adjust z to match NDC for OpenGL
         real depth = lerp(UNITY_NEAR_CLIP_VALUE, 1, SampleSceneDepth(UV));
 #endif
+        if (depth > 1) depth = 0;
+        if (depth < 0) depth = 0;
         // Defining the color variable and returning it.
         //half4 customColor = half4(UV.x, UV.y, depth, 1);
-        //half4 customColor = half4(depth, depth, depth, 1);
-        //return customColor;
-        float3 worldPos = ComputeWorldSpacePosition(UV, depth, UNITY_MATRIX_I_VP);
+        half4 customColor = half4(depth, depth, depth, 1);
+        return customColor;
+        //float3 worldPos = ComputeWorldSpacePosition(UV, depth, UNITY_MATRIX_I_VP);
 
-        uint scale = 10;
-        uint3 worldIntPos = uint3(abs(worldPos.xyz * scale));
-        bool white = (worldIntPos.x & 1) ^ (worldIntPos.y & 1) ^ (worldIntPos.z & 1);
-        half4 color = white ? half4(1, 1, 1, 1) : half4(0, 0, 0, 1);
+        //uint scale = 10;
+        //uint3 worldIntPos = uint3(abs(worldPos.xyz * scale));
+        //bool white = (worldIntPos.x & 1) ^ (worldIntPos.y & 1) ^ (worldIntPos.z & 1);
+        //half4 color = white ? half4(1, 1, 1, 1) : half4(0, 0, 0, 1);
 
-        return color;
+        //return color;
     }
     ENDHLSL
 }

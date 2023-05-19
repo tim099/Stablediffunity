@@ -27,7 +27,7 @@ namespace SDU
                     {
                         foreach (var e in t.Exception.Flatten().InnerExceptions)
                         {
-                            Debug.LogError(e);
+                            Debug.LogException(e);
                         }
                     }
                     else

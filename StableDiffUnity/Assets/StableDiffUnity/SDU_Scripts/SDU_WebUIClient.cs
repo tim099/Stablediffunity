@@ -110,6 +110,7 @@ namespace SDU
             {
                 if (WebRequest.result == UnityWebRequest.Result.Success)
                 {
+                    //Debug.LogWarning($"WebRequest.downloadHandler.text:{WebRequest.downloadHandler.text}");
                     if (string.IsNullOrEmpty(WebRequest.downloadHandler.text) || WebRequest.downloadHandler.text == "null")
                     {
                         return default;
@@ -121,7 +122,8 @@ namespace SDU
                 }
                 else
                 {
-                    throw new WebRequestException($"{WebRequest.error}");
+                    //Debug.LogError($"WebRequest.error:{WebRequest.error},URL:{WebRequest.url}");
+                    throw new WebRequestException($"WebRequest.error:{WebRequest.error},URL:{WebRequest.url}");
                 }
             }
 
@@ -148,7 +150,18 @@ namespace SDU
 
                 return ParseResult(GetListResponce<TResponses>);
             }
+            protected async ValueTask<TResponses> SendRequestAsync<TResponses>(string iJson)where TResponses : IResponses
+            {
+                CheckDone();
+                var bytes = Encoding.UTF8.GetBytes(iJson);
 
+                WebRequest.uploadHandler = new UploadHandlerRaw(bytes);// GetUploadHandler(body);
+                WebRequest.downloadHandler = new DownloadHandlerBuffer();
+
+                await WebRequest.SendWebRequest();
+
+                return ParseResult(GetResponce<TResponses>);
+            }
             protected async ValueTask<TResponses> SendRequestAsync<TRequestBody, TResponses>(TRequestBody body)
                 where TRequestBody : IRequestBody
                 where TResponses : IResponses
@@ -357,6 +370,7 @@ namespace SDU
                             public string lora_dir;
                             public string scunet_models_path;
                             public string swinir_models_path;
+                            public string CheckPointDir => lora_dir.Replace("Lora", "Stable-diffusion");
                         }
 
                         // method
@@ -586,9 +600,9 @@ namespace SDU
                             return new RequestBody(def);
                         }
 
-                        public ValueTask<Responses> SendRequestAsync(RequestBody body)
+                        public ValueTask<Responses> SendRequestAsync(string iJson)
                         {
-                            return base.SendRequestAsync<RequestBody, Responses>(body);
+                            return base.SendRequestAsync<Responses>(iJson);
                         }
                     }
 
@@ -803,7 +817,10 @@ namespace SDU
                         public int width = 960;
                         public int height = 540;
                         public float denoising_strength = 0.0f;
+                        public RequestBody()
+                        {
 
+                        }
                         public RequestBody(IDefault def)
                         {
                             sampler_index = def.Sampler;
@@ -833,13 +850,17 @@ namespace SDU
 
                     // method
                     public Txt2Img() : base(Url, Method, RequestHeaderList) { }
+                    public Txt2Img(string url) : base(url, Method, RequestHeaderList) { }
                     public Txt2Img(IUrl url) : base(url.Url, Method, RequestHeaderList) { }
 
                     public RequestBody GetRequestBody(RequestBody.IDefault def)
                     {
                         return new RequestBody(def);
                     }
-
+                    public ValueTask<Responses> SendRequestAsync(string iJson)
+                    {
+                        return base.SendRequestAsync<Responses>(iJson);
+                    }
                     public ValueTask<Responses> SendRequestAsync(RequestBody body)
                     {
                         return base.SendRequestAsync<RequestBody, Responses>(body);

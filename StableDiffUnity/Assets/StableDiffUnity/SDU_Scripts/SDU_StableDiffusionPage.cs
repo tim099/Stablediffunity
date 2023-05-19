@@ -13,6 +13,7 @@ using UCL.Core.EditorLib.Page;
 using System.Text.RegularExpressions;
 using UCL.Core.JsonLib;
 using System.Linq;
+using System.Threading.Tasks;
 //using System.Diagnostics;
 
 namespace SDU
@@ -76,10 +77,12 @@ namespace SDU
             public string m_PythonZipFileName = "Python_310.zip";
 
             public string InstallStableDiffusionRoot => Path.Combine(Application.streamingAssetsPath ,"InstallStableDiffUnity");
-            public string EnvPath => Path.Combine(InstallStableDiffusionRoot , m_EnvZipFileName);
-            public string WebUIPath => Path.Combine(InstallStableDiffusionRoot , m_WebUIZipFileName);
-            public string PythonPath => Path.Combine(InstallStableDiffusionRoot, m_PythonZipFileName);
+            public string EnvZipPath => Path.Combine(InstallStableDiffusionRoot , m_EnvZipFileName);
+            public string WebUIZipPath => Path.Combine(InstallStableDiffusionRoot , m_WebUIZipFileName);
+            public string PythonZipPath => Path.Combine(InstallStableDiffusionRoot, m_PythonZipFileName);
             public string RunPythonPath => Path.Combine(EnvInstallRoot, "run.py");
+
+            public string OutputPath => Path.Combine(EnvInstallRoot, "Output");
 
             //public string ConfigFilePath => Path.Combine(EnvInstallRoot, "Config.json");
             public string PythonInstallPathFilePath => Path.Combine(EnvInstallRoot, "PythonRoot.txt");
@@ -104,12 +107,15 @@ namespace SDU
             public string m_ApiOptions = "/sdapi/v1/options";
             public string m_ApiTxt2img = "/sdapi/v1/txt2img";
             public string m_ApiPngInfo = "/sdapi/v1/png-info";
+            public string m_ControlNetTxt2img = "/controlnet/txt2img";
+
 
             public string URL_SdModels => ServerUrl + m_ApiSdModels;
             public string URL_CmdFlags => ServerUrl + m_ApiCmdFlags;
             public string URL_Options => ServerUrl + m_ApiOptions;
             public string URL_Txt2img => ServerUrl + m_ApiTxt2img;
             public string URL_PngInfo => ServerUrl + m_ApiPngInfo;
+            public string URL_ControlNetTxt2img => ServerUrl + m_ControlNetTxt2img;
         }
         [System.Serializable]
         public class WebUISettings
@@ -174,7 +180,12 @@ namespace SDU
         {
             public Dictionary<string, string> m_Infos = new Dictionary<string, string>();
         }
-
+        public enum GenMode
+        {
+            None,
+            GenTex2Img,
+            GenDepthTex2Img,
+        }
         [System.Serializable]
         public class RunTimeData : UCL.Core.JsonLib.UnityJsonSerializable
         {
@@ -183,9 +194,12 @@ namespace SDU
             public WebUISettings m_WebUISettings = new WebUISettings();
             public Tex2ImgSettings m_Tex2ImgSettings = new Tex2ImgSettings();
             public Tex2ImgResults m_Tex2ImgResults = new Tex2ImgResults();
+
             public bool m_RedirectStandardOutput = false;
             public bool m_AutoOpenWeb = true;
+            public GenMode m_AutoGenMode = GenMode.None;
             public string m_WebURL = "http://127.0.0.1:7860";
+            [HideInInspector] public int m_OutPutFileID = 0;
         }
 
 
@@ -236,10 +250,13 @@ namespace SDU
         UCL.Core.UCL_ObjectDictionary m_Dic = new UCL.Core.UCL_ObjectDictionary();
         int m_ProcessID = -1;
         //System.DateTime m_CheckProcessEndTime = DateTime.MinValue;
+        GenMode m_GenMode = GenMode.None;
+        bool m_StartGenerating = false;
         bool m_GeneratingImage = false;
         bool m_ServerReady = false;
         string m_ProgressStr = string.Empty;
         Texture2D m_Texture;
+        Texture2D m_DepthTexture;
         ~SDU_StableDiffusionPage()
         {
             SaveRunTimeData();
@@ -248,6 +265,7 @@ namespace SDU
         {
             base.Init(iGUIPageController);
             LoadRunTimeData();
+            Data.m_AutoGenMode = GenMode.None;
         }
         public override void OnClose()
         {
@@ -272,26 +290,57 @@ namespace SDU
                 Debug.LogWarning($"ModelNames:{Data.m_WebUISettings.m_ModelNames.ConcatString()}");
             }
 
-            using (var client = new SDU_WebUIClient.Get.SdApi.V1.CmdFlags
-                (Data.m_StableDiffusionAPI.URL_CmdFlags))
+            using (var client = new SDU_WebUIClient.Get.SdApi.V1.CmdFlags(Data.m_StableDiffusionAPI.URL_CmdFlags))
             {
                 SDU_WebUIClient.Get.SdApi.V1.CmdFlags.Responses responses = await client.SendRequestAsync();
                 Data.m_WebUISettings.m_CmdFlags = responses;
-                Debug.LogWarning($"responses.lora_dir:{responses.lora_dir}");
-                Data.m_WebUISettings.m_LoraNames = Directory.GetFiles(responses.lora_dir, "*", SearchOption.AllDirectories)
-                    .Select(x => Path.GetFileNameWithoutExtension(x)).ToList();
+                
+                var aLoraDir = responses.lora_dir;
+                //var aCheckPointDir = responses.CheckPointDir;
+                //Debug.LogWarning($"aLoraDir:{aLoraDir},aCheckPointDir:{aCheckPointDir}");
+                //if (Directory.Exists(aCheckPointDir))
+                //{
+                //    var aCheckPoints = Directory.GetFiles(aCheckPointDir, "*", SearchOption.AllDirectories);
+                //    Data.m_WebUISettings.m_ModelNames.Clear();
+                //    foreach (var aCheckPoint in aCheckPoints )
+                //    {
+                //        if (!aCheckPoint.Contains(".txt"))
+                //        {
+                //            Data.m_WebUISettings.m_ModelNames.Add(Path.GetFileName(aCheckPoint));
+                //        }
+                //    }
+                //}
+                if (Directory.Exists(aLoraDir))
+                {
+                    var aLoras = Directory.GetFiles(aLoraDir, "*", SearchOption.AllDirectories);
+                    Data.m_WebUISettings.m_LoraNames.Clear();
+                    foreach (var aLora in aLoras)
+                    {
+                        if (!aLora.Contains(".txt"))
+                        {
+                            Data.m_WebUISettings.m_LoraNames.Add(Path.GetFileNameWithoutExtension(aLora));
+                        }
+                    }
+                }
+                //Data.m_WebUISettings.m_LoraNames = Directory.GetFiles(responses.lora_dir, "*", SearchOption.AllDirectories)
+                //    .Select(x => Path.GetFileNameWithoutExtension(x)).ToList();
                 Debug.LogWarning($"_modelNamesForLora:{Data.m_WebUISettings.m_LoraNames.ConcatString()}");
             }
         }
-        private async System.Threading.Tasks.ValueTask GenerateImage()
+        private async System.Threading.Tasks.ValueTask GenerateImage(Texture2D iDepthTexture = null, System.Action iEndAct = null)
         {
+            SaveRunTimeData();
+            m_GenMode = GenMode.None;
             if (m_GeneratingImage) return;
             m_GeneratingImage = true;
             m_ProgressStr = "Generating Image 0%";
             try
             {
-                Debug.Log("Image generating started.");
-
+                Debug.LogWarning($"Image generating started. DepthMode:{iDepthTexture != null}");
+                if(m_DepthTexture == null)
+                {
+                    m_DepthTexture = iDepthTexture;
+                }
                 using (var client = new SDU_WebUIClient.Post.SdApi.V1.Options(Data.m_StableDiffusionAPI.URL_Options))
                 {
                     var body = client.GetRequestBody();
@@ -300,26 +349,74 @@ namespace SDU
 
                     var responses = await client.SendRequestAsync(body);
                 }
-                using (var client = new SDU_WebUIClient.Post.SdApi.V1.Txt2Img(Data.m_StableDiffusionAPI.URL_Txt2img))
+                using (var client = new SDU_WebUIClient.Post.ControlNet.Txt2Img(Data.m_StableDiffusionAPI.URL_Txt2img))
                 {
                     var aSetting = Data.m_Tex2ImgSettings;
-                    var body = new SDU_WebUIClient.Post.SdApi.V1.Txt2Img.RequestBody();//client.GetRequestBody(_stableDiffusionWebUISettings);
-                    body.sampler_index = aSetting.m_SelectedSampler;
-                    body.prompt = aSetting.m_Prompt;
-                    body.steps = aSetting.m_Steps;
-                    body.negative_prompt = aSetting.m_NegativePrompt;
-                    body.seed = aSetting.m_Seed;
-                    body.cfg_scale = aSetting.m_CfgScale;
-                    //body.denoising_strength = _denoisingStrength;
-                    body.width = aSetting.m_Width;
-                    body.height = aSetting.m_Height;
-                    var responses = await client.SendRequestAsync(body);
+                    JsonData aJson = new JsonData();
+
+                    aJson["sampler_index"] = aSetting.m_SelectedSampler;
+                    aJson["prompt"] = aSetting.m_Prompt;
+                    aJson["steps"] = aSetting.m_Steps;
+                    aJson["negative_prompt"] = aSetting.m_NegativePrompt;
+                    aJson["seed"] = aSetting.m_Seed;
+                    aJson["cfg_scale"] = aSetting.m_CfgScale;
+                    aJson["width"] = aSetting.m_Width;
+                    aJson["height"] = aSetting.m_Height;
+
+                    if (iDepthTexture != null)
+                    {
+                        JsonData aAlwayson = new JsonData();
+                        aJson["alwayson_scripts"] = aAlwayson;
+
+                        {
+                            JsonData aControlnet = new JsonData();
+                            aAlwayson["controlnet"] = aControlnet;
+                            {
+                                JsonData aArgs = new JsonData();
+                                aControlnet["args"] = aArgs;
+                                {
+                                    JsonData aArg1 = new JsonData();
+                                    byte[] iDepth = iDepthTexture.EncodeToPNG();
+                                    aArg1["input_image"] = Convert.ToBase64String(iDepth);
+                                    //aArg1["module"] = "depth";
+                                    aArg1["model"] = "control_sd15_depth";// "diff_control_sd15_depth_fp16 [978ef0a1]";
+                                                                          //control_sd15_depth [fef5e48e]
+                                    aArgs.Add(aArg1);
+                                }
+                            }
+                        }
+                    }
+                    ////body.denoising_strength = _denoisingStrength;
+
+                    string aJsonStr = aJson.ToJson();
+                    //Debug.LogWarning(aJsonStr);
+                    
+                    //GUIUtility.systemCopyBuffer = aJsonStr;
+                    var responses = await client.SendRequestAsync(aJsonStr);
+                    Debug.LogWarning("Image generating Ended");
                     var aImageBytes = responses.GetImage();
                     if (m_Texture != null)
                     {
                         GameObject.DestroyImmediate(m_Texture);
                     }
                     m_Texture = UCL.Core.TextureLib.Lib.CreateTexture(aImageBytes);
+                    var aDate = DateTime.Now;
+                    string aPath = Path.Combine(Data.m_InstallSetting.OutputPath, aDate.ToString("MM_dd_yyyy"));
+                    if (!Directory.Exists(aPath))
+                    {
+                        UCL.Core.FileLib.Lib.CreateDirectory(aPath);
+                    }
+                    Data.m_OutPutFileID = Data.m_OutPutFileID + 1;
+                    string aFileName = $"{Data.m_OutPutFileID.ToString()}_{System.DateTime.Now.ToString("HHmmssff")}";
+                    string aFilePath = Path.Combine(aPath, $"{aFileName}.png"); // M HH:mm:ss
+                    Debug.Log($"aPath:{aPath},aFilePath:{aFilePath}");
+                    var aFileTasks = new List<Task>();
+                    aFileTasks.Add(File.WriteAllBytesAsync(aFilePath, m_Texture.EncodeToPNG()));
+                    if (iDepthTexture != null)
+                    {
+                        var aDepthFilePath = Path.Combine(aPath, $"{aFileName}_depth.png");
+                        aFileTasks.Add(File.WriteAllBytesAsync(aDepthFilePath, iDepthTexture.EncodeToPNG()));
+                    }
                     //m_Texture
                     using (var clientInfo = new SDU_WebUIClient.Post.SdApi.V1.PngInfo(Data.m_StableDiffusionAPI.URL_PngInfo))
                     {
@@ -333,78 +430,20 @@ namespace SDU
                         Debug.LogWarning($"Seed:{dic.GetValueOrDefault("Seed")}");
                     }
                 }
-                //using (var client = new StableDiffusionWebUIClient.Post.SdApi.V1.Txt2Img(_stableDiffusionWebUISettings))
-                //{
-                //    var body = client.GetRequestBody(_stableDiffusionWebUISettings);
-
-                //    body.prompt = _prompt;
-                //    body.steps = _steps;
-                //    body.negative_prompt = _negativePrompt;
-                //    body.seed = _seed;
-                //    body.cfg_scale = _cfgScale;
-                //    //body.denoising_strength = _denoisingStrength;
-                //    body.width = _width;
-                //    body.height = _height;
-
-                //    var responses = await client.SendRequestAsync(body);
-
-                //    using (var clientInfo = new StableDiffusionWebUIClient.Post.SdApi.V1.PngInfo(_stableDiffusionWebUISettings))
-                //    {
-                //        var bodyInfo = clientInfo.GetRequestBody();
-                //        bodyInfo.SetImage(responses.GetImage());
-
-                //        var responsesInfo = await clientInfo.SendRequestAsync(bodyInfo);
-
-                //        var dic = responsesInfo.Parse();
-
-                //        Debug.Log($"Seed:{dic.GetValueOrDefault("Seed")}");
-                //    }
-
-                //    var texture = ImagePorter.GenerateTexture(responses.GetImage());
-
-                //    if (ImagePorter.SaveImage(texture, _exportType))
-                //    {
-                //        Debug.Log("Image generating completed.");
-                //    }
-                //    else
-                //    {
-                //        Debug.LogWarning("Faled to save generated image.");
-                //    }
-
-                //    Image image = GetComponent<Image>();
-                //    if (image != null)
-                //    {
-                //        if (ImagePorter.LoadIntoImage(texture, image))
-                //        {
-                //            Debug.Log($"Image loaded in {image.name}.", image);
-                //            return;
-                //        }
-                //    }
-
-                //    RawImage rawImage = GetComponent<RawImage>();
-                //    if (rawImage != null)
-                //    {
-                //        if (ImagePorter.LoadIntoImage(texture, rawImage))
-                //        {
-                //            Debug.Log($"Image loaded in {rawImage.name}.", rawImage);
-                //            return;
-                //        }
-                //    }
-
-                //    Renderer renderer = GetComponent<Renderer>();
-                //    if (renderer != null)
-                //    {
-                //        if (ImagePorter.LoadIntoImage(texture, renderer))
-                //        {
-                //            Debug.Log($"Image loaded in {renderer.name}.", renderer);
-                //            return;
-                //        }
-                //    }
-                //}
             }
             finally
             {
                 m_GeneratingImage = false;
+                if (m_DepthTexture != iDepthTexture)
+                {
+                    GameObject.DestroyImmediate(m_DepthTexture);
+                }
+                else
+                {
+                    m_DepthTexture = iDepthTexture;
+                }
+                await Resources.UnloadUnusedAssets();
+                iEndAct?.Invoke();
             }
         }
         protected override void ContentOnGUI()
@@ -439,9 +478,18 @@ namespace SDU
                     }
                     if (!m_GeneratingImage)
                     {
+                        m_GenMode = Data.m_AutoGenMode;
                         if (GUILayout.Button("GenerateImage"))
                         {
-                            GenerateImage().Forget();
+                            m_GenMode = GenMode.GenTex2Img;
+                        }
+                        
+                        if (URP_Camera.CurCamera != null)
+                        {
+                            if (GUILayout.Button("GenerateImageByDepth"))
+                            {
+                                m_GenMode = GenMode.GenDepthTex2Img;
+                            }
                         }
                     }
                 }
@@ -451,10 +499,16 @@ namespace SDU
             {
                 GUILayout.Label(m_ProgressStr, UCL_GUIStyle.LabelStyle);
             }
+            GUILayout.BeginHorizontal();
             if (m_Texture != null)
             {
-                GUILayout.Box(m_Texture);
+                GUILayout.Box(m_Texture, GUILayout.MaxHeight(256));
             }
+            if (m_DepthTexture != null)
+            {
+                GUILayout.Box(m_DepthTexture, GUILayout.MaxHeight(256));
+            }
+            GUILayout.EndHorizontal();
             //if (GUILayout.Button("Open Web"))
             //{
             //    System.Diagnostics.Process.Start(Data.m_WebURL);
@@ -466,6 +520,54 @@ namespace SDU
                 ConfigFilePath = aNewConfigFilePath;
             }
             UCL.Core.UI.UCL_GUILayout.DrawObjectData(Data, m_Dic.GetSubDic("RunTimeData"), "Configs", true);
+
+            if (!m_GeneratingImage && !m_StartGenerating)
+            {
+                if (m_GenMode == GenMode.GenDepthTex2Img && URP_Camera.CurCamera == null)
+                {
+                    m_GenMode = GenMode.None;
+                }
+                switch (m_GenMode)
+                {
+                    case GenMode.GenTex2Img:
+                        {
+                            m_StartGenerating = true;
+                            UCL.Core.ServiceLib.UCL_UpdateService.AddAction(() =>
+                            {
+                                m_StartGenerating = false;
+                                GenerateImage().Forget();
+                            });
+                            break;
+                        }
+                    case GenMode.GenDepthTex2Img:
+                        {
+                            m_StartGenerating = true;
+                            UCL.Core.ServiceLib.UCL_UpdateService.AddAction(() =>
+                            {
+                                m_StartGenerating = false;
+                                var aCam = URP_Camera.CurCamera;
+                                if (aCam != null)
+                                {
+                                    var aSetting = Data.m_Tex2ImgSettings;
+
+                                    var aDepthTexture = aCam.CreateDepthImage(aSetting.m_Width, aSetting.m_Height);
+                                    GenerateImage(aDepthTexture).Forget();
+                                }
+                            });
+
+                            break;
+                        }
+                }
+            }
+            if (UnityChan.IdleChanger.s_Ins != null)
+            {
+                UnityChan.IdleChanger.s_Ins.CustomOnGUI();
+            }
+            if (UnityChan.FaceUpdate.s_Ins != null)
+            {
+                UnityChan.FaceUpdate.s_Ins.CustomOnGUI();
+            }
+
         }
         public void StartServer()
         {
@@ -600,15 +702,15 @@ namespace SDU
         }
         private string CheckInstallPython()
         {
-            return CheckInstall(Data.m_InstallSetting.PythonInstallRoot, Data.m_InstallSetting.PythonPath, "Python");
+            return CheckInstall(Data.m_InstallSetting.PythonInstallRoot, Data.m_InstallSetting.PythonZipPath, "Python");
         }
         private string CheckInstallEnv()
         {
-            return CheckInstall(Data.m_InstallSetting.EnvInstallRoot, Data.m_InstallSetting.EnvPath, "Env");
+            return CheckInstall(Data.m_InstallSetting.EnvInstallRoot, Data.m_InstallSetting.EnvZipPath, "Env");
         }
         private string CheckInstallWebUI()
         {
-            return CheckInstall(Data.m_InstallSetting.WebUIInstallRoot, Data.m_InstallSetting.WebUIPath, "WebUI");
+            return CheckInstall(Data.m_InstallSetting.WebUIInstallRoot, Data.m_InstallSetting.WebUIZipPath, "WebUI");
         }
     }
 }
