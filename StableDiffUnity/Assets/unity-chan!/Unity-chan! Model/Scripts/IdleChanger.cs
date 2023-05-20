@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace UnityChan
 {
@@ -15,7 +16,7 @@ namespace UnityChan
 
 	public class IdleChanger : MonoBehaviour
 	{
-		public static IdleChanger s_Ins = null;
+		public static List<IdleChanger> s_IdleChangers = new List<IdleChanger>();
         private Animator anim;						// Animatorへの参照
 		private AnimatorStateInfo currentState;		// 現在のステート状態を保存する参照
 		private AnimatorStateInfo previousState;	// ひとつ前のステート状態を保存する参照
@@ -35,15 +36,12 @@ namespace UnityChan
 			previousState = currentState;
 			// ランダム判定用関数をスタートする
 			StartCoroutine ("RandomChange");
-			s_Ins = this;
+			s_IdleChangers.Add(this);
 
-        }
+		}
         private void OnDestroy()
         {
-            if(s_Ins != null)
-			{
-				s_Ins = null;
-			}
+			s_IdleChangers.Remove(this);
         }
         // Update is called once per frame
         void  Update ()
@@ -81,13 +79,29 @@ namespace UnityChan
 			}
 		}
 
-		public void CustomOnGUI ()
+		public void CustomOnGUI(int iID)
 		{
-            GUILayout.Box ("Change Motion");
-			if (GUILayout.Button ("Next"))
-				anim.SetBool ("Next", true);
-			if (GUILayout.Button ("Back"))
-				anim.SetBool ("Back", true);
+            //GUILayout.Box ("Change Motion");
+			using(var aScope = new GUILayout.HorizontalScope("box"))
+            {
+				GUILayout.Box($"Name: {name}({iID}),Anim:", GUILayout.ExpandWidth(false));
+				var aInfos = anim.GetCurrentAnimatorClipInfo(0);
+				foreach(var aInfo in aInfos)
+                {
+					GUILayout.Label(aInfo.clip.name, GUILayout.ExpandWidth(false));
+                }
+				if (GUILayout.Button("Next Anim"))
+                {
+					
+					anim.SetBool("Next", true);
+				}
+					
+				if (GUILayout.Button("Prev Anim"))
+                {
+					anim.SetBool("Back", true);
+				}
+			}
+
 		}
 
 

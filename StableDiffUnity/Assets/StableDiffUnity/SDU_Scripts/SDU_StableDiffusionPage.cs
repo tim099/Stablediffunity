@@ -594,9 +594,15 @@ namespace SDU
                         }
                 }
             }
-            if (UnityChan.IdleChanger.s_Ins != null)
+            if (!UnityChan.IdleChanger.s_IdleChangers.IsNullOrEmpty())
             {
-                UnityChan.IdleChanger.s_Ins.CustomOnGUI();
+                GUILayout.Box($"Change Motion");
+                for (int i = 0; i < UnityChan.IdleChanger.s_IdleChangers.Count; i++)
+                {
+                    var aIdleChanger = UnityChan.IdleChanger.s_IdleChangers[i];
+                    
+                    aIdleChanger.CustomOnGUI(i);
+                }
             }
             //if (UnityChan.FaceUpdate.s_Ins != null)
             //{

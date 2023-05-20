@@ -17,7 +17,6 @@ namespace SDU
         public Texture2D m_Texture;
         public Camera m_Camera;
         public Volume m_Volume;
-        public Material m_DepthMaterial;
         private void Start()
         {
             if(m_Camera == null) m_Camera = GetComponent<Camera>();
