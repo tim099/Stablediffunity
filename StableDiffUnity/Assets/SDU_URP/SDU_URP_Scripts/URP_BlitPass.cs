@@ -15,9 +15,20 @@ namespace SDU
         public Material Material;
         public int ShaderPassIndex = 0;
         public ScriptableRenderer Renderer;
+        public RenderingData RenderingData;
+
 
         public List<RenderTargetHandle> _temporaryColorTextures = new List<RenderTargetHandle>();
         public List<RenderTexture> _temporaryRenderTextures = new List<RenderTexture>();
+        public RenderTargetHandle GetTemporaryRT(int width, int height, int depthBuffer, FilterMode filterMode, 
+            RenderTextureFormat format = RenderTextureFormat.Default)
+        {
+            RenderTargetHandle targetHandle = new RenderTargetHandle();
+            targetHandle.Init($"TemporaryRT_{ID.ToString()}_{_temporaryColorTextures.Count}");
+            _temporaryColorTextures.Add(targetHandle);
+            Cmd.GetTemporaryRT(targetHandle.id, width,height, depthBuffer, filterMode, format);
+            return targetHandle;
+        }
         public RenderTargetHandle GetTemporaryRT(FilterMode filterMode)
         {
             RenderTargetHandle targetHandle = new RenderTargetHandle();
@@ -97,6 +108,7 @@ namespace SDU
                     Material = this._blitMaterial,
                     ShaderPassIndex = this._blitShaderPassIndex,
                     Renderer = this._renderer,
+                    RenderingData = renderingData,
                 };
                 blitRequest.Blit(blitData);
             }

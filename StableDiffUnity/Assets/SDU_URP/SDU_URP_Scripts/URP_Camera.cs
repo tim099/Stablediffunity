@@ -17,6 +17,7 @@ namespace SDU
         public Texture2D m_Texture;
         public Camera m_Camera;
         public Volume m_Volume;
+        public Material m_DepthMaterial;
         private void Start()
         {
             if(m_Camera == null) m_Camera = GetComponent<Camera>();
@@ -52,10 +53,20 @@ namespace SDU
                 {
                     RemoveAfterBlit = true,
                     Camera = m_Camera,
-                    RenderAction = (iBlitData) =>
+                    RenderAction = (BlitData iBlitData) =>
                     {
-                        iBlitData.Camera = m_Camera;
-                        iBlitData.Cmd.Blit(iBlitData.Renderer.cameraColorTarget, m_RT);
+                        var aCmd = iBlitData.Cmd;
+                        var aCameraData = iBlitData.RenderingData.cameraData;
+                        int width = aCameraData.cameraTargetDescriptor.width;
+                        int height = aCameraData.cameraTargetDescriptor.height;
+
+                        int aDesID = iBlitData.GetTemporaryRT(width, height, 0, FilterMode.Point, RenderTextureFormat.Default).id;//s_KeepFrameBuffer;
+
+                        m_DepthMaterial.SetFloat("_Weight", 1f);//depth.weight.value
+                        m_DepthMaterial.SetMatrix("_ViewToWorld", aCameraData.camera.cameraToWorldMatrix);
+
+                        aCmd.SetGlobalTexture("_MainTex", aDesID);
+                        aCmd.Blit(iBlitData.Renderer.cameraColorTarget, m_RT, m_DepthMaterial, 0);
                     },
                     RenderPassEvent = UnityEngine.Rendering.Universal.RenderPassEvent.BeforeRenderingPostProcessing,
                 };
