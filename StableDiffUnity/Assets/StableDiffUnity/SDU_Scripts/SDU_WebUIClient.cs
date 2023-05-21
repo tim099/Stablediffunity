@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using UCL.Core.JsonLib;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -16,7 +17,29 @@ namespace SDU
     {
         public WebRequestException(string str) : base(str) { }
     }
-
+    public static class SDU_WebRequest
+    {
+        public enum Method
+        {
+            Get,
+            Post,
+        }
+        public static string GetMethodVerb(this Method iMethod)
+        {
+            switch (iMethod)
+            {
+                case Method.Get:
+                    {
+                        return UnityWebRequest.kHttpVerbGET;
+                    }
+                case Method.Post:
+                    {
+                        return UnityWebRequest.kHttpVerbPOST;
+                    }
+            }
+            return UnityWebRequest.kHttpVerbGET;
+        }
+    }
     public static class SDU_WebUIClient
     {
         public interface IParameters { }
@@ -37,24 +60,100 @@ namespace SDU
                 _value = value;
             }
         }
+        public class SDU_WebRequest : WebRequestWrapper
+        {
 
+
+            public SDU_WebRequest(string url, SDU.SDU_WebRequest.Method iMethod) //: base(url, GetMethodVerb(iMethod), RequestHeaderList)
+            {
+                m_Request = new UnityWebRequest(url, iMethod.GetMethodVerb());
+
+                SetRequestHeader(ContentType, ApplicationJson);
+            }
+            public void SetRequestHeader(string name, string value)
+            {
+                if(m_Request == null)
+                {
+                    Debug.LogError($"SetRequestHeader, m_Request == null,name:{name},value:{value}");
+                    return;
+                }
+                m_Request.SetRequestHeader(name, value);
+            }
+            public async ValueTask<TResponses> SendWebRequestAsync<TResponses>(string iJson = null) where TResponses : IResponses, new()
+            {
+                CheckDone();
+                if (iJson != null)
+                {
+                    var bytes = Encoding.UTF8.GetBytes(iJson);
+                    WebRequest.uploadHandler = new UploadHandlerRaw(bytes);
+                }
+
+                WebRequest.downloadHandler = new DownloadHandlerBuffer();
+
+                var aResult = await SendWebRequestAsync();
+                if(aResult == null)
+                {
+                    return default;
+                }
+                return JsonConvert.LoadDataFromJson<TResponses>(aResult);
+            }
+            public async ValueTask<UCL.Core.JsonLib.JsonData> SendWebRequestAsync(string iJson = null)
+            {
+                string aResult = await SendWebRequestAsyncString(iJson);
+                if (string.IsNullOrEmpty(aResult) || aResult == "null")
+                {
+                    return null;
+                }
+                else
+                {
+                    return UCL.Core.JsonLib.JsonData.ParseJson(aResult);
+                }
+            }
+            public async ValueTask<string> SendWebRequestAsyncString(string iJson = null)
+            {
+                CheckDone();
+
+                if (iJson != null)
+                {
+                    byte[] bytes = Encoding.UTF8.GetBytes(iJson);
+                    WebRequest.uploadHandler = new UploadHandlerRaw(bytes);
+                }
+
+                WebRequest.downloadHandler = new DownloadHandlerBuffer();
+
+                await WebRequest.SendWebRequest();
+                if (WebRequest.result == UnityWebRequest.Result.Success)
+                {
+                    return WebRequest.downloadHandler.text;
+                }
+                else
+                {
+                    //Debug.LogError($"WebRequest.error:{WebRequest.error},URL:{WebRequest.url}");
+                    throw new WebRequestException($"WebRequest.error:{WebRequest.error},URL:{WebRequest.url}");
+                }
+            }
+        }
         public abstract class WebRequestWrapper : IDisposable
         {
             // field
-            private UnityWebRequest _request;
+            protected UnityWebRequest m_Request;
 
             // property
-            protected UnityWebRequest WebRequest => _request;
-            public bool isDone => _request.isDone;
-            public UnityWebRequest.Result Result => _request.result;
+            protected UnityWebRequest WebRequest => m_Request;
+            public bool isDone => m_Request.isDone;
+            public UnityWebRequest.Result Result => m_Request.result;
 
+            public WebRequestWrapper()
+            {
+
+            }
             protected WebRequestWrapper(string uri, string method, IReadOnlyList<RequestHeader> list)
             {
-                _request = new UnityWebRequest(uri, method);
+                m_Request = new UnityWebRequest(uri, method);
 
                 foreach (var header in list)
                 {
-                    _request.SetRequestHeader(header.Name, header.Value);
+                    m_Request.SetRequestHeader(header.Name, header.Value);
                 }
             }
 
@@ -88,7 +187,7 @@ namespace SDU
                 return Convert.ToBase64String(data);
             }
 
-            protected static string[] GetImageStringArray(byte[] data)
+            public static string[] GetImageStringArray(byte[] data)
             {
                 return new string[] { GetImageString(data) };
             }
@@ -198,8 +297,8 @@ namespace SDU
 
         public static string ServerUrl => "http://127.0.0.1:7860";
 
-        private static string ContentType => "Content-Type";
-        private static string ApplicationJson => "application/json";
+        public const string ContentType = "Content-Type";
+        public const string ApplicationJson = "application/json";
 
         public static class Get
         {

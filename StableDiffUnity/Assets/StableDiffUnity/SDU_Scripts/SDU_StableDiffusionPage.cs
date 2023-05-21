@@ -39,25 +39,7 @@ namespace SDU
             }
             set
             {
-                //if (PlayerPrefs.HasKey(ConfigFilePathKey))//Old Path
-                //{
-                //    try
-                //    {
-                //        string aOldPath = PlayerPrefs.GetString(ConfigFilePathKey);
-
-                //        if (File.Exists(aOldPath))
-                //        {
-                //            //File.Move(aOldPath, value);
-                //            File.Delete(aOldPath);
-                //        }
-                //    }
-                //    catch(Exception e)
-                //    {
-                //        Debug.LogException(e);
-                //    }
-                //}
                 PlayerPrefs.SetString(ConfigFilePathKey, value);
-
             }
         }
         public static string DefaultInstallRoot => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments),
@@ -117,9 +99,50 @@ namespace SDU
             public string URL_PngInfo => ServerUrl + m_ApiPngInfo;
             public string URL_ControlNetTxt2img => ServerUrl + m_ControlNetTxt2img;
         }
+        public class APISetting
+        {
+            public ControlNetAPI m_ControlNetAPI = new ControlNetAPI();
+            public StableDiffusionAPI m_StableDiffusionAPI = new StableDiffusionAPI();
+        }
+        /// <summary>
+        /// https://github.com/Mikubill/sd-webui-controlnet/wiki/API
+        /// </summary>
+        [System.Serializable]
+        public class ControlNetAPI
+        {
+            public const string ContentType = "application/json";
+
+            #region Get
+            public string m_ModelLists = "/controlnet/model_list";
+            public string m_ModuleLists = "/controlnet/module_list";
+            public string m_Version = "/controlnet/version";
+            #endregion
+
+            #region Post
+            public string m_Detect = "/controlnet/detect";
+            #endregion
+
+            #region Get
+            public string URL_ModelLists => ServerUrl + m_ModelLists;
+            public string URL_ModuleLists => ServerUrl + m_ModuleLists;
+            public string URL_Version => ServerUrl + m_Version;
+            #endregion
+
+            #region Post
+            public string URL_Detect => ServerUrl + m_Detect;
+            #endregion
+
+        }
+        [System.Serializable]
+        public class ControlNetSettings
+        {
+            public List<string> m_ModelList = new List<string>();
+        }
         [System.Serializable]
         public class WebUISettings
         {
+            public ControlNetSettings m_ControlNetSettings = new ControlNetSettings();
+
             public List<string> m_ModelNames = new List<string>();
             public List<string> m_LoraNames = new List<string>();
             public List<string> m_Samplers = new List<string>
@@ -208,8 +231,10 @@ namespace SDU
         {
             public InstallSetting m_InstallSetting = new InstallSetting();
             public ResolutionSettings m_ResolutionSettings = new ResolutionSettings();
-            public StableDiffusionAPI m_StableDiffusionAPI = new StableDiffusionAPI();
+            public APISetting m_APISetting = new APISetting();
             public WebUISettings m_WebUISettings = new WebUISettings();
+
+
             public Tex2ImgSettings m_Tex2ImgSettings = new Tex2ImgSettings();
             public Tex2ImgResults m_Tex2ImgResults = new Tex2ImgResults();
 
@@ -235,6 +260,8 @@ namespace SDU
                 return s_RunTimeData;
             }
         }
+        static public StableDiffusionAPI SD_API => Data.m_APISetting.m_StableDiffusionAPI;
+        static public ControlNetAPI ControlNet_API => Data.m_APISetting.m_ControlNetAPI;
         static RunTimeData s_RunTimeData = null;
         static RunTimeData LoadRunTimeData()
         {
@@ -295,57 +322,80 @@ namespace SDU
         }
         public async System.Threading.Tasks.ValueTask RefreshModels()
         {
-            using (var client = new SDU_WebUIClient.Get.SdApi.V1.SdModels(Data.m_StableDiffusionAPI.URL_SdModels))
+            try
             {
-                var responses = await client.SendRequestAsync();
-                Data.m_WebUISettings.m_Models.Clear();
-                Data.m_WebUISettings.m_ModelNames.Clear();
-                foreach (var aModel in responses)
+                using (var client = new SDU_WebUIClient.SDU_WebRequest(SD_API.URL_SdModels, SDU_WebRequest.Method.Get))
                 {
-                    Data.m_WebUISettings.m_Models.Add(aModel);
-                    Data.m_WebUISettings.m_ModelNames.Add(aModel.model_name);
-                    Debug.LogWarning($"model_name:{aModel.model_name}");
+                    var responses = await client.SendWebRequestAsync();
+                    Data.m_WebUISettings.m_Models.Clear();
+                    Data.m_WebUISettings.m_ModelNames.Clear();
+                    //Debug.LogWarning($"responses:{responses.ToJsonBeautify()}");
+                    foreach (JsonData aModelJson in responses)
+                    {
+                        var aModel = JsonConvert.LoadDataFromJson<SDU_WebUIClient.Get.SdApi.V1.SdModels.Responses>(aModelJson);
+                        Data.m_WebUISettings.m_Models.Add(aModel);
+                        Data.m_WebUISettings.m_ModelNames.Add(aModel.model_name);
+                        //Debug.LogWarning($"model_name:{aModel.model_name}");
+                    }
+                    Debug.LogWarning($"ModelNames:{Data.m_WebUISettings.m_ModelNames.ConcatString()}");
                 }
-                //Data.m_WebUISettings.m_ModelNames = responses.Select(x => x.model_name).ToList();
-                Debug.LogWarning($"ModelNames:{Data.m_WebUISettings.m_ModelNames.ConcatString()}");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogException(e);
             }
 
-            using (var client = new SDU_WebUIClient.Get.SdApi.V1.CmdFlags(Data.m_StableDiffusionAPI.URL_CmdFlags))
+            try
             {
-                SDU_WebUIClient.Get.SdApi.V1.CmdFlags.Responses responses = await client.SendRequestAsync();
-                Data.m_WebUISettings.m_CmdFlags = responses;
-                
-                var aLoraDir = responses.lora_dir;
-                //var aCheckPointDir = responses.CheckPointDir;
-                //Debug.LogWarning($"aLoraDir:{aLoraDir},aCheckPointDir:{aCheckPointDir}");
-                //if (Directory.Exists(aCheckPointDir))
-                //{
-                //    var aCheckPoints = Directory.GetFiles(aCheckPointDir, "*", SearchOption.AllDirectories);
-                //    Data.m_WebUISettings.m_ModelNames.Clear();
-                //    foreach (var aCheckPoint in aCheckPoints )
-                //    {
-                //        if (!aCheckPoint.Contains(".txt"))
-                //        {
-                //            Data.m_WebUISettings.m_ModelNames.Add(Path.GetFileName(aCheckPoint));
-                //        }
-                //    }
-                //}
-                if (Directory.Exists(aLoraDir))
+                using (var client = new SDU_WebUIClient.SDU_WebRequest(SD_API.URL_CmdFlags, SDU_WebRequest.Method.Get))
                 {
-                    var aLoras = Directory.GetFiles(aLoraDir, "*", SearchOption.AllDirectories);
-                    Data.m_WebUISettings.m_LoraNames.Clear();
-                    foreach (var aLora in aLoras)
+                    var responses = await client.SendWebRequestAsync();
+                    Data.m_WebUISettings.m_CmdFlags = JsonConvert.LoadDataFromJson<SDU_WebUIClient.Get.SdApi.V1.CmdFlags.Responses>(responses);
+
+                    var aLoraDir = Data.m_WebUISettings.m_CmdFlags.lora_dir;
+                    if (Directory.Exists(aLoraDir))
                     {
-                        if (!aLora.Contains(".txt"))
+                        var aLoras = Directory.GetFiles(aLoraDir, "*", SearchOption.AllDirectories);
+                        Data.m_WebUISettings.m_LoraNames.Clear();
+                        foreach (var aLora in aLoras)
                         {
-                            Data.m_WebUISettings.m_LoraNames.Add(Path.GetFileNameWithoutExtension(aLora));
+                            if (!aLora.Contains(".txt"))
+                            {
+                                Data.m_WebUISettings.m_LoraNames.Add(Path.GetFileNameWithoutExtension(aLora));
+                            }
                         }
                     }
+                    Debug.LogWarning($"_modelNamesForLora:{Data.m_WebUISettings.m_LoraNames.ConcatString()}");
                 }
-                //Data.m_WebUISettings.m_LoraNames = Directory.GetFiles(responses.lora_dir, "*", SearchOption.AllDirectories)
-                //    .Select(x => Path.GetFileNameWithoutExtension(x)).ToList();
-                Debug.LogWarning($"_modelNamesForLora:{Data.m_WebUISettings.m_LoraNames.ConcatString()}");
             }
+            catch (System.Exception e)
+            {
+                Debug.LogException(e);
+            }
+
+            try
+            {
+                //string aURL = SD_API.URL_CmdFlags;
+                //Debug.LogError($"aURL:{aURL}");
+                using (var client = new SDU_WebUIClient.SDU_WebRequest(ControlNet_API.URL_ModelLists, SDU_WebRequest.Method.Get))
+                {
+                    
+                    var responses = await client.SendWebRequestAsync();
+                    //{"model_list":["control_sd15_canny [fef5e48e]","control_sd15_depth [fef5e48e]","control_sd15_normal [fef5e48e]","control_sd15_openpose [fef5e48e]","controlnetPreTrained_cannyV10 [e3fe7712]"]}
+                    if (responses.Contains("model_list"))
+                    {
+                        //Data.m_WebUISettings.m_ControlNetSettings.m_ModelList.Clear();
+                        Data.m_WebUISettings.m_ControlNetSettings.m_ModelList = JsonConvert.LoadDataFromJson<List<string>>(responses["model_list"]);
+                    }
+                    
+                    //Debug.LogWarning($"ControlNet_API responses:{responses.ToJson()}");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogException(e);
+            }
+
         }
         private async System.Threading.Tasks.ValueTask GenerateImage(Texture2D iDepthTexture = null, System.Action iEndAct = null)
         {
@@ -361,15 +411,16 @@ namespace SDU
                 {
                     m_DepthTexture = iDepthTexture;
                 }
-                using (var client = new SDU_WebUIClient.Post.SdApi.V1.Options(Data.m_StableDiffusionAPI.URL_Options))
+                using (var client = new SDU_WebUIClient.SDU_WebRequest(SD_API.URL_Options, SDU_WebRequest.Method.Post))
                 {
-                    var body = client.GetRequestBody();
+                    JsonData aJson = new JsonData();
 
-                    body.sd_model_checkpoint = Data.m_Tex2ImgSettings.m_SelectedModel; //ModelsList[_selectedModel];
-
-                    var responses = await client.SendRequestAsync(body);
+                    aJson["sd_model_checkpoint"] = Data.m_Tex2ImgSettings.m_SelectedModel;
+                    string aJsonStr = aJson.ToJson();
+                    var aResultJson = await client.SendWebRequestAsyncString(aJsonStr);
+                    Debug.LogWarning($"aResultJson:{aResultJson}");
                 }
-                using (var client = new SDU_WebUIClient.Post.ControlNet.Txt2Img(Data.m_StableDiffusionAPI.URL_Txt2img))
+                using (var client = new SDU_WebUIClient.SDU_WebRequest(SD_API.URL_Txt2img, SDU_WebRequest.Method.Post))//Post.ControlNet.Txt2Img
                 {
                     var aSetting = Data.m_Tex2ImgSettings;
                     JsonData aJson = new JsonData();
@@ -385,6 +436,7 @@ namespace SDU
 
                     if (iDepthTexture != null)
                     {
+                        byte[] iDepth = iDepthTexture.EncodeToPNG();
                         JsonData aAlwayson = new JsonData();
                         aJson["alwayson_scripts"] = aAlwayson;
 
@@ -396,9 +448,8 @@ namespace SDU
                                 aControlnet["args"] = aArgs;
                                 {
                                     JsonData aArg1 = new JsonData();
-                                    byte[] iDepth = iDepthTexture.EncodeToPNG();
-                                    aArg1["input_image"] = Convert.ToBase64String(iDepth);
                                     //aArg1["module"] = "depth";
+                                    aArg1["input_image"] = Convert.ToBase64String(iDepth);
                                     aArg1["model"] = "control_sd15_depth";// "diff_control_sd15_depth_fp16 [978ef0a1]";
                                                                           //control_sd15_depth [fef5e48e]
                                     aArgs.Add(aArg1);
@@ -412,43 +463,72 @@ namespace SDU
                     //Debug.LogWarning(aJsonStr);
                     
                     //GUIUtility.systemCopyBuffer = aJsonStr;
-                    var responses = await client.SendRequestAsync(aJsonStr);
+                    var aResultJson = await client.SendWebRequestAsync(aJsonStr);//<SDU_WebUIClient.Post.ControlNet.Txt2Img.Responses>
                     Debug.LogWarning("Image generating Ended");
-                    var aImageBytes = responses.GetImage();
-                    if (m_Texture != null)
+                    if(aResultJson == null)
                     {
-                        GameObject.DestroyImmediate(m_Texture);
+                        throw new Exception("SendWebRequestAsync, aResultJson == null");
                     }
-                    m_Texture = UCL.Core.TextureLib.Lib.CreateTexture(aImageBytes);
+                    if (!aResultJson.Contains("images"))
+                    {
+                        throw new Exception($"SendWebRequestAsync, !responses.Contains(\"images\"),aResultJson:{aResultJson.ToJsonBeautify()}");
+                    }
+
                     var aDate = DateTime.Now;
                     string aPath = Path.Combine(Data.m_InstallSetting.OutputPath, aDate.ToString("MM_dd_yyyy"));
                     if (!Directory.Exists(aPath))
                     {
                         UCL.Core.FileLib.Lib.CreateDirectory(aPath);
                     }
-                    Data.m_OutPutFileID = Data.m_OutPutFileID + 1;
                     string aFileName = $"{Data.m_OutPutFileID.ToString()}_{System.DateTime.Now.ToString("HHmmssff")}";
-                    string aFilePath = Path.Combine(aPath, $"{aFileName}.png"); // M HH:mm:ss
-                    Debug.Log($"aPath:{aPath},aFilePath:{aFilePath}");
                     var aFileTasks = new List<Task>();
-                    aFileTasks.Add(File.WriteAllBytesAsync(aFilePath, m_Texture.EncodeToPNG()));
                     if (iDepthTexture != null)
                     {
                         var aDepthFilePath = Path.Combine(aPath, $"{aFileName}_depth.png");
                         aFileTasks.Add(File.WriteAllBytesAsync(aDepthFilePath, iDepthTexture.EncodeToPNG()));
                     }
-                    //m_Texture
-                    using (var clientInfo = new SDU_WebUIClient.Post.SdApi.V1.PngInfo(Data.m_StableDiffusionAPI.URL_PngInfo))
+                    //Convert.FromBase64String(images[0].Split(",")[0]);
+                    var aImages = aResultJson["images"];
+                    Data.m_OutPutFileID = Data.m_OutPutFileID + 1;
+                    Debug.LogWarning($"aImages.Count:{aImages.Count}");
+                    
+                    for (int i = 0; i < aImages.Count; i++)
                     {
-                        var bodyInfo = clientInfo.GetRequestBody();
-                        bodyInfo.SetImage(aImageBytes);
+                        var aImageStr = aImages[i].GetString();
+                        var aSplitStr = aImageStr.Split(",");
+                        foreach(var aSplit in aSplitStr)
+                        {
+                            Debug.LogWarning($"aSplit:{aSplit}");
+                        }
+                        
+                        var aImageBytes = Convert.FromBase64String(aSplitStr[0]);
+                        if(i == 0)
+                        {
+                            if (m_Texture != null)
+                            {
+                                GameObject.DestroyImmediate(m_Texture);
+                            }
+                            m_Texture = UCL.Core.TextureLib.Lib.CreateTexture(aImageBytes);
+                        }
 
-                        var responsesInfo = await clientInfo.SendRequestAsync(bodyInfo);
+                        string aFilePath = Path.Combine(aPath, $"{aFileName}_{i}.png"); // M HH:mm:ss
+                        Debug.Log($"aPath:{aPath},aFilePath:{aFilePath}");
 
-                        var dic = responsesInfo.Parse();
-                        Data.m_Tex2ImgResults.m_Infos = dic;
-                        Debug.LogWarning($"Seed:{dic.GetValueOrDefault("Seed")}");
+                        aFileTasks.Add(File.WriteAllBytesAsync(aFilePath, m_Texture.EncodeToPNG()));
                     }
+
+
+                    //using (var clientInfo = new SDU_WebUIClient.Post.SdApi.V1.PngInfo(Data.m_StableDiffusionAPI.URL_PngInfo))
+                    //{
+                    //    var bodyInfo = clientInfo.GetRequestBody();
+                    //    bodyInfo.SetImage(aImageBytes);
+
+                    //    var responsesInfo = await clientInfo.SendRequestAsync(bodyInfo);
+
+                    //    var dic = responsesInfo.Parse();
+                    //    Data.m_Tex2ImgResults.m_Infos = dic;
+                    //    Debug.LogWarning($"Seed:{dic.GetValueOrDefault("Seed")}");
+                    //}
                 }
             }
             finally
@@ -613,9 +693,9 @@ namespace SDU
         public void StartServer()
         {
             m_ServerReady = false;
-            var aPythonRoot = CheckInstallPython();
-            var aEnvInstallRoot = CheckInstallEnv();
-            var aWebUIRoot = CheckInstallWebUI();
+            var aPythonRoot = CheckInstall(Data.m_InstallSetting.PythonInstallRoot, Data.m_InstallSetting.PythonZipPath, "Python");
+            var aEnvInstallRoot = CheckInstall(Data.m_InstallSetting.EnvInstallRoot, Data.m_InstallSetting.EnvZipPath, "Env");
+            var aWebUIRoot = CheckInstall(Data.m_InstallSetting.WebUIInstallRoot, Data.m_InstallSetting.WebUIZipPath, "WebUI");
             File.WriteAllText(Data.m_InstallSetting.PythonInstallPathFilePath, aPythonRoot);
             File.WriteAllText(Data.m_InstallSetting.WebUIInstallPathFilePath, aWebUIRoot);
             File.WriteAllText(Data.m_InstallSetting.CommandlindArgsFilePath, Data.m_InstallSetting.CommandlindArgs);
@@ -740,18 +820,6 @@ namespace SDU
                 Debug.LogException(ex);
             }
             return iInstallRoot;
-        }
-        private string CheckInstallPython()
-        {
-            return CheckInstall(Data.m_InstallSetting.PythonInstallRoot, Data.m_InstallSetting.PythonZipPath, "Python");
-        }
-        private string CheckInstallEnv()
-        {
-            return CheckInstall(Data.m_InstallSetting.EnvInstallRoot, Data.m_InstallSetting.EnvZipPath, "Env");
-        }
-        private string CheckInstallWebUI()
-        {
-            return CheckInstall(Data.m_InstallSetting.WebUIInstallRoot, Data.m_InstallSetting.WebUIZipPath, "WebUI");
         }
     }
 }

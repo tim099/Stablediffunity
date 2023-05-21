@@ -76,8 +76,7 @@ namespace SDU
                 {
                     if(m_Texture.width != iWidth || m_Texture.height != iHeight)
                     {
-                        Debug.LogWarning($"Refresh m_Texture m_Texture.width:{m_Texture.width},iWidth:{iWidth}" +
-                            $",m_Texture.height:{m_Texture.height},iHeight:{iHeight}");
+                        Debug.LogWarning($"Refresh m_Texture m_Texture size:({m_Texture.width},{m_Texture.height}), to: ({iWidth},{iHeight})");
                         GameObject.DestroyImmediate(m_Texture);
                         m_Texture = null;
                     }
