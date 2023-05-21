@@ -43,7 +43,9 @@ namespace UnityChan
         {
 			s_IdleChangers.Remove(this);
         }
+
         // Update is called once per frame
+        [System.Obsolete]
         void  Update ()
 		{
 			// ↑キー/スペースが押されたら、ステートを次に送る処理

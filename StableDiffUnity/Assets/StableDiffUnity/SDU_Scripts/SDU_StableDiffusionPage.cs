@@ -42,97 +42,10 @@ namespace SDU
                 PlayerPrefs.SetString(ConfigFilePathKey, value);
             }
         }
-        public static string DefaultInstallRoot => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments),
-            "StableDiffUnity_V1");
-        public static string DefaultConfigFilePath => Path.Combine(DefaultInstallRoot, "StableDiffusion.json");
+        
+        public static string DefaultConfigFilePath => Path.Combine(InstallSetting.DefaultInstallRoot, "StableDiffusion.json");
         static public SDU_StableDiffusionPage Create() => UCL_EditorPage.Create<SDU_StableDiffusionPage>();
-        [System.Serializable]
-        public class InstallSetting
-        {
-            public string EnvInstallRoot = Path.Combine(DefaultInstallRoot, "Env");
-            public string WebUIInstallRoot = Path.Combine(DefaultInstallRoot, "WebUI");
-            public string PythonInstallRoot = Path.Combine(DefaultInstallRoot, "Python");
-            public string CommandlindArgs = "--api --xformers";
 
-            public string m_EnvZipFileName = "Env_V1.0.zip";
-            public string m_WebUIZipFileName = "WebUI1.2.1.zip";
-            public string m_PythonZipFileName = "Python_310.zip";
-
-            public string InstallStableDiffusionRoot => Path.Combine(Application.streamingAssetsPath ,"InstallStableDiffUnity");
-            public string EnvZipPath => Path.Combine(InstallStableDiffusionRoot , m_EnvZipFileName);
-            public string WebUIZipPath => Path.Combine(InstallStableDiffusionRoot , m_WebUIZipFileName);
-            public string PythonZipPath => Path.Combine(InstallStableDiffusionRoot, m_PythonZipFileName);
-            public string RunPythonPath => Path.Combine(EnvInstallRoot, "run.py");
-
-            public string OutputPath => Path.Combine(EnvInstallRoot, "Output");
-
-            //public string ConfigFilePath => Path.Combine(EnvInstallRoot, "Config.json");
-            public string PythonInstallPathFilePath => Path.Combine(EnvInstallRoot, "PythonRoot.txt");
-            public string WebUIInstallPathFilePath => Path.Combine(EnvInstallRoot, "WebUIInstallPath.txt");
-            public string CommandlindArgsFilePath => Path.Combine(EnvInstallRoot, "CommandlindArgs.txt");
-
-            /// <summary>
-            /// inside Env folder
-            /// </summary>
-            public string RunBatPath => Path.Combine(EnvInstallRoot, "run.bat");
-            /// <summary>
-            /// PythonExePath inside Env folder
-            /// </summary>
-            public string PythonExePath => Path.Combine(PythonInstallRoot, @"python.exe");
-        }
-
-        [System.Serializable]
-        public class StableDiffusionAPI
-        {
-            public string m_ApiSdModels = "/sdapi/v1/sd-models";
-            public string m_ApiCmdFlags = "/sdapi/v1/cmd-flags";
-            public string m_ApiOptions = "/sdapi/v1/options";
-            public string m_ApiTxt2img = "/sdapi/v1/txt2img";
-            public string m_ApiPngInfo = "/sdapi/v1/png-info";
-            public string m_ControlNetTxt2img = "/controlnet/txt2img";
-
-
-            public string URL_SdModels => ServerUrl + m_ApiSdModels;
-            public string URL_CmdFlags => ServerUrl + m_ApiCmdFlags;
-            public string URL_Options => ServerUrl + m_ApiOptions;
-            public string URL_Txt2img => ServerUrl + m_ApiTxt2img;
-            public string URL_PngInfo => ServerUrl + m_ApiPngInfo;
-            public string URL_ControlNetTxt2img => ServerUrl + m_ControlNetTxt2img;
-        }
-        public class APISetting
-        {
-            public ControlNetAPI m_ControlNetAPI = new ControlNetAPI();
-            public StableDiffusionAPI m_StableDiffusionAPI = new StableDiffusionAPI();
-        }
-        /// <summary>
-        /// https://github.com/Mikubill/sd-webui-controlnet/wiki/API
-        /// </summary>
-        [System.Serializable]
-        public class ControlNetAPI
-        {
-            public const string ContentType = "application/json";
-
-            #region Get
-            public string m_ModelLists = "/controlnet/model_list";
-            public string m_ModuleLists = "/controlnet/module_list";
-            public string m_Version = "/controlnet/version";
-            #endregion
-
-            #region Post
-            public string m_Detect = "/controlnet/detect";
-            #endregion
-
-            #region Get
-            public string URL_ModelLists => ServerUrl + m_ModelLists;
-            public string URL_ModuleLists => ServerUrl + m_ModuleLists;
-            public string URL_Version => ServerUrl + m_Version;
-            #endregion
-
-            #region Post
-            public string URL_Detect => ServerUrl + m_Detect;
-            #endregion
-
-        }
         [System.Serializable]
         public class ControlNetSettings
         {
@@ -188,33 +101,7 @@ namespace SDU
         }
         //Screen.SetResolution(resolution.x, resolution.y, Screen.fullScreenMode);
 
-        [UCL.Core.ATTR.EnableUCLEditor]
-        [System.Serializable]
-        public class Tex2ImgSettings
-        {
-            public List<string> GetAllModelNames() => Data.m_WebUISettings.m_ModelNames;
-            [UCL.Core.PA.UCL_List("GetAllModelNames")] public string m_SelectedModel;
-            public List<string> GetAllSamplerNames() => Data.m_WebUISettings.m_Samplers;
-            [UCL.Core.PA.UCL_List("GetAllSamplerNames")] public string m_SelectedSampler;
 
-            public List<string> GetAllLoraNames() => Data.m_WebUISettings.m_LoraNames;
-            [UCL.Core.PA.UCL_List("GetAllLoraNames")] public string m_SelectedLoraModel;
-
-
-            public string m_Prompt;
-            public string m_NegativePrompt;
-            public int m_Width = 512;
-            public int m_Height = 512;
-            public int m_Steps = 20;
-            public float m_CfgScale = 7;
-            public long m_Seed = -1;
-
-            [UCL.Core.ATTR.UCL_FunctionButton]
-            public void AddLora()
-            {
-                m_Prompt += $"<lora:{m_SelectedLoraModel}:1>";
-            }
-        }
         [System.Serializable]
         public class Tex2ImgResults
         {
@@ -224,7 +111,7 @@ namespace SDU
         {
             None,
             GenTex2Img,
-            GenDepthTex2Img,
+            //GenDepthTex2Img,
         }
         [System.Serializable]
         public class RunTimeData : UCL.Core.JsonLib.UnityJsonSerializable
@@ -235,10 +122,8 @@ namespace SDU
             public WebUISettings m_WebUISettings = new WebUISettings();
 
 
-            public Tex2ImgSettings m_Tex2ImgSettings = new Tex2ImgSettings();
-            public Tex2ImgResults m_Tex2ImgResults = new Tex2ImgResults();
-
-
+            [UCL.Core.ATTR.UCL_HideOnGUI] public Tex2ImgSettings m_Tex2ImgSettings = new Tex2ImgSettings();
+            [UCL.Core.ATTR.UCL_HideOnGUI] public Tex2ImgResults m_Tex2ImgResults = new Tex2ImgResults();
 
             public bool m_RedirectStandardOutput = false;
             public bool m_AutoOpenWeb = true;
@@ -246,9 +131,6 @@ namespace SDU
             public string m_WebURL = "http://127.0.0.1:7860";
             [HideInInspector] public int m_OutPutFileID = 0;
         }
-
-
-
         static public RunTimeData Data
         {
             get
@@ -260,9 +142,10 @@ namespace SDU
                 return s_RunTimeData;
             }
         }
+        static RunTimeData s_RunTimeData = null;
         static public StableDiffusionAPI SD_API => Data.m_APISetting.m_StableDiffusionAPI;
         static public ControlNetAPI ControlNet_API => Data.m_APISetting.m_ControlNetAPI;
-        static RunTimeData s_RunTimeData = null;
+        
         static RunTimeData LoadRunTimeData()
         {
             if (File.Exists(ConfigFilePath))
@@ -283,7 +166,7 @@ namespace SDU
         }
         static void SaveRunTimeData()
         {
-            string aJsonStr = UCL.Core.JsonLib.JsonConvert.SaveDataToJsonUnityVer(s_RunTimeData).ToJsonBeautify();
+            string aJsonStr = UCL.Core.JsonLib.JsonConvert.SaveDataToJsonUnityVer(Data).ToJsonBeautify();
             UCL.Core.FileLib.Lib.WriteAllText(ConfigFilePath, aJsonStr);
             //PlayerPrefs.SetString(RunTimeDataKey, aJsonStr);
         }
@@ -303,7 +186,6 @@ namespace SDU
         bool m_ServerReady = false;
         string m_ProgressStr = string.Empty;
         Texture2D m_Texture;
-        Texture2D m_DepthTexture;
         ~SDU_StableDiffusionPage()
         {
             SaveRunTimeData();
@@ -359,7 +241,7 @@ namespace SDU
                         Data.m_WebUISettings.m_LoraNames.Clear();
                         foreach (var aLora in aLoras)
                         {
-                            if (!aLora.Contains(".txt"))
+                            if (!aLora.Contains(".txt") && !aLora.Contains(".png"))
                             {
                                 Data.m_WebUISettings.m_LoraNames.Add(Path.GetFileNameWithoutExtension(aLora));
                             }
@@ -397,7 +279,7 @@ namespace SDU
             }
 
         }
-        private async System.Threading.Tasks.ValueTask GenerateImage(Texture2D iDepthTexture = null, System.Action iEndAct = null)
+        private async System.Threading.Tasks.ValueTask GenerateImage(Tex2ImgSettings iSetting)
         {
             SaveRunTimeData();
             m_GenMode = GenMode.None;
@@ -406,11 +288,11 @@ namespace SDU
             m_ProgressStr = "Generating Image 0%";
             try
             {
-                Debug.LogWarning($"Image generating started. DepthMode:{iDepthTexture != null}");
-                if(m_DepthTexture == null)
-                {
-                    m_DepthTexture = iDepthTexture;
-                }
+                //Debug.LogWarning($"Image generating started. DepthMode:{iDepthTexture != null}");
+                //if(m_DepthTexture == null)
+                //{
+                //    m_DepthTexture = iDepthTexture;
+                //}
                 using (var client = new SDU_WebUIClient.SDU_WebRequest(SD_API.URL_Options, SDU_WebRequest.Method.Post))
                 {
                     JsonData aJson = new JsonData();
@@ -422,39 +304,42 @@ namespace SDU
                 }
                 using (var client = new SDU_WebUIClient.SDU_WebRequest(SD_API.URL_Txt2img, SDU_WebRequest.Method.Post))//Post.ControlNet.Txt2Img
                 {
-                    var aSetting = Data.m_Tex2ImgSettings;
                     JsonData aJson = new JsonData();
 
-                    aJson["sampler_index"] = aSetting.m_SelectedSampler;
-                    aJson["prompt"] = aSetting.m_Prompt;
-                    aJson["steps"] = aSetting.m_Steps;
-                    aJson["negative_prompt"] = aSetting.m_NegativePrompt;
-                    aJson["seed"] = aSetting.m_Seed;
-                    aJson["cfg_scale"] = aSetting.m_CfgScale;
-                    aJson["width"] = aSetting.m_Width;
-                    aJson["height"] = aSetting.m_Height;
+                    aJson["sampler_index"] = iSetting.m_SelectedSampler;
+                    aJson["prompt"] = iSetting.m_Prompt;
+                    aJson["steps"] = iSetting.m_Steps;
+                    aJson["negative_prompt"] = iSetting.m_NegativePrompt;
+                    aJson["seed"] = iSetting.m_Seed;
+                    aJson["cfg_scale"] = iSetting.m_CfgScale;
+                    aJson["width"] = iSetting.m_Width;
+                    aJson["height"] = iSetting.m_Height;
 
-                    if (iDepthTexture != null)
+                    //if (iDepthTexture != null)
                     {
-                        byte[] iDepth = iDepthTexture.EncodeToPNG();
+                        //byte[] iDepth = iDepthTexture.EncodeToPNG();
                         JsonData aAlwayson = new JsonData();
                         aJson["alwayson_scripts"] = aAlwayson;
 
                         {
-                            JsonData aControlnet = new JsonData();
-                            aAlwayson["controlnet"] = aControlnet;
+                            JsonData aControlnet = Data.m_Tex2ImgSettings.m_ControlNetSettings.GetConfigJson();//new JsonData();
+                            if(aControlnet != null)
                             {
-                                JsonData aArgs = new JsonData();
-                                aControlnet["args"] = aArgs;
-                                {
-                                    JsonData aArg1 = new JsonData();
-                                    //aArg1["module"] = "depth";
-                                    aArg1["input_image"] = Convert.ToBase64String(iDepth);
-                                    aArg1["model"] = "control_sd15_depth";// "diff_control_sd15_depth_fp16 [978ef0a1]";
-                                                                          //control_sd15_depth [fef5e48e]
-                                    aArgs.Add(aArg1);
-                                }
+                                aAlwayson["controlnet"] = aControlnet;
                             }
+                            
+                            //{
+                            //    JsonData aArgs = new JsonData();
+                            //    aControlnet["args"] = aArgs;
+                            //    {
+                            //        var aSetting = Data.m_Tex2ImgSettings.m_ControlNetSettings;
+                            //        JsonData aArg1 = new JsonData();
+                            //        //aArg1["module"] = "depth";
+                            //        aArg1["input_image"] = Convert.ToBase64String(iDepth);
+                            //        aArg1["model"] = aSetting.m_SelectedModel ;//"control_sd15_depth"
+                            //        aArgs.Add(aArg1);
+                            //    }
+                            //}
                         }
                     }
                     ////body.denoising_strength = _denoisingStrength;
@@ -463,7 +348,7 @@ namespace SDU
                     //Debug.LogWarning(aJsonStr);
                     
                     //GUIUtility.systemCopyBuffer = aJsonStr;
-                    var aResultJson = await client.SendWebRequestAsync(aJsonStr);//<SDU_WebUIClient.Post.ControlNet.Txt2Img.Responses>
+                    var aResultJson = await client.SendWebRequestAsync(aJsonStr);
                     Debug.LogWarning("Image generating Ended");
                     if(aResultJson == null)
                     {
@@ -482,12 +367,7 @@ namespace SDU
                     }
                     string aFileName = $"{Data.m_OutPutFileID.ToString()}_{System.DateTime.Now.ToString("HHmmssff")}";
                     var aFileTasks = new List<Task>();
-                    if (iDepthTexture != null)
-                    {
-                        var aDepthFilePath = Path.Combine(aPath, $"{aFileName}_depth.png");
-                        aFileTasks.Add(File.WriteAllBytesAsync(aDepthFilePath, iDepthTexture.EncodeToPNG()));
-                    }
-                    //Convert.FromBase64String(images[0].Split(",")[0]);
+
                     var aImages = aResultJson["images"];
                     Data.m_OutPutFileID = Data.m_OutPutFileID + 1;
                     Debug.LogWarning($"aImages.Count:{aImages.Count}");
@@ -502,19 +382,25 @@ namespace SDU
                         }
                         
                         var aImageBytes = Convert.FromBase64String(aSplitStr[0]);
-                        if(i == 0)
+                        var aTexture = UCL.Core.TextureLib.Lib.CreateTexture(aImageBytes);
+
+
+                        string aFilePath = Path.Combine(aPath, $"{aFileName}_{i}.png"); // M HH:mm:ss
+                        Debug.Log($"aPath:{aPath},aFilePath:{aFilePath}");
+
+                        aFileTasks.Add(File.WriteAllBytesAsync(aFilePath, aTexture.EncodeToPNG()));
+                        if (i == 0)
                         {
                             if (m_Texture != null)
                             {
                                 GameObject.DestroyImmediate(m_Texture);
                             }
-                            m_Texture = UCL.Core.TextureLib.Lib.CreateTexture(aImageBytes);
+                            m_Texture = aTexture;//UCL.Core.TextureLib.Lib.CreateTexture(aImageBytes);
                         }
-
-                        string aFilePath = Path.Combine(aPath, $"{aFileName}_{i}.png"); // M HH:mm:ss
-                        Debug.Log($"aPath:{aPath},aFilePath:{aFilePath}");
-
-                        aFileTasks.Add(File.WriteAllBytesAsync(aFilePath, m_Texture.EncodeToPNG()));
+                        else
+                        {
+                            GameObject.DestroyImmediate(aTexture);
+                        }
                     }
 
 
@@ -534,16 +420,15 @@ namespace SDU
             finally
             {
                 m_GeneratingImage = false;
-                if (m_DepthTexture != iDepthTexture)
-                {
-                    GameObject.DestroyImmediate(m_DepthTexture);
-                }
-                else
-                {
-                    m_DepthTexture = iDepthTexture;
-                }
+                //if (m_DepthTexture != iDepthTexture)
+                //{
+                //    GameObject.DestroyImmediate(m_DepthTexture);
+                //}
+                //else
+                //{
+                //    m_DepthTexture = iDepthTexture;
+                //}
                 await Resources.UnloadUnusedAssets();
-                iEndAct?.Invoke();
             }
         }
         protected override void ContentOnGUI()
@@ -583,14 +468,6 @@ namespace SDU
                         {
                             m_GenMode = GenMode.GenTex2Img;
                         }
-                        
-                        if (URP_Camera.CurCamera != null)
-                        {
-                            if (GUILayout.Button("GenerateImageByDepth"))
-                            {
-                                m_GenMode = GenMode.GenDepthTex2Img;
-                            }
-                        }
                     }
                 }
             }
@@ -604,15 +481,8 @@ namespace SDU
             {
                 GUILayout.Box(m_Texture, GUILayout.MaxHeight(256));
             }
-            if (m_DepthTexture != null)
-            {
-                GUILayout.Box(m_DepthTexture, GUILayout.MaxHeight(256));
-            }
             GUILayout.EndHorizontal();
-            //if (GUILayout.Button("Open Web"))
-            //{
-            //    System.Diagnostics.Process.Start(Data.m_WebURL);
-            //}
+
             using(var aScope = new GUILayout.HorizontalScope("box"))
             {
                 if (GUILayout.Button("Save", GUILayout.ExpandWidth(false)))
@@ -634,14 +504,12 @@ namespace SDU
                 }
             }
 
-            UCL.Core.UI.UCL_GUILayout.DrawObjectData(Data, m_Dic.GetSubDic("RunTimeData"), "Configs", true);
-
+            UCL.Core.UI.UCL_GUILayout.DrawObjectData(Data, m_Dic.GetSubDic("RunTimeData"), "Configs", false);
+            
+            Data.m_Tex2ImgSettings.OnGUI(m_Dic.GetSubDic("Tex2ImgSettings"));
+            //m_Tex2ImgSettings
             if (!m_GeneratingImage && !m_StartGenerating)
             {
-                if (m_GenMode == GenMode.GenDepthTex2Img && URP_Camera.CurCamera == null)
-                {
-                    m_GenMode = GenMode.None;
-                }
                 switch (m_GenMode)
                 {
                     case GenMode.GenTex2Img:
@@ -650,28 +518,28 @@ namespace SDU
                             UCL.Core.ServiceLib.UCL_UpdateService.AddAction(() =>
                             {
                                 m_StartGenerating = false;
-                                GenerateImage().Forget();
+                                GenerateImage(Data.m_Tex2ImgSettings).Forget();
                             });
                             break;
                         }
-                    case GenMode.GenDepthTex2Img:
-                        {
-                            m_StartGenerating = true;
-                            UCL.Core.ServiceLib.UCL_UpdateService.AddAction(() =>
-                            {
-                                m_StartGenerating = false;
-                                var aCam = URP_Camera.CurCamera;
-                                if (aCam != null)
-                                {
-                                    var aSetting = Data.m_Tex2ImgSettings;
+                    //case GenMode.GenDepthTex2Img:
+                    //    {
+                    //        m_StartGenerating = true;
+                    //        UCL.Core.ServiceLib.UCL_UpdateService.AddAction(() =>
+                    //        {
+                    //            m_StartGenerating = false;
+                    //            var aCam = URP_Camera.CurCamera;
+                    //            if (aCam != null)
+                    //            {
+                    //                var aSetting = Data.m_Tex2ImgSettings;
 
-                                    var aDepthTexture = aCam.CreateDepthImage(aSetting.m_Width, aSetting.m_Height);
-                                    GenerateImage(aDepthTexture).Forget();
-                                }
-                            });
+                    //                var aDepthTexture = aCam.CreateDepthImage(aSetting.m_Width, aSetting.m_Height);
+                    //                GenerateImage(aSetting, aDepthTexture).Forget();
+                    //            }
+                    //        });
 
-                            break;
-                        }
+                    //        break;
+                    //    }
                 }
             }
             if (!UnityChan.IdleChanger.s_IdleChangers.IsNullOrEmpty())

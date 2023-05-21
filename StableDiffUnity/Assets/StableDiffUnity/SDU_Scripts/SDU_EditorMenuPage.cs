@@ -11,7 +11,7 @@ namespace SDU
 {
     public class SDU_EditorMenuPage : UCL_EditorPage
     {
-        public const string SDU_Version = "1.0.0";
+        public const string SDU_Version = "1.0.1";
         public override string WindowName => $"SDU_EditorMenu {SDU_Version}";
 
         protected override bool ShowCloseButton => false;

@@ -25,11 +25,11 @@ Shader "URP/DepthShader"
 
             half4 Frag(Varyings IN) : SV_Target
             {
-                float4 mainColor = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uv);
+                //float4 mainColor = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uv);
 
                 float depth = SampleSceneDepth(IN.uv);
 
-                return lerp(mainColor, depth, _Weight);
+                return half4(depth, depth, depth, 1); //lerp(mainColor, depth, _Weight);
             }
 
             ENDHLSL

@@ -96,6 +96,7 @@ namespace SDU
         }
         private URP_BlitPass GetBlitPass(RenderPassEvent renderPassEvent)
         {
+
             if (!_blitPassDic.ContainsKey(renderPassEvent))
             {
                 _blitPassDic.Add(renderPassEvent, new URP_BlitPass(renderPassEvent, m_Settings.blitMaterial,
@@ -105,6 +106,7 @@ namespace SDU
         }
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
         {
+            //renderingData.ConfigureInput(ScriptableRenderPassInput.Normal);
             if (s_BlitRequests.Count == 0)
             {
                 return;
