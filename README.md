@@ -1,8 +1,4 @@
-# Sample GitLab Project
+# This is the Unity version of the Stable Diffusion operation interface and includes a one-click installation function
+# 這是Unity版本的Stable Diffusion操作介面 並包含一鍵安裝功能
 
-This sample project shows how a project in GitLab looks for demonstration purposes. It contains issues, merge requests and Markdown files in many branches,
-named and filled with lorem ipsum.
-
-You can look around to get an idea how to structure your project and, when done, you can safely delete this project.
-
-[Learn more about creating GitLab projects.](https://docs.gitlab.com/ee/gitlab-basics/create-project.html)
+GitLab:https://gitlab.com/unityprojects8840820/stablediffunity
