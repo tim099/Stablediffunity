@@ -279,6 +279,18 @@ namespace SDU
             }
 
         }
+        public static Tuple<string ,string> GetSaveImagePath()
+        {
+            var aDate = DateTime.Now;
+            string aPath = Path.Combine(Data.m_InstallSetting.OutputPath, aDate.ToString("MM_dd_yyyy"));
+            if (!Directory.Exists(aPath))
+            {
+                UCL.Core.FileLib.Lib.CreateDirectory(aPath);
+            }
+            string aFileName = $"{Data.m_OutPutFileID.ToString()}_{System.DateTime.Now.ToString("HHmmssff")}";
+            Data.m_OutPutFileID = Data.m_OutPutFileID + 1;
+            return Tuple.Create(aPath, aFileName);
+        }
         private async System.Threading.Tasks.ValueTask GenerateImage(Tex2ImgSettings iSetting)
         {
             SaveRunTimeData();
@@ -358,18 +370,14 @@ namespace SDU
                     {
                         throw new Exception($"SendWebRequestAsync, !responses.Contains(\"images\"),aResultJson:{aResultJson.ToJsonBeautify()}");
                     }
-
-                    var aDate = DateTime.Now;
-                    string aPath = Path.Combine(Data.m_InstallSetting.OutputPath, aDate.ToString("MM_dd_yyyy"));
-                    if (!Directory.Exists(aPath))
-                    {
-                        UCL.Core.FileLib.Lib.CreateDirectory(aPath);
-                    }
-                    string aFileName = $"{Data.m_OutPutFileID.ToString()}_{System.DateTime.Now.ToString("HHmmssff")}";
-                    var aFileTasks = new List<Task>();
-
-                    var aImages = aResultJson["images"];
+                    var aSavePath = GetSaveImagePath();
+                    string aPath = aSavePath.Item1;
+                    string aFileName = aSavePath.Item2;
                     Data.m_OutPutFileID = Data.m_OutPutFileID + 1;
+
+                    var aFileTasks = new List<Task>();
+                    var aImages = aResultJson["images"];
+                    
                     Debug.LogWarning($"aImages.Count:{aImages.Count}");
                     
                     for (int i = 0; i < aImages.Count; i++)

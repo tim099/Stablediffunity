@@ -117,8 +117,33 @@ namespace SDU
         {
             using(var aScope = new GUILayout.VerticalScope("box"))
             {
-                GUILayout.Label(iFieldName);
+                
+                {
+                    GUILayout.BeginHorizontal();
 
+                    GUILayout.Label(iFieldName, GUILayout.ExpandWidth(false));
+
+                    if (m_Texture != null)
+                    {
+                        if (GUILayout.Button("SaveImage"))
+                        {
+                            UCL.Core.ServiceLib.UCL_UpdateService.AddAction(() =>
+                            {
+                                var aSavePath = SDU_StableDiffusionPage.GetSaveImagePath();
+                                string aPath = aSavePath.Item1;
+                                string aFileName = aSavePath.Item2;
+                                string aFilePath = Path.Combine(aPath, $"Input_{aFileName}.png"); // M HH:mm:ss
+                                Debug.Log($"aPath:{aPath},aFilePath:{aFilePath}");
+
+                                File.WriteAllBytes(aFilePath, m_Texture.EncodeToPNG());
+                            });
+
+                        }
+                    }
+
+                    GUILayout.EndHorizontal();
+                }
+                
                 var aCam = URP_Camera.CurCamera;
                 if (aCam != null)
                 {
