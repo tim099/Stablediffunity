@@ -35,7 +35,7 @@ Shader "Unlit/URPNormalShader"
                 // IN.normal is a 3D vector. Each vector component has the range
                 // -1..1. To show all vector elements as color, including the
                 // negative values, compress each value into the range 0..1.
-                color.rgb = half4(normals.z, normals.y, normals.x, 1) * 0.5 + 0.5;// *0.5 + 0.5;_ViewToWorld *
+                color.rgb = half4(normals.x, normals.y, normals.z, 1) * 0.5 + 0.5;// *0.5 + 0.5;_ViewToWorld *
 
                 return color;
             }

@@ -58,5 +58,9 @@ namespace SDU
         #region Post
         public string URL_Detect => ServerUrl + m_Detect;
         #endregion
+
+        #region Client
+        public SDU_WebUIClient.SDU_WebRequest Client_ModelLists => new SDU_WebUIClient.SDU_WebRequest(URL_ModelLists, SDU_WebRequest.Method.Get);
+        #endregion
     }
 }

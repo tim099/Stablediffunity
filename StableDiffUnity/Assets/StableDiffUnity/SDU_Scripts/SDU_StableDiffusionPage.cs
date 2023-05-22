@@ -43,7 +43,7 @@ namespace SDU
             }
         }
         
-        public static string DefaultConfigFilePath => Path.Combine(InstallSetting.DefaultInstallRoot, "StableDiffusion.json");
+        public static string DefaultConfigFilePath => Path.Combine(InstallSetting.DefaultInstallRoot, "Configs", "StableDiffusion.json");
         static public SDU_StableDiffusionPage Create() => UCL_EditorPage.Create<SDU_StableDiffusionPage>();
 
         [System.Serializable]
@@ -122,8 +122,11 @@ namespace SDU
             public WebUISettings m_WebUISettings = new WebUISettings();
 
 
-            [UCL.Core.ATTR.UCL_HideOnGUI] public Tex2ImgSettings m_Tex2ImgSettings = new Tex2ImgSettings();
-            [UCL.Core.ATTR.UCL_HideOnGUI] public Tex2ImgResults m_Tex2ImgResults = new Tex2ImgResults();
+            [UCL.Core.ATTR.UCL_HideOnGUI] 
+            public Tex2ImgSettings m_Tex2ImgSettings = new Tex2ImgSettings();
+
+            [UCL.Core.ATTR.UCL_HideOnGUI] 
+            public Tex2ImgResults m_Tex2ImgResults = new Tex2ImgResults();
 
             public bool m_RedirectStandardOutput = false;
             public bool m_AutoOpenWeb = true;
@@ -257,19 +260,14 @@ namespace SDU
 
             try
             {
-                //string aURL = SD_API.URL_CmdFlags;
-                //Debug.LogError($"aURL:{aURL}");
-                using (var client = new SDU_WebUIClient.SDU_WebRequest(ControlNet_API.URL_ModelLists, SDU_WebRequest.Method.Get))
+                using (var client = ControlNet_API.Client_ModelLists)
                 {
-                    
                     var responses = await client.SendWebRequestAsync();
-                    //{"model_list":["control_sd15_canny [fef5e48e]","control_sd15_depth [fef5e48e]","control_sd15_normal [fef5e48e]","control_sd15_openpose [fef5e48e]","controlnetPreTrained_cannyV10 [e3fe7712]"]}
                     if (responses.Contains("model_list"))
                     {
                         //Data.m_WebUISettings.m_ControlNetSettings.m_ModelList.Clear();
                         Data.m_WebUISettings.m_ControlNetSettings.m_ModelList = JsonConvert.LoadDataFromJson<List<string>>(responses["model_list"]);
                     }
-                    
                     //Debug.LogWarning($"ControlNet_API responses:{responses.ToJson()}");
                 }
             }
@@ -326,36 +324,20 @@ namespace SDU
                     aJson["cfg_scale"] = iSetting.m_CfgScale;
                     aJson["width"] = iSetting.m_Width;
                     aJson["height"] = iSetting.m_Height;
-
-                    //if (iDepthTexture != null)
+                    //aJson["denoising_strength"] = iSetting.m_DenoisingStrength;
+                    var aControlNetSettings = Data.m_Tex2ImgSettings.m_ControlNetSettings;
+                    if (aControlNetSettings.m_EnableControlNet)
                     {
-                        //byte[] iDepth = iDepthTexture.EncodeToPNG();
                         JsonData aAlwayson = new JsonData();
                         aJson["alwayson_scripts"] = aAlwayson;
-
                         {
                             JsonData aControlnet = Data.m_Tex2ImgSettings.m_ControlNetSettings.GetConfigJson();//new JsonData();
                             if(aControlnet != null)
                             {
                                 aAlwayson["controlnet"] = aControlnet;
                             }
-                            
-                            //{
-                            //    JsonData aArgs = new JsonData();
-                            //    aControlnet["args"] = aArgs;
-                            //    {
-                            //        var aSetting = Data.m_Tex2ImgSettings.m_ControlNetSettings;
-                            //        JsonData aArg1 = new JsonData();
-                            //        //aArg1["module"] = "depth";
-                            //        aArg1["input_image"] = Convert.ToBase64String(iDepth);
-                            //        aArg1["model"] = aSetting.m_SelectedModel ;//"control_sd15_depth"
-                            //        aArgs.Add(aArg1);
-                            //    }
-                            //}
                         }
                     }
-                    ////body.denoising_strength = _denoisingStrength;
-
                     string aJsonStr = aJson.ToJson();
                     //Debug.LogWarning(aJsonStr);
                     
@@ -514,7 +496,7 @@ namespace SDU
 
             UCL.Core.UI.UCL_GUILayout.DrawObjectData(Data, m_Dic.GetSubDic("RunTimeData"), "Configs", false);
             
-            Data.m_Tex2ImgSettings.OnGUI(m_Dic.GetSubDic("Tex2ImgSettings"));
+            Data.m_Tex2ImgSettings.OnGUI("Tex2Img", m_Dic.GetSubDic("Tex2ImgSettings"));
             //m_Tex2ImgSettings
             if (!m_GeneratingImage && !m_StartGenerating)
             {
@@ -530,24 +512,6 @@ namespace SDU
                             });
                             break;
                         }
-                    //case GenMode.GenDepthTex2Img:
-                    //    {
-                    //        m_StartGenerating = true;
-                    //        UCL.Core.ServiceLib.UCL_UpdateService.AddAction(() =>
-                    //        {
-                    //            m_StartGenerating = false;
-                    //            var aCam = URP_Camera.CurCamera;
-                    //            if (aCam != null)
-                    //            {
-                    //                var aSetting = Data.m_Tex2ImgSettings;
-
-                    //                var aDepthTexture = aCam.CreateDepthImage(aSetting.m_Width, aSetting.m_Height);
-                    //                GenerateImage(aSetting, aDepthTexture).Forget();
-                    //            }
-                    //        });
-
-                    //        break;
-                    //    }
                 }
             }
             if (!UnityChan.IdleChanger.s_IdleChangers.IsNullOrEmpty())

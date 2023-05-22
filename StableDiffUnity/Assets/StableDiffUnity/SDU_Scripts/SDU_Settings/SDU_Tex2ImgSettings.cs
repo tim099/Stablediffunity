@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UCL.Core.UI;
@@ -16,7 +16,7 @@ namespace SDU
 {
     [UCL.Core.ATTR.EnableUCLEditor]
     [System.Serializable]
-    public class Tex2ImgSettings
+    public class Tex2ImgSettings : UCL.Core.UI.UCLI_FieldOnGUI
     {
         public List<string> GetAllModelNames() => SDU_StableDiffusionPage.Data.m_WebUISettings.m_ModelNames;
         [UCL.Core.PA.UCL_List("GetAllModelNames")] public string m_SelectedModel;
@@ -29,42 +29,38 @@ namespace SDU
         //[UCL.Core.PA.UCL_List("GetAllLoraNames")] 
         [UCL.Core.ATTR.UCL_HideOnGUI] public string m_SelectedLoraModel;
 
-        public string m_Prompt;
+        public string m_Prompt = "masterpiece, best quality, ultra-detailed,((black background)),1girl,";
         public string m_NegativePrompt;
         public int m_Width = 512;
         public int m_Height = 512;
         public int m_Steps = 20;
         public float m_CfgScale = 7;
         public long m_Seed = -1;
-        //public bool m_EnableControlNet = false;
-        [UCL.Core.ATTR.UCL_HideOnGUI] public ControlNetSettings m_ControlNetSettings = new ControlNetSettings();
-        //[UCL.Core.ATTR.UCL_FunctionButton]
-        public void AddLora()
-        {
-            m_Prompt += $"<lora:{m_SelectedLoraModel}:1>";
-        }
-        public void OnGUI(UCL.Core.UCL_ObjectDictionary iDataDic)
+
+        //[UCL.Core.ATTR.UCL_HideOnGUI] 
+        public ControlNetSettings m_ControlNetSettings = new ControlNetSettings();
+
+        public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {
             using (var aScope = new GUILayout.HorizontalScope("box"))
             {
                 if (GUILayout.Button("Add Lora", GUILayout.ExpandWidth(false)))
                 {
-                    AddLora();
+                    m_Prompt += $"<lora:{m_SelectedLoraModel}:1>";
                 }
                 var aLoraNames = SDU_StableDiffusionPage.Data.m_WebUISettings.m_LoraNames;
                 int aIndex = aLoraNames.IndexOf(m_SelectedLoraModel);
                 int aSelectedIndex = UCL.Core.UI.UCL_GUILayout.PopupAuto(aIndex, aLoraNames, iDataDic, "Lora", 8);
                 m_SelectedLoraModel = aLoraNames[aSelectedIndex];
             }
-            UCL.Core.UI.UCL_GUILayout.DrawObjectData(this, iDataDic.GetSubDic("Tex2Img"), "Tex2Img", true);
-            m_ControlNetSettings.OnGUI(iDataDic.GetSubDic("ControlNetSettings"));
-            
-            
+            UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic.GetSubDic("Tex2Img"), iFieldName, true);
+            //m_ControlNetSettings.OnGUI(iDataDic.GetSubDic("ControlNetSettings"));
+            return this;
         }
     }
 
     [System.Serializable]
-    public class ControlNetSettings
+    public class ControlNetSettings : UCL.Core.UI.UCLI_FieldOnGUI
     {
         public bool m_EnableControlNet = false;
         //Data.m_WebUISettings.m_ControlNetSettings.m_ModelList
@@ -72,9 +68,10 @@ namespace SDU
         [UCL.Core.PA.UCL_List("GetAllModels")] public string m_SelectedModel;
 
         public URP_InputImage m_InputImage = new URP_InputImage();
-        public void OnGUI(UCL.Core.UCL_ObjectDictionary iDataDic)
+        public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {
-            UCL.Core.UI.UCL_GUILayout.DrawObjectData(this, iDataDic, "ControlNetSettings", false);
+            UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic, iFieldName, false);
+            return this;
         }
         public JsonData GetConfigJson()//byte[] iDepth = iDepthTexture.EncodeToPNG();
         {
@@ -101,19 +98,47 @@ namespace SDU
 
     public class URP_InputImage : UCL.Core.UI.UCLI_FieldOnGUI
     {
-        [UCL.Core.PA.UCL_FolderExplorer]
-        public string m_FilePath = "";//SDU_StableDiffusionPage.Data.m_InstallSetting.EnvInstallRoot;
+        public class LoadImageSetting : UCL.Core.UI.UCLI_FieldOnGUI
+        {
+            [UCL.Core.PA.UCL_FolderExplorer(UCL.Core.PA.ExplorerType.None)]
+            public string m_FolderPath = string.Empty;//SDU_StableDiffusionPage.Data.m_InstallSetting.EnvInstallRoot;
+            /// <summary>
+            /// 檔案名稱
+            /// </summary>
+            [UCL.Core.PA.UCL_List("GetAllFileNames")]
+            public string m_FileName = "InputImage.png";
 
-        public string m_FileName = "InputImage.png";
+            public string FilePath => string.IsNullOrEmpty(m_FileName)?string.Empty : Path.Combine(m_FolderPath, m_FileName);
+            public IList<string> GetAllFileNames()
+            {
+                if (!Directory.Exists(m_FolderPath))
+                {
+                    return null;
+                }
+                return UCL.Core.FileLib.Lib.GetFilesName(m_FolderPath,"*.png"); //RCG_FileData.GetFileData(m_FolderPath, "*");
+            }
+            public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
+            {
+                if (string.IsNullOrEmpty(m_FolderPath))
+                {
+                    m_FolderPath = SDU_StableDiffusionPage.Data.m_InstallSetting.OutputPath;
+                }
+                //Debug.LogWarning($"m_FolderPath:{m_FolderPath}");
+                UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic, iFieldName, true);
+                return this;
+            }
+        }
+        public LoadImageSetting m_LoadImageSetting = new LoadImageSetting();
         public Texture2D Texture => m_Texture;
         private Texture2D m_Texture;
+        private Texture2D m_LoadFromFileTexture;
         /// <summary>
         /// return new data if the data of field altered
         /// </summary>
         /// <param name="iFieldName"></param>
         /// <param name="iEditTmpDatas"></param>
         /// <returns></returns>
-        public object OnGUI(string iFieldName, UCL_ObjectDictionary iEditTmpDatas)
+        public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {
             using(var aScope = new GUILayout.VerticalScope("box"))
             {
@@ -133,14 +158,12 @@ namespace SDU
                                 string aPath = aSavePath.Item1;
                                 string aFileName = aSavePath.Item2;
                                 string aFilePath = Path.Combine(aPath, $"Input_{aFileName}.png"); // M HH:mm:ss
-                                Debug.Log($"aPath:{aPath},aFilePath:{aFilePath}");
+                                Debug.Log($"Save Image Path:{aFilePath}");
 
                                 File.WriteAllBytes(aFilePath, m_Texture.EncodeToPNG());
                             });
-
                         }
                     }
-
                     GUILayout.EndHorizontal();
                 }
                 
@@ -177,6 +200,41 @@ namespace SDU
                 {
                     GUILayout.Box(m_Texture, GUILayout.MaxHeight(256));
                 }
+            }
+            try
+            {
+                UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic, iFieldName, false);
+                var aPath = m_LoadImageSetting.FilePath;
+                if (File.Exists(aPath))
+                {
+                    if (GUILayout.Button("LoadImage"))
+                    {
+                        UCL.Core.ServiceLib.UCL_UpdateService.AddAction(() =>
+                        {
+                            try
+                            {
+                                var aBytes = File.ReadAllBytes(aPath);
+                                var aTexture = UCL.Core.TextureLib.Lib.CreateTexture(aBytes);
+                                if (aTexture != null)
+                                {
+                                    if (m_LoadFromFileTexture != null)
+                                    {
+                                        GameObject.DestroyImmediate(m_LoadFromFileTexture);
+                                    }
+                                    m_Texture = m_LoadFromFileTexture = aTexture;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.LogException(ex);
+                            }
+                        });
+                    }
+                }
+            }
+            catch(System.Exception e)
+            {
+                Debug.LogException(e);
             }
 
             return this;
