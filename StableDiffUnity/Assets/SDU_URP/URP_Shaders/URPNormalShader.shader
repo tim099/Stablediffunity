@@ -27,15 +27,19 @@ Shader "Unlit/URPNormalShader"
                 //float4 mainColor = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uv);
 
                 float3 normals = SampleSceneNormals(IN.uv);
-                if (normals.z < 0)normals.z = -normals.z;
+                float4 camNormals = float4(normals.xyz, 1);
                 if (normals.x == 0 && normals.y == 0 && normals.z == 0) {
-                    normals.z = 1;
+                    camNormals.z = 1;
                 }
+                else {
+                    camNormals = mul(camNormals, _ViewToWorld);
+                    float aLen = sqrt(camNormals.x * camNormals.x + camNormals.y * camNormals.y + camNormals.z * camNormals.z);
+                    camNormals /= aLen;
+                }
+
                 half4 color = 0;
-                // IN.normal is a 3D vector. Each vector component has the range
-                // -1..1. To show all vector elements as color, including the
-                // negative values, compress each value into the range 0..1.
-                color.rgb = half4(normals.x, normals.y, normals.z, 1) * 0.5 + 0.5;// *0.5 + 0.5;_ViewToWorld *
+
+                color.rgb = half4(camNormals.z, camNormals.y, camNormals.x, 1) * 0.5 + 0.5;// *0.5 + 0.5;_ViewToWorld *
 
                 return color;
             }
