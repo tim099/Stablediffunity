@@ -78,7 +78,7 @@ namespace SDU
             {
                 m_RT = RenderTexture.GetTemporary(iWidth, iHeight, 24, UnityEngine.Experimental.Rendering.GraphicsFormat.R32G32B32A32_SFloat);
                 m_RT2 = RenderTexture.GetTemporary(iWidth, iHeight, 24, UnityEngine.Experimental.Rendering.GraphicsFormat.R32G32B32A32_SFloat);
-                m_RT.antiAliasing = 8;
+                //m_RT.antiAliasing = 8;
                 var aBlitRequest = new BlitToCamera()
                 {
                     RemoveAfterBlit = true,
