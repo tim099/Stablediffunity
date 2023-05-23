@@ -65,9 +65,10 @@ namespace SDU
         bool m_GeneratingImage = false;
         bool m_ServerReady = false;
         string m_ProgressStr = string.Empty;
-        Texture2D m_Texture;
+        List<Texture2D> m_Textures = new List<Texture2D>();
         ~SDU_StableDiffusionPage()
         {
+            ClearTextures();
             RunTimeData.SaveRunTimeData();
         }
         public override void Init(UCL_GUIPageController iGUIPageController)
@@ -76,8 +77,18 @@ namespace SDU
             RunTimeData.LoadRunTimeData();
             RunTimeData.Ins.m_AutoGenMode = GenMode.None;
         }
+        void ClearTextures()
+        {
+            if (m_Textures.IsNullOrEmpty()) return;
+            foreach(var aTexture in m_Textures)
+            {
+                GameObject.DestroyImmediate(aTexture);
+            }
+            m_Textures.Clear();
+        }
         public override void OnClose()
         {
+            ClearTextures();
             RunTimeData.SaveRunTimeData();
             SDU_WebUIStatus.Ins.Close();
             base.OnClose();
@@ -238,7 +249,7 @@ namespace SDU
                     var aImages = aResultJson["images"];
                     
                     Debug.LogWarning($"aImages.Count:{aImages.Count}");
-                    
+                    ClearTextures();
                     for (int i = 0; i < aImages.Count; i++)
                     {
                         var aImageStr = aImages[i].GetString();
@@ -256,18 +267,7 @@ namespace SDU
                         Debug.Log($"aPath:{aPath},aFilePath:{aFilePath}");
 
                         aFileTasks.Add(File.WriteAllBytesAsync(aFilePath, aTexture.EncodeToPNG()));
-                        if (i == 0)
-                        {
-                            if (m_Texture != null)
-                            {
-                                GameObject.DestroyImmediate(m_Texture);
-                            }
-                            m_Texture = aTexture;//UCL.Core.TextureLib.Lib.CreateTexture(aImageBytes);
-                        }
-                        else
-                        {
-                            GameObject.DestroyImmediate(aTexture);
-                        }
+                        m_Textures.Add(aTexture);
                     }
 
 
@@ -344,10 +344,10 @@ namespace SDU
                 GUILayout.Label(m_ProgressStr, UCL_GUIStyle.LabelStyle);
             }
             GUILayout.BeginHorizontal();
-            if (m_Texture != null)
+            foreach(var aTexture in m_Textures)
             {
-                var aSize = SDU_Util.GetTextureSize(512, m_Texture);
-                GUILayout.Box(m_Texture, GUILayout.Width(aSize.x), GUILayout.Height(aSize.y));
+                var aSize = SDU_Util.GetTextureSize(512, aTexture);
+                GUILayout.Box(aTexture, GUILayout.Width(aSize.x), GUILayout.Height(aSize.y));
             }
             GUILayout.EndHorizontal();
 

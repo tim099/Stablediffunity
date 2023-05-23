@@ -14,6 +14,7 @@ namespace SDU
         public static List<URP_Camera> s_Cameras = new List<URP_Camera>();
         //public static List<RenderTexture> s_RenderTextures = new List<RenderTexture>();
         public RenderTexture m_RT;
+        public RenderTexture m_RT2;
         public Texture2D m_Texture;
         public Camera m_Camera;
         public Volume m_Volume;
@@ -76,6 +77,7 @@ namespace SDU
             try
             {
                 m_RT = RenderTexture.GetTemporary(iWidth, iHeight, 24, UnityEngine.Experimental.Rendering.GraphicsFormat.R32G32B32A32_SFloat);
+                m_RT2 = RenderTexture.GetTemporary(iWidth, iHeight, 24, UnityEngine.Experimental.Rendering.GraphicsFormat.R32G32B32A32_SFloat);
                 m_RT.antiAliasing = 8;
                 var aBlitRequest = new BlitToCamera()
                 {
@@ -114,7 +116,7 @@ namespace SDU
                     m_Texture = new Texture2D(iWidth, iHeight, TextureFormat.RGB24, false);
                 }
                 
-                //m_Camera.targetTexture = m_RT;
+                m_Camera.targetTexture = m_RT2;
                 m_Camera.Render();
                 RenderTexture.active = m_RT;
                 m_Texture.ReadPixels(new Rect(0, 0, iWidth, iHeight), 0, 0);
@@ -122,8 +124,9 @@ namespace SDU
             }
             finally
             {
-                //m_Camera.targetTexture = null;
+                m_Camera.targetTexture = null;
                 RenderTexture.ReleaseTemporary(m_RT);
+                RenderTexture.ReleaseTemporary(m_RT2);
                 RenderTexture.active = null;
             }
             //var pipeline = ((UniversalRenderPipelineAsset)GraphicsSettings.renderPipelineAsset);

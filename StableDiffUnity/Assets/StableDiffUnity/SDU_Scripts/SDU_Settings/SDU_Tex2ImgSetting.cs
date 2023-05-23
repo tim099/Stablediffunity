@@ -186,7 +186,7 @@ namespace SDU
                     GUILayout.BeginHorizontal();
                     if (Texture != null)
                     {
-                        var aSize = SDU_Util.GetTextureSize(32, Texture);
+                        var aSize = SDU_Util.GetTextureSize(48, Texture);
                         GUILayout.Box(Texture, GUILayout.Width(aSize.x), GUILayout.Height(aSize.y));
                     }
                     m_ShowImageDetail = UCL.Core.UI.UCL_GUILayout.Toggle(m_ShowImageDetail);
