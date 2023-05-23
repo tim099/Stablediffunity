@@ -346,7 +346,7 @@ namespace SDU
             GUILayout.BeginHorizontal();
             if (m_Texture != null)
             {
-                var aSize = SDU_Util.GetTextureSize(256, m_Texture);
+                var aSize = SDU_Util.GetTextureSize(512, m_Texture);
                 GUILayout.Box(m_Texture, GUILayout.Width(aSize.x), GUILayout.Height(aSize.y));
             }
             GUILayout.EndHorizontal();
