@@ -12,7 +12,7 @@ namespace SDU
     {
         public static URP_Camera CurCamera => s_Cameras.IsNullOrEmpty() ? null : s_Cameras[0];
         public static List<URP_Camera> s_Cameras = new List<URP_Camera>();
-        public static List<RenderTexture> s_RenderTextures = new List<RenderTexture>();
+        //public static List<RenderTexture> s_RenderTextures = new List<RenderTexture>();
         public RenderTexture m_RT;
         public Texture2D m_Texture;
         public Camera m_Camera;
@@ -24,19 +24,10 @@ namespace SDU
             if(m_Camera == null) m_Camera = GetComponent<Camera>();
             m_Camera.enabled = true;
             s_Cameras.Add(this);
-            //m_RT = new RenderTexture(512, 512, 16, RenderTextureFormat.ARGB32);
-            //m_RT.Create();
-            //m_Camera.targetTexture = m_RT;
-            //s_RenderTextures.Add(m_RT);
         }
         private void OnDestroy()
         {
             s_Cameras.Remove(this);
-        }
-        [UCL.Core.ATTR.UCL_FunctionButton]
-        public void Test()
-        {
-            CreateDepthImage(908, 512);
         }
         public BlitToCamera CreateDepthBlitRequest(int iWidth, int iHeight, Material iMat)
         {
@@ -72,65 +63,7 @@ namespace SDU
         }
         public Texture2D CreateNormalImage(int iWidth, int iHeight)
         {
-            var iMat = m_NormalMaterial;
-            if (m_RT != null)
-            {
-                RenderTexture.ReleaseTemporary(m_RT);
-            }
-
-            try
-            {
-                m_RT = RenderTexture.GetTemporary(iWidth, iHeight, 24, UnityEngine.Experimental.Rendering.GraphicsFormat.R32G32B32A32_SFloat);
-                m_RT.antiAliasing = 8;
-                var aBlitRequest = new BlitToCamera()
-                {
-                    RemoveAfterBlit = true,
-                    Camera = m_Camera,
-                    RenderAction = (BlitData iBlitData) =>
-                    {
-                        var aCmd = iBlitData.Cmd;
-                        var aCameraData = iBlitData.RenderingData.cameraData;
-                        int width = aCameraData.cameraTargetDescriptor.width;
-                        int height = aCameraData.cameraTargetDescriptor.height;
-
-                        int aDesID = iBlitData.GetTemporaryRT(width, height, 0, FilterMode.Point, RenderTextureFormat.Default).id;//s_KeepFrameBuffer;
-
-                        iMat.SetFloat("_Weight", 1f);//depth.weight.value
-                        iMat.SetMatrix("_ViewToWorld", aCameraData.camera.cameraToWorldMatrix);
-
-                        aCmd.SetGlobalTexture("_MainTex", aDesID);
-                        aCmd.Blit(iBlitData.Renderer.cameraColorTarget, m_RT, iMat, 0);
-                    },
-                    RenderPassEvent = UnityEngine.Rendering.Universal.RenderPassEvent.BeforeRenderingPostProcessing,
-                };
-                URP_BlitRendererFeature.AddBlitRequest(aBlitRequest);
-
-                if (m_Texture != null)
-                {
-                    if (m_Texture.width != iWidth || m_Texture.height != iHeight)
-                    {
-                        Debug.LogWarning($"Refresh m_Texture m_Texture size:({m_Texture.width},{m_Texture.height}), to: ({iWidth},{iHeight})");
-                        GameObject.DestroyImmediate(m_Texture);
-                        m_Texture = null;
-                    }
-                }
-                if (m_Texture == null)
-                {
-                    m_Texture = new Texture2D(iWidth, iHeight, TextureFormat.RGB24, false);
-                }
-
-                //m_Camera.targetTexture = m_RT;
-                m_Camera.Render();
-                RenderTexture.active = m_RT;
-                m_Texture.ReadPixels(new Rect(0, 0, iWidth, iHeight), 0, 0);
-                m_Texture.Apply();
-            }
-            finally
-            {
-                RenderTexture.ReleaseTemporary(m_RT);
-                RenderTexture.active = null;
-            }
-            return m_Texture;
+            return CreateImage(iWidth, iHeight, m_NormalMaterial);
         }
         public Texture2D CreateImage(int iWidth, int iHeight, Material iMat)
         {

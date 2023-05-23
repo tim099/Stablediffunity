@@ -25,7 +25,7 @@ namespace SDU
         const string ConfigFilePathKey = "StableDiffusionPage.ConfigFilePath";
 
         #region static
-        public static string ServerUrl => Data.m_WebURL;
+        public static string ServerUrl => RunTimeData.Ins.m_WebURL;
 
         public static string ConfigFilePath
         {
@@ -46,133 +46,10 @@ namespace SDU
         public static string DefaultConfigFilePath => Path.Combine(InstallSetting.DefaultInstallRoot, "Configs", "StableDiffusion.json");
         static public SDU_StableDiffusionPage Create() => UCL_EditorPage.Create<SDU_StableDiffusionPage>();
 
-        [System.Serializable]
-        public class ControlNetSettings
-        {
-            public List<string> m_ModelList = new List<string>();
-        }
-        [System.Serializable]
-        public class WebUISettings
-        {
-            public ControlNetSettings m_ControlNetSettings = new ControlNetSettings();
-
-            public List<string> m_ModelNames = new List<string>();
-            public List<string> m_LoraNames = new List<string>();
-            public List<string> m_Samplers = new List<string>
-            {
-                "Euler a",
-                "Euler",
-                "LMS",
-                "Heun",
-                "DPM2",
-                "DPM2 a",
-                "DPM++ 2S a",
-                "DPM++ 2M",
-                "DPM++ SDE",
-                "DPM fast",
-                "DPM adaptive",
-                "LMS Karras",
-                "DPM2 Karras",
-                "DPM2 a Karras",
-                "DPM++ 2S a Karras",
-                "DPM++ 2M Karras",
-                "DPM++ SDE Karras",
-                "DDIM",
-                "PLMS"
-            };
-
-            public List<SDU_WebUIClient.Get.SdApi.V1.SdModels.Responses> m_Models = new();
-            public SDU_WebUIClient.Get.SdApi.V1.CmdFlags.Responses m_CmdFlags = new();
-        }
-
-        [UCL.Core.ATTR.EnableUCLEditor]
-        [System.Serializable]
-        public class ResolutionSettings
-        {
-            public int m_Width = 1920;
-            public int m_Height = 1080;
-            public FullScreenMode m_FullScreenMode = FullScreenMode.Windowed;
-
-            [UCL.Core.ATTR.UCL_FunctionButton]
-            public void ApplyResolutionSetting()
-            {
-                Screen.SetResolution(m_Width, m_Height, m_FullScreenMode);
-            }
-        }
-        //Screen.SetResolution(resolution.x, resolution.y, Screen.fullScreenMode);
-
-
-        [System.Serializable]
-        public class Tex2ImgResults
-        {
-            public Dictionary<string, string> m_Infos = new Dictionary<string, string>();
-        }
-        public enum GenMode
-        {
-            None,
-            GenTex2Img,
-            //GenDepthTex2Img,
-        }
-        [System.Serializable]
-        public class RunTimeData : UCL.Core.JsonLib.UnityJsonSerializable
-        {
-            public InstallSetting m_InstallSetting = new InstallSetting();
-            public ResolutionSettings m_ResolutionSettings = new ResolutionSettings();
-            public APISetting m_APISetting = new APISetting();
-            public WebUISettings m_WebUISettings = new WebUISettings();
-
-
-            [UCL.Core.ATTR.UCL_HideOnGUI] 
-            public Tex2ImgSettings m_Tex2ImgSettings = new Tex2ImgSettings();
-
-            [UCL.Core.ATTR.UCL_HideOnGUI] 
-            public Tex2ImgResults m_Tex2ImgResults = new Tex2ImgResults();
-
-            public bool m_RedirectStandardOutput = false;
-            public bool m_AutoOpenWeb = true;
-            public GenMode m_AutoGenMode = GenMode.None;
-            public string m_WebURL = "http://127.0.0.1:7860";
-            [HideInInspector] public int m_OutPutFileID = 0;
-        }
-        static public RunTimeData Data
-        {
-            get
-            {
-                if (s_RunTimeData == null)
-                {
-                    s_RunTimeData = LoadRunTimeData();
-                }
-                return s_RunTimeData;
-            }
-        }
-        static RunTimeData s_RunTimeData = null;
-        static public StableDiffusionAPI SD_API => Data.m_APISetting.m_StableDiffusionAPI;
-        static public ControlNetAPI ControlNet_API => Data.m_APISetting.m_ControlNetAPI;
+        static public StableDiffusionAPI SD_API => RunTimeData.Ins.m_APISetting.m_StableDiffusionAPI;
+        static public ControlNetAPI ControlNet_API => RunTimeData.Ins.m_APISetting.m_ControlNetAPI;
         
-        static RunTimeData LoadRunTimeData()
-        {
-            if (File.Exists(ConfigFilePath))
-            {
-                try
-                {
-                    string aJsonStr = File.ReadAllText(ConfigFilePath);//PlayerPrefs.GetString(RunTimeDataKey);
-                    JsonData aJson = JsonData.ParseJson(aJsonStr);
-                    var aRunTimeData = JsonConvert.LoadDataFromJsonUnityVer<RunTimeData>(aJson);
-                    if (aRunTimeData != null) return aRunTimeData;
-                }
-                catch (Exception e)
-                {
-                    Debug.LogException(e);
-                }
-            }
-            return new RunTimeData();
-        }
-        static void SaveRunTimeData()
-        {
-            string aJsonStr = UCL.Core.JsonLib.JsonConvert.SaveDataToJsonUnityVer(Data).ToJsonBeautify();
-            UCL.Core.FileLib.Lib.WriteAllText(ConfigFilePath, aJsonStr);
-            //PlayerPrefs.SetString(RunTimeDataKey, aJsonStr);
-        }
+
         #endregion
         public override bool IsWindow => true;
         public override string WindowName => $"StableDiffUnity GUI {SDU_EditorMenuPage.SDU_Version}";
@@ -191,17 +68,17 @@ namespace SDU
         Texture2D m_Texture;
         ~SDU_StableDiffusionPage()
         {
-            SaveRunTimeData();
+            RunTimeData.SaveRunTimeData();
         }
         public override void Init(UCL_GUIPageController iGUIPageController)
         {
             base.Init(iGUIPageController);
-            LoadRunTimeData();
-            Data.m_AutoGenMode = GenMode.None;
+            RunTimeData.LoadRunTimeData();
+            RunTimeData.Ins.m_AutoGenMode = GenMode.None;
         }
         public override void OnClose()
         {
-            SaveRunTimeData();
+            RunTimeData.SaveRunTimeData();
             SDU_WebUIStatus.Ins.Close();
             base.OnClose();
         }
@@ -212,17 +89,17 @@ namespace SDU
                 using (var client = new SDU_WebUIClient.SDU_WebRequest(SD_API.URL_SdModels, SDU_WebRequest.Method.Get))
                 {
                     var responses = await client.SendWebRequestAsync();
-                    Data.m_WebUISettings.m_Models.Clear();
-                    Data.m_WebUISettings.m_ModelNames.Clear();
+                    RunTimeData.Ins.m_WebUISetting.m_Models.Clear();
+                    RunTimeData.Ins.m_WebUISetting.m_ModelNames.Clear();
                     //Debug.LogWarning($"responses:{responses.ToJsonBeautify()}");
                     foreach (JsonData aModelJson in responses)
                     {
                         var aModel = JsonConvert.LoadDataFromJson<SDU_WebUIClient.Get.SdApi.V1.SdModels.Responses>(aModelJson);
-                        Data.m_WebUISettings.m_Models.Add(aModel);
-                        Data.m_WebUISettings.m_ModelNames.Add(aModel.model_name);
+                        RunTimeData.Ins.m_WebUISetting.m_Models.Add(aModel);
+                        RunTimeData.Ins.m_WebUISetting.m_ModelNames.Add(aModel.model_name);
                         //Debug.LogWarning($"model_name:{aModel.model_name}");
                     }
-                    Debug.LogWarning($"ModelNames:{Data.m_WebUISettings.m_ModelNames.ConcatString()}");
+                    Debug.LogWarning($"ModelNames:{RunTimeData.Ins.m_WebUISetting.m_ModelNames.ConcatString()}");
                 }
             }
             catch (System.Exception e)
@@ -235,22 +112,22 @@ namespace SDU
                 using (var client = new SDU_WebUIClient.SDU_WebRequest(SD_API.URL_CmdFlags, SDU_WebRequest.Method.Get))
                 {
                     var responses = await client.SendWebRequestAsync();
-                    Data.m_WebUISettings.m_CmdFlags = JsonConvert.LoadDataFromJson<SDU_WebUIClient.Get.SdApi.V1.CmdFlags.Responses>(responses);
+                    RunTimeData.Ins.m_WebUISetting.m_CmdFlags = JsonConvert.LoadDataFromJson<SDU_WebUIClient.Get.SdApi.V1.CmdFlags.Responses>(responses);
 
-                    var aLoraDir = Data.m_WebUISettings.m_CmdFlags.lora_dir;
+                    var aLoraDir = RunTimeData.Ins.m_WebUISetting.m_CmdFlags.lora_dir;
                     if (Directory.Exists(aLoraDir))
                     {
                         var aLoras = Directory.GetFiles(aLoraDir, "*", SearchOption.AllDirectories);
-                        Data.m_WebUISettings.m_LoraNames.Clear();
+                        RunTimeData.Ins.m_WebUISetting.m_LoraNames.Clear();
                         foreach (var aLora in aLoras)
                         {
                             if (!aLora.Contains(".txt") && !aLora.Contains(".png"))
                             {
-                                Data.m_WebUISettings.m_LoraNames.Add(Path.GetFileNameWithoutExtension(aLora));
+                                RunTimeData.Ins.m_WebUISetting.m_LoraNames.Add(Path.GetFileNameWithoutExtension(aLora));
                             }
                         }
                     }
-                    Debug.LogWarning($"_modelNamesForLora:{Data.m_WebUISettings.m_LoraNames.ConcatString()}");
+                    Debug.LogWarning($"_modelNamesForLora:{RunTimeData.Ins.m_WebUISetting.m_LoraNames.ConcatString()}");
                 }
             }
             catch (System.Exception e)
@@ -266,7 +143,7 @@ namespace SDU
                     if (responses.Contains("model_list"))
                     {
                         //Data.m_WebUISettings.m_ControlNetSettings.m_ModelList.Clear();
-                        Data.m_WebUISettings.m_ControlNetSettings.m_ModelList = JsonConvert.LoadDataFromJson<List<string>>(responses["model_list"]);
+                        RunTimeData.Ins.m_WebUISetting.m_ControlNetData.m_ModelList = JsonConvert.LoadDataFromJson<List<string>>(responses["model_list"]);
                     }
                     //Debug.LogWarning($"ControlNet_API responses:{responses.ToJson()}");
                 }
@@ -280,18 +157,18 @@ namespace SDU
         public static Tuple<string ,string> GetSaveImagePath()
         {
             var aDate = DateTime.Now;
-            string aPath = Path.Combine(Data.m_InstallSetting.OutputPath, aDate.ToString("MM_dd_yyyy"));
+            string aPath = Path.Combine(RunTimeData.Ins.m_InstallSetting.OutputPath, aDate.ToString("MM_dd_yyyy"));
             if (!Directory.Exists(aPath))
             {
                 UCL.Core.FileLib.Lib.CreateDirectory(aPath);
             }
-            string aFileName = $"{Data.m_OutPutFileID.ToString()}_{System.DateTime.Now.ToString("HHmmssff")}";
-            Data.m_OutPutFileID = Data.m_OutPutFileID + 1;
+            string aFileName = $"{RunTimeData.Ins.m_OutPutFileID.ToString()}_{System.DateTime.Now.ToString("HHmmssff")}";
+            RunTimeData.Ins.m_OutPutFileID = RunTimeData.Ins.m_OutPutFileID + 1;
             return Tuple.Create(aPath, aFileName);
         }
-        private async System.Threading.Tasks.ValueTask GenerateImage(Tex2ImgSettings iSetting)
+        private async System.Threading.Tasks.ValueTask GenerateImage(Tex2ImgSetting iSetting)
         {
-            SaveRunTimeData();
+            RunTimeData.SaveRunTimeData();
             m_GenMode = GenMode.None;
             if (m_GeneratingImage) return;
             m_GeneratingImage = true;
@@ -307,7 +184,7 @@ namespace SDU
                 {
                     JsonData aJson = new JsonData();
 
-                    aJson["sd_model_checkpoint"] = Data.m_Tex2ImgSettings.m_SelectedModel;
+                    aJson["sd_model_checkpoint"] = RunTimeData.Ins.m_Tex2ImgSettings.m_SelectedModel;
                     string aJsonStr = aJson.ToJson();
                     var aResultJson = await client.SendWebRequestAsyncString(aJsonStr);
                     Debug.LogWarning($"aResultJson:{aResultJson}");
@@ -325,13 +202,13 @@ namespace SDU
                     aJson["width"] = iSetting.m_Width;
                     aJson["height"] = iSetting.m_Height;
                     //aJson["denoising_strength"] = iSetting.m_DenoisingStrength;
-                    var aControlNetSettings = Data.m_Tex2ImgSettings.m_ControlNetSettings;
+                    var aControlNetSettings = RunTimeData.Ins.m_Tex2ImgSettings.m_ControlNetSettings;
                     if (aControlNetSettings.m_EnableControlNet)
                     {
                         JsonData aAlwayson = new JsonData();
                         aJson["alwayson_scripts"] = aAlwayson;
                         {
-                            JsonData aControlnet = Data.m_Tex2ImgSettings.m_ControlNetSettings.GetConfigJson();//new JsonData();
+                            JsonData aControlnet = RunTimeData.Ins.m_Tex2ImgSettings.m_ControlNetSettings.GetConfigJson();//new JsonData();
                             if(aControlnet != null)
                             {
                                 aAlwayson["controlnet"] = aControlnet;
@@ -355,7 +232,7 @@ namespace SDU
                     var aSavePath = GetSaveImagePath();
                     string aPath = aSavePath.Item1;
                     string aFileName = aSavePath.Item2;
-                    Data.m_OutPutFileID = Data.m_OutPutFileID + 1;
+                    RunTimeData.Ins.m_OutPutFileID = RunTimeData.Ins.m_OutPutFileID + 1;
 
                     var aFileTasks = new List<Task>();
                     var aImages = aResultJson["images"];
@@ -453,7 +330,7 @@ namespace SDU
                     }
                     if (!m_GeneratingImage)
                     {
-                        m_GenMode = Data.m_AutoGenMode;
+                        m_GenMode = RunTimeData.Ins.m_AutoGenMode;
                         if (GUILayout.Button("GenerateImage"))
                         {
                             m_GenMode = GenMode.GenTex2Img;
@@ -469,7 +346,8 @@ namespace SDU
             GUILayout.BeginHorizontal();
             if (m_Texture != null)
             {
-                GUILayout.Box(m_Texture, GUILayout.MaxHeight(256));
+                var aSize = SDU_Util.GetTextureSize(256, m_Texture);
+                GUILayout.Box(m_Texture, GUILayout.Width(aSize.x), GUILayout.Height(aSize.y));
             }
             GUILayout.EndHorizontal();
 
@@ -477,15 +355,16 @@ namespace SDU
             {
                 if (GUILayout.Button("Save", GUILayout.ExpandWidth(false)))
                 {
-                    SaveRunTimeData();
+                    RunTimeData.SaveRunTimeData();
                 }
-                if (GUILayout.Button("Load", GUILayout.ExpandWidth(false)))
+                if (File.Exists(ConfigFilePath))
                 {
-                    if (File.Exists(ConfigFilePath))
+                    if (GUILayout.Button("Load", GUILayout.ExpandWidth(false)))
                     {
-                        s_RunTimeData = LoadRunTimeData();
+                        RunTimeData.ReloadRunTimeData();
                     }
                 }
+
                 var aConfigFilePath = ConfigFilePath;
                 var aNewConfigFilePath = UCL_GUILayout.TextField("ConfigFilePath", aConfigFilePath);
                 if (aNewConfigFilePath != aConfigFilePath)
@@ -494,9 +373,9 @@ namespace SDU
                 }
             }
 
-            UCL.Core.UI.UCL_GUILayout.DrawObjectData(Data, m_Dic.GetSubDic("RunTimeData"), "Configs", false);
+            UCL.Core.UI.UCL_GUILayout.DrawObjectData(RunTimeData.Ins, m_Dic.GetSubDic("RunTimeData"), "Configs", false);
             
-            Data.m_Tex2ImgSettings.OnGUI("Tex2Img", m_Dic.GetSubDic("Tex2ImgSettings"));
+            RunTimeData.Ins.m_Tex2ImgSettings.OnGUI("Tex2Img", m_Dic.GetSubDic("Tex2ImgSettings"));
             //m_Tex2ImgSettings
             if (!m_GeneratingImage && !m_StartGenerating)
             {
@@ -508,7 +387,7 @@ namespace SDU
                             UCL.Core.ServiceLib.UCL_UpdateService.AddAction(() =>
                             {
                                 m_StartGenerating = false;
-                                GenerateImage(Data.m_Tex2ImgSettings).Forget();
+                                GenerateImage(RunTimeData.Ins.m_Tex2ImgSettings).Forget();
                             });
                             break;
                         }
@@ -533,14 +412,14 @@ namespace SDU
         public void StartServer()
         {
             m_ServerReady = false;
-            var aPythonRoot = CheckInstall(Data.m_InstallSetting.PythonInstallRoot, Data.m_InstallSetting.PythonZipPath, "Python");
-            var aEnvInstallRoot = CheckInstall(Data.m_InstallSetting.EnvInstallRoot, Data.m_InstallSetting.EnvZipPath, "Env");
-            var aWebUIRoot = CheckInstall(Data.m_InstallSetting.WebUIInstallRoot, Data.m_InstallSetting.WebUIZipPath, "WebUI");
-            File.WriteAllText(Data.m_InstallSetting.PythonInstallPathFilePath, aPythonRoot);
-            File.WriteAllText(Data.m_InstallSetting.WebUIInstallPathFilePath, aWebUIRoot);
-            File.WriteAllText(Data.m_InstallSetting.CommandlindArgsFilePath, Data.m_InstallSetting.CommandlindArgs);
+            var aPythonRoot = CheckInstall(RunTimeData.Ins.m_InstallSetting.PythonInstallRoot, RunTimeData.Ins.m_InstallSetting.PythonZipPath, "Python");
+            var aEnvInstallRoot = CheckInstall(RunTimeData.Ins.m_InstallSetting.EnvInstallRoot, RunTimeData.Ins.m_InstallSetting.EnvZipPath, "Env");
+            var aWebUIRoot = CheckInstall(RunTimeData.Ins.m_InstallSetting.WebUIInstallRoot, RunTimeData.Ins.m_InstallSetting.WebUIZipPath, "WebUI");
+            File.WriteAllText(RunTimeData.Ins.m_InstallSetting.PythonInstallPathFilePath, aPythonRoot);
+            File.WriteAllText(RunTimeData.Ins.m_InstallSetting.WebUIInstallPathFilePath, aWebUIRoot);
+            File.WriteAllText(RunTimeData.Ins.m_InstallSetting.CommandlindArgsFilePath, RunTimeData.Ins.m_InstallSetting.CommandlindArgs);
 
-            var aPythonExePath = Data.m_InstallSetting.PythonExePath;//System.IO.Path.Combine(aEnvInstallRoot, Data.PythonExePath);
+            var aPythonExePath = RunTimeData.Ins.m_InstallSetting.PythonExePath;//System.IO.Path.Combine(aEnvInstallRoot, Data.PythonExePath);
             UnityEngine.Debug.LogWarning($"PythonExePath:{aPythonExePath}");
             if (!System.IO.File.Exists(aPythonExePath))
             {
@@ -557,8 +436,8 @@ namespace SDU
             var aProcess = new System.Diagnostics.Process();
             
             //string aBatPath = System.IO.Path.Combine(Data.RootPath, Data.WebUIScriptBatPath);
-            string aRunPythonPath = Data.m_InstallSetting.RunPythonPath;
-            string aBatPath = Data.m_InstallSetting.RunBatPath;//System.IO.Path.Combine(aEnvInstallRoot, Data.WebUIScriptBatPath);
+            string aRunPythonPath = RunTimeData.Ins.m_InstallSetting.RunPythonPath;
+            string aBatPath = RunTimeData.Ins.m_InstallSetting.RunBatPath;//System.IO.Path.Combine(aEnvInstallRoot, Data.WebUIScriptBatPath);
             UnityEngine.Debug.LogWarning($"RunPythonPath:{aRunPythonPath},BatPath:{aBatPath}");
 
             aProcess.StartInfo.FileName = aPythonExePath;
@@ -566,9 +445,9 @@ namespace SDU
             aProcess.StartInfo.Verb = string.Empty;
 
             aProcess.StartInfo.CreateNoWindow = false;
-            aProcess.StartInfo.RedirectStandardOutput = Data.m_RedirectStandardOutput;
+            aProcess.StartInfo.RedirectStandardOutput = RunTimeData.Ins.m_RedirectStandardOutput;
 
-            if (Data.m_RedirectStandardOutput)
+            if (RunTimeData.Ins.m_RedirectStandardOutput)
             {
                 aProcess.StartInfo.RedirectStandardOutput = true;
                 aProcess.StartInfo.UseShellExecute = false;
@@ -583,7 +462,7 @@ namespace SDU
 
             aProcess.Start();
 
-            if (Data.m_RedirectStandardOutput)
+            if (RunTimeData.Ins.m_RedirectStandardOutput)
             {
                 aProcess.BeginOutputReadLine();
             }
@@ -600,10 +479,10 @@ namespace SDU
                     UnityEngine.Debug.LogWarning($"ValidateConnectionContinuously End");
                     SDU_ProcessList.CheckProcessEvent();
                     //aProcess.StandardOutput.ReadToEnd();
-                    if (Data.m_AutoOpenWeb)
+                    if (RunTimeData.Ins.m_AutoOpenWeb)
                     {
-                        System.Diagnostics.Process.Start(Data.m_WebURL);
-                        UnityEngine.Debug.LogWarning($"Open WebURL:{Data.m_WebURL}");
+                        System.Diagnostics.Process.Start(RunTimeData.Ins.m_WebURL);
+                        UnityEngine.Debug.LogWarning($"Open WebURL:{RunTimeData.Ins.m_WebURL}");
                     }
                     RefreshModels().Forget();
                 }
@@ -624,7 +503,7 @@ namespace SDU
             else if (iOutPut.Contains("Running on local URL:"))
             {
                 string aURL = iOutPut.Replace("Running on local URL:", string.Empty);
-                Data.m_WebURL = Regex.Replace(aURL, @"\s", string.Empty);
+                RunTimeData.Ins.m_WebURL = Regex.Replace(aURL, @"\s", string.Empty);
                 //System.Diagnostics.Process.Start(Data.m_WebURL);
                 //UnityEngine.Debug.LogWarning($"Open WebURL:{Data.m_WebURL}");
             }
