@@ -71,6 +71,8 @@ namespace SDU
 
         public SDU_WebUIClient.SDU_WebRequest Client_Progress =>
             new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/sdapi/v1/progress", SDU_WebRequest.Method.Get);
+        public SDU_WebUIClient.SDU_WebRequest Client_Samplers =>
+            new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/sdapi/v1/samplers", SDU_WebRequest.Method.Get);
         public SDU_WebUIClient.SDU_WebRequest Client_SdModels =>
             new SDU_WebUIClient.SDU_WebRequest(URL_SdModels, SDU_WebRequest.Method.Get);
 

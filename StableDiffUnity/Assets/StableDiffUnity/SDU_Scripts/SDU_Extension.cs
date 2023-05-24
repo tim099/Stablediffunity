@@ -19,7 +19,11 @@ namespace SDU
         }
         public static void Forget(this ValueTask task, bool logWarning = false)
         {
-            task.AsTask().ContinueWith(t =>
+            task.AsTask().Forget(logWarning);
+        }
+        public static void Forget(this Task task, bool logWarning = false)
+        {
+            task.ContinueWith(t =>
             {
                 if (t.IsFaulted)
                 {

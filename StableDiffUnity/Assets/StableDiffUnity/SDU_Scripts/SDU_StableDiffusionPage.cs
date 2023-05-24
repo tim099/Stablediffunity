@@ -97,6 +97,7 @@ namespace SDU
         public async System.Threading.Tasks.ValueTask RefreshModels()
         {
             await RunTimeData.Ins.m_WebUISetting.RefreshCheckpoints();
+            await RunTimeData.Ins.m_WebUISetting.RefreshSamplers();
             await RunTimeData.Ins.m_WebUISetting.RefreshLora();
             await RunTimeData.Ins.m_WebUISetting.RefreshControlNetModels();
         }

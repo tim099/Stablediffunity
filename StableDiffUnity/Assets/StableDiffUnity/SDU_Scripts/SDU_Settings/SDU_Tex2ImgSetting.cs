@@ -21,7 +21,7 @@ namespace SDU
         public List<string> GetAllModelNames() => RunTimeData.Ins.m_WebUISetting.m_ModelNames;
         [UCL.Core.PA.UCL_List("GetAllModelNames")] public string m_SelectedModel;
         public List<string> GetAllSamplerNames() => RunTimeData.Ins.m_WebUISetting.m_Samplers;
-        [UCL.Core.PA.UCL_List("GetAllSamplerNames")] public string m_SelectedSampler;
+        [UCL.Core.PA.UCL_List("GetAllSamplerNames")] public string m_SelectedSampler = "DPM++ 2M Karras";
 
 
         //public List<string> GetAllLoraNames() => Data.m_WebUISettings.m_LoraNames;

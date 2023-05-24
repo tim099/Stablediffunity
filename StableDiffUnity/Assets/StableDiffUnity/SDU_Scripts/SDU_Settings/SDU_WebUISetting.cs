@@ -42,7 +42,6 @@ namespace SDU
                 "DDIM",
                 "PLMS"
             };
-
         public List<SDU_WebUIClient.Get.SdApi.V1.SdModels.Responses> m_Models = new();
         public SDU_WebUIClient.Get.SdApi.V1.CmdFlags.Responses m_CmdFlags = new();
 
@@ -59,8 +58,33 @@ namespace SDU
             }
             return this;
         }
+        public async System.Threading.Tasks.Task RefreshSamplers()
+        {
+            try
+            {
+                using (var aClient = RunTimeData.SD_API.Client_Samplers)
+                {
+                    var aResponses = await aClient.SendWebRequestAsync();
+                    m_Samplers.Clear();
+                    for(int i = 0; i < aResponses.Count; i++)
+                    {
+                        var aSampler = aResponses[i];
+                        if (aSampler.Contains("name"))
+                        {
+                            m_Samplers.Add(aSampler["name"].GetString());
+                        }
+                    }
+                    //m_CmdFlags = JsonConvert.LoadDataFromJson<SDU_WebUIClient.Get.SdApi.V1.CmdFlags.Responses>(aResponses);
 
-        public async System.Threading.Tasks.ValueTask RefreshCheckpoints()
+                    Debug.LogWarning($"Samplers aResponses:{aResponses}");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogException(e);
+            }
+        }
+        public async System.Threading.Tasks.Task RefreshCheckpoints()
         {
             try
             {
@@ -94,7 +118,7 @@ namespace SDU
             }
 
         }
-        public async System.Threading.Tasks.ValueTask RefreshLora()
+        public async System.Threading.Tasks.Task RefreshLora()
         {
             try
             {
@@ -124,7 +148,7 @@ namespace SDU
                 Debug.LogException(e);
             }
         }
-        public async System.Threading.Tasks.ValueTask RefreshControlNetModels()
+        public async System.Threading.Tasks.Task RefreshControlNetModels()
         {
             try
             {
