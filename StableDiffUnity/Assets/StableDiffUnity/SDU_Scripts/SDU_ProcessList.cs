@@ -22,27 +22,6 @@ namespace SDU
         {
             try
             {
-                //Process[] Processes = Process.GetProcessesByName(s_ProcessName);
-
-                //foreach (Process aProcess in Processes)
-                //{
-                //    if (s_PidList.Contains(aProcess.Id))
-                //    {
-                //        UnityEngine.Debug.LogWarning($"KillProcess Id:{aProcess.Id},ProcessName:{aProcess.ProcessName}");
-                //        if (!aProcess.HasExited)
-                //        {
-                //            //aProcess.CloseMainWindow();
-                //            aProcess.Kill();
-                //            aProcess.WaitForExit();
-                //        }
-                //        else
-                //        {
-                //            UnityEngine.Debug.LogError($"KillProcess Process.HasExited, Id:{aProcess.Id},ProcessName:{aProcess.ProcessName}");
-                //        }
-                //        s_PidList.Remove(aProcess.Id);
-                //    }
-                //}
-
                 while (s_PidList.Count > 0)
                 {
                     var aId = s_PidList[0];
@@ -66,19 +45,6 @@ namespace SDU
             {
                 UnityEngine.Debug.LogException(e);
             }
-
-            //DoActionForListedProcess((iProcess) =>
-            //{
-            //    if (!iProcess.HasExited)
-            //    {
-            //        UnityEngine.Debug.LogWarning($"KillProcess iProcess iID:{iProcess.Id}");
-            //        iProcess.Kill();
-            //        iProcess.WaitForExit();
-            //    }
-            //},(iID)=> {
-            //    UnityEngine.Debug.LogError($"KillProcess not found iID:{iID}");
-            //    s_PidList.Remove(iID);
-            //});
         }
         public static bool CheckProcessEnd(int iID)
         {
@@ -89,14 +55,7 @@ namespace SDU
             var aProcess = Process.GetProcessById(iID);
             if(aProcess == null) return true;//Process Not found
             if(aProcess.HasExited) return true;//Process HasExited
-            //Process[] Processes = Process.GetProcessesByName(s_ProcessName);
-            //foreach (Process process in Processes)
-            //{
-            //    if (process.Id == iID)
-            //    {
-            //        return process.HasExited;
-            //    }
-            //}
+
             return false;//Process Not End
         }
         static List<int> s_PreCheckProcess = new List<int>();
@@ -162,9 +121,6 @@ namespace SDU
             }
 
             UnityEngine.Debug.LogWarning($"OnExited (process.Id:{process.Id})");
-
-            //_webUIStatus.Close();
-            //_webUIStatus.ResetServerArgs();
         }
 
         #region ProcessEvent

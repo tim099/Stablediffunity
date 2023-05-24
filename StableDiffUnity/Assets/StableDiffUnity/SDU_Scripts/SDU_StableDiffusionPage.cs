@@ -65,6 +65,7 @@ namespace SDU
         bool m_GeneratingImage = false;
         bool m_ServerReady = false;
         string m_ProgressStr = string.Empty;
+        float m_ProgressVal = 0f;
         List<Texture2D> m_Textures = new List<Texture2D>();
         ~SDU_StableDiffusionPage()
         {
@@ -95,75 +96,9 @@ namespace SDU
         }
         public async System.Threading.Tasks.ValueTask RefreshModels()
         {
-            try
-            {
-                using (var client = new SDU_WebUIClient.SDU_WebRequest(SD_API.URL_SdModels, SDU_WebRequest.Method.Get))
-                {
-                    var responses = await client.SendWebRequestAsync();
-                    RunTimeData.Ins.m_WebUISetting.m_Models.Clear();
-                    RunTimeData.Ins.m_WebUISetting.m_ModelNames.Clear();
-                    //Debug.LogWarning($"responses:{responses.ToJsonBeautify()}");
-                    foreach (JsonData aModelJson in responses)
-                    {
-                        var aModel = JsonConvert.LoadDataFromJson<SDU_WebUIClient.Get.SdApi.V1.SdModels.Responses>(aModelJson);
-                        RunTimeData.Ins.m_WebUISetting.m_Models.Add(aModel);
-                        RunTimeData.Ins.m_WebUISetting.m_ModelNames.Add(aModel.model_name);
-                        //Debug.LogWarning($"model_name:{aModel.model_name}");
-                    }
-                    Debug.LogWarning($"ModelNames:{RunTimeData.Ins.m_WebUISetting.m_ModelNames.ConcatString()}");
-                }
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogException(e);
-            }
-
-            try
-            {
-                using (var client = new SDU_WebUIClient.SDU_WebRequest(SD_API.URL_CmdFlags, SDU_WebRequest.Method.Get))
-                {
-                    var responses = await client.SendWebRequestAsync();
-                    RunTimeData.Ins.m_WebUISetting.m_CmdFlags = JsonConvert.LoadDataFromJson<SDU_WebUIClient.Get.SdApi.V1.CmdFlags.Responses>(responses);
-
-                    var aLoraDir = RunTimeData.Ins.m_WebUISetting.m_CmdFlags.lora_dir;
-                    if (Directory.Exists(aLoraDir))
-                    {
-                        var aLoras = Directory.GetFiles(aLoraDir, "*", SearchOption.AllDirectories);
-                        RunTimeData.Ins.m_WebUISetting.m_LoraNames.Clear();
-                        foreach (var aLora in aLoras)
-                        {
-                            if (!aLora.Contains(".txt") && !aLora.Contains(".png"))
-                            {
-                                RunTimeData.Ins.m_WebUISetting.m_LoraNames.Add(Path.GetFileNameWithoutExtension(aLora));
-                            }
-                        }
-                    }
-                    Debug.LogWarning($"_modelNamesForLora:{RunTimeData.Ins.m_WebUISetting.m_LoraNames.ConcatString()}");
-                }
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogException(e);
-            }
-
-            try
-            {
-                using (var client = ControlNet_API.Client_ModelLists)
-                {
-                    var responses = await client.SendWebRequestAsync();
-                    if (responses.Contains("model_list"))
-                    {
-                        //Data.m_WebUISettings.m_ControlNetSettings.m_ModelList.Clear();
-                        RunTimeData.Ins.m_WebUISetting.m_ControlNetData.m_ModelList = JsonConvert.LoadDataFromJson<List<string>>(responses["model_list"]);
-                    }
-                    //Debug.LogWarning($"ControlNet_API responses:{responses.ToJson()}");
-                }
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogException(e);
-            }
-
+            await RunTimeData.Ins.m_WebUISetting.RefreshCheckpoints();
+            await RunTimeData.Ins.m_WebUISetting.RefreshLora();
+            await RunTimeData.Ins.m_WebUISetting.RefreshControlNetModels();
         }
         public static Tuple<string ,string> GetSaveImagePath()
         {
@@ -183,137 +118,191 @@ namespace SDU
             m_GenMode = GenMode.None;
             if (m_GeneratingImage) return;
             m_GeneratingImage = true;
-            m_ProgressStr = "Generating Image 0%";
-            try
+            m_ProgressStr = "Generating Image Start";
+            ClearTextures();
+            //List<Texture2D> aTextures = new List<Texture2D>();
+            int aBatchCount = iSetting.m_BatchCount;
+            for (int aBatchID = 0; aBatchID < aBatchCount; aBatchID++)
             {
-                //Debug.LogWarning($"Image generating started. DepthMode:{iDepthTexture != null}");
-                //if(m_DepthTexture == null)
-                //{
-                //    m_DepthTexture = iDepthTexture;
-                //}
-                using (var client = new SDU_WebUIClient.SDU_WebRequest(SD_API.URL_Options, SDU_WebRequest.Method.Post))
+                try
                 {
-                    JsonData aJson = new JsonData();
-
-                    aJson["sd_model_checkpoint"] = RunTimeData.Ins.m_Tex2ImgSettings.m_SelectedModel;
-                    string aJsonStr = aJson.ToJson();
-                    var aResultJson = await client.SendWebRequestAsyncString(aJsonStr);
-                    Debug.LogWarning($"aResultJson:{aResultJson}");
-                }
-                using (var client = new SDU_WebUIClient.SDU_WebRequest(SD_API.URL_Txt2img, SDU_WebRequest.Method.Post))//Post.ControlNet.Txt2Img
-                {
-                    JsonData aJson = new JsonData();
-
-                    aJson["sampler_index"] = iSetting.m_SelectedSampler;
-                    aJson["prompt"] = iSetting.m_Prompt;
-                    aJson["steps"] = iSetting.m_Steps;
-                    aJson["negative_prompt"] = iSetting.m_NegativePrompt;
-                    aJson["seed"] = iSetting.m_Seed;
-                    aJson["cfg_scale"] = iSetting.m_CfgScale;
-                    aJson["width"] = iSetting.m_Width;
-                    aJson["height"] = iSetting.m_Height;
-                    //aJson["denoising_strength"] = iSetting.m_DenoisingStrength;
-                    var aControlNetSettings = RunTimeData.Ins.m_Tex2ImgSettings.m_ControlNetSettings;
-                    if (aControlNetSettings.m_EnableControlNet)
+                    using (var client = SD_API.Client_Options)
                     {
-                        JsonData aAlwayson = new JsonData();
-                        aJson["alwayson_scripts"] = aAlwayson;
+                        JsonData aJson = new JsonData();
+
+                        aJson["sd_model_checkpoint"] = RunTimeData.Ins.m_Tex2ImgSettings.m_SelectedModel;
+                        string aJsonStr = aJson.ToJson();
+                        var aResultJson = await client.SendWebRequestStringAsync(aJsonStr);
+                        Debug.LogWarning($"aResultJson:{aResultJson}");
+                    }
+                    using (var aClient = SD_API.Client_Txt2img)
+                    {
+                        JsonData aJson = new JsonData();
+
+                        aJson["sampler_index"] = iSetting.m_SelectedSampler;
+                        aJson["prompt"] = iSetting.m_Prompt;
+                        aJson["steps"] = iSetting.m_Steps;
+                        aJson["negative_prompt"] = iSetting.m_NegativePrompt;
+                        aJson["seed"] = iSetting.m_Seed;
+                        aJson["cfg_scale"] = iSetting.m_CfgScale;
+                        aJson["width"] = iSetting.m_Width;
+                        aJson["height"] = iSetting.m_Height;
+                        //aJson["batch_count"] = iSetting.m_BatchCount;
+                        aJson["batch_size"] = iSetting.m_BatchSize;
+                        //aJson["denoising_strength"] = iSetting.m_DenoisingStrength;
+                        var aControlNetSettings = RunTimeData.Ins.m_Tex2ImgSettings.m_ControlNetSettings;
+                        if (aControlNetSettings.m_EnableControlNet)
                         {
-                            JsonData aControlnet = RunTimeData.Ins.m_Tex2ImgSettings.m_ControlNetSettings.GetConfigJson();//new JsonData();
-                            if(aControlnet != null)
+                            JsonData aAlwayson = new JsonData();
+                            aJson["alwayson_scripts"] = aAlwayson;
                             {
-                                aAlwayson["controlnet"] = aControlnet;
+                                JsonData aControlnet = RunTimeData.Ins.m_Tex2ImgSettings.m_ControlNetSettings.GetConfigJson();//new JsonData();
+                                if (aControlnet != null)
+                                {
+                                    aAlwayson["controlnet"] = aControlnet;
+                                }
                             }
                         }
-                    }
-                    string aJsonStr = aJson.ToJson();
-                    //Debug.LogWarning(aJsonStr);
-                    
-                    //GUIUtility.systemCopyBuffer = aJsonStr;
-                    var aResultJson = await client.SendWebRequestAsync(aJsonStr);
-                    Debug.LogWarning("Image generating Ended");
-                    if(aResultJson == null)
-                    {
-                        throw new Exception("SendWebRequestAsync, aResultJson == null");
-                    }
-                    if (!aResultJson.Contains("images"))
-                    {
-                        throw new Exception($"SendWebRequestAsync, !responses.Contains(\"images\"),aResultJson:{aResultJson.ToJsonBeautify()}");
-                    }
-                    var aSavePath = GetSaveImagePath();
-                    string aPath = aSavePath.Item1;
-                    string aFileName = aSavePath.Item2;
-                    RunTimeData.Ins.m_OutPutFileID = RunTimeData.Ins.m_OutPutFileID + 1;
+                        string aJsonStr = aJson.ToJson();
+                        //Debug.LogWarning(aJsonStr);
 
-                    var aFileTasks = new List<Task>();
-                    var aImages = aResultJson["images"];
-                    
-                    Debug.LogWarning($"aImages.Count:{aImages.Count}");
-                    ClearTextures();
-                    for (int i = 0; i < aImages.Count; i++)
-                    {
-                        var aImageStr = aImages[i].GetString();
-                        var aSplitStr = aImageStr.Split(",");
-                        foreach(var aSplit in aSplitStr)
+                        //GUIUtility.systemCopyBuffer = aJsonStr;
+                        var aValueTask = aClient.SendWebRequestAsync(aJsonStr);
+                        var aTask = aValueTask.AsTask();
+
+                        while (aTask.Status != TaskStatus.RanToCompletion)
                         {
-                            Debug.LogWarning($"aSplit:{aSplit}");
+                            bool aEndTask = false;
+                            switch (aTask.Status)
+                            {
+                                case TaskStatus.Faulted:
+                                case TaskStatus.Canceled:
+                                    {
+                                        aEndTask = true;
+                                        break;
+                                    }
+                            }
+                            if (aEndTask)
+                            {
+                                break;
+                            }
+                            using (var aClientProgress = SD_API.Client_Progress)
+                            {
+                                JsonData aProgressJson = new JsonData();
+
+                                var aProgress = await aClientProgress.SendWebRequestAsync();
+                                if (aProgress.Contains("progress"))
+                                {
+                                    double aProgressVal = aProgress["progress"].GetDouble(0);
+                                    m_ProgressStr = $"Generating Image[{aBatchID + 1}/{aBatchCount}] " +
+                                        $"{(100f * aProgressVal).ToString("0.0")}%";
+                                    m_ProgressVal = (float)aProgressVal;
+                                }
+
+                                //Debug.LogWarning($"m_ProgressStr:{m_ProgressStr}");
+                            }
                         }
-                        
-                        var aImageBytes = Convert.FromBase64String(aSplitStr[0]);
-                        var aTexture = UCL.Core.TextureLib.Lib.CreateTexture(aImageBytes);
+                        switch (aTask.Status)
+                        {
+                            case TaskStatus.RanToCompletion:
+                                {
+                                    m_ProgressStr = "Generating Image Success";
+                                    break;
+                                }
+                            default:
+                                {
+                                    m_ProgressStr = $"Generating Image Fail, TaskStatus:{aTask.Status}";
+                                    m_GeneratingImage = false;
+                                    return;
+                                }
+                        }
+                        //JsonData aResultJson = await aClient.SendWebRequestAsync(aJsonStr);
+                        JsonData aResultJson = aValueTask.Result;
+
+                        Debug.LogWarning("Image generating Ended");
+                        if (aResultJson == null)
+                        {
+                            throw new Exception("SendWebRequestAsync, aResultJson == null");
+                        }
+                        if (!aResultJson.Contains("images"))
+                        {
+                            throw new Exception($"SendWebRequestAsync, !responses.Contains(\"images\"),aResultJson:{aResultJson.ToJsonBeautify()}");
+                        }
+                        var aSavePath = GetSaveImagePath();
+                        string aPath = aSavePath.Item1;
+                        string aFileName = aSavePath.Item2;
+                        RunTimeData.Ins.m_OutPutFileID = RunTimeData.Ins.m_OutPutFileID + 1;
+
+                        var aFileTasks = new List<Task>();
+                        var aImages = aResultJson["images"];
+
+                        Debug.LogWarning($"aImages.Count:{aImages.Count}");
+                        for (int i = 0; i < aImages.Count; i++)
+                        {
+                            var aImageStr = aImages[i].GetString();
+                            var aSplitStr = aImageStr.Split(",");
+                            foreach (var aSplit in aSplitStr)
+                            {
+                                Debug.LogWarning($"aSplit:{aSplit}");
+                            }
+
+                            var aImageBytes = Convert.FromBase64String(aSplitStr[0]);
+                            var aTexture = UCL.Core.TextureLib.Lib.CreateTexture(aImageBytes);
 
 
-                        string aFilePath = Path.Combine(aPath, $"{aFileName}_{i}.png"); // M HH:mm:ss
-                        Debug.Log($"aPath:{aPath},aFilePath:{aFilePath}");
+                            string aFilePath = Path.Combine(aPath, $"{aFileName}_{i}.png"); // M HH:mm:ss
+                            Debug.Log($"aPath:{aPath},aFilePath:{aFilePath}");
 
-                        aFileTasks.Add(File.WriteAllBytesAsync(aFilePath, aTexture.EncodeToPNG()));
-                        m_Textures.Add(aTexture);
+                            aFileTasks.Add(File.WriteAllBytesAsync(aFilePath, aTexture.EncodeToPNG()));
+                            m_Textures.Add(aTexture);
+                        }
+
+
+                        //using (var clientInfo = new SDU_WebUIClient.Post.SdApi.V1.PngInfo(Data.m_StableDiffusionAPI.URL_PngInfo))
+                        //{
+                        //    var bodyInfo = clientInfo.GetRequestBody();
+                        //    bodyInfo.SetImage(aImageBytes);
+
+                        //    var responsesInfo = await clientInfo.SendRequestAsync(bodyInfo);
+
+                        //    var dic = responsesInfo.Parse();
+                        //    Data.m_Tex2ImgResults.m_Infos = dic;
+                        //    Debug.LogWarning($"Seed:{dic.GetValueOrDefault("Seed")}");
+                        //}
                     }
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogException(e);
+                }
+                finally
+                {
 
-
-                    //using (var clientInfo = new SDU_WebUIClient.Post.SdApi.V1.PngInfo(Data.m_StableDiffusionAPI.URL_PngInfo))
-                    //{
-                    //    var bodyInfo = clientInfo.GetRequestBody();
-                    //    bodyInfo.SetImage(aImageBytes);
-
-                    //    var responsesInfo = await clientInfo.SendRequestAsync(bodyInfo);
-
-                    //    var dic = responsesInfo.Parse();
-                    //    Data.m_Tex2ImgResults.m_Infos = dic;
-                    //    Debug.LogWarning($"Seed:{dic.GetValueOrDefault("Seed")}");
-                    //}
                 }
             }
-            finally
-            {
-                m_GeneratingImage = false;
-                //if (m_DepthTexture != iDepthTexture)
-                //{
-                //    GameObject.DestroyImmediate(m_DepthTexture);
-                //}
-                //else
-                //{
-                //    m_DepthTexture = iDepthTexture;
-                //}
-                await Resources.UnloadUnusedAssets();
-            }
+
+
+
+            m_ProgressStr = string.Empty;
+            m_GeneratingImage = false;
+            m_ProgressVal = 0f;
+            //m_Textures.Append(aTextures);
+            await Resources.UnloadUnusedAssets();
         }
         protected override void ContentOnGUI()
         {
             GUILayout.Label($"StableDiffusion Time:{System.DateTime.Now.ToString("HH:mm:ss.ff")}", UCL_GUIStyle.LabelStyle);
             if(!SDU_ProcessList.ProcessStarted)
             {
-                if (GUILayout.Button("StartServer"))
+                if (GUILayout.Button("StartServer", UCL_GUIStyle.ButtonStyle))
                 {
-                    //Witchpot.Editor.StableDiffusion.WebUISingleton.Start();
                     StartServer();
                 }
             }
             else
             {
-                if (GUILayout.Button("StopServer"))
+                if (GUILayout.Button("StopServer", UCL_GUIStyle.ButtonStyle))
                 {
-                    //Witchpot.Editor.StableDiffusion.WebUISingleton.Stop();
                     UnityEngine.Debug.Log($"Stop server. m_ProcessID:{m_ProcessID}");
                     if (!m_ServerReady)
                     {
@@ -324,14 +313,14 @@ namespace SDU
                 }
                 if (m_ServerReady)
                 {
-                    if (GUILayout.Button("Refresh Models"))
+                    if (GUILayout.Button("Refresh Models", UCL_GUIStyle.ButtonStyle))
                     {
                         RefreshModels().Forget();
                     }
                     if (!m_GeneratingImage)
                     {
                         m_GenMode = RunTimeData.Ins.m_AutoGenMode;
-                        if (GUILayout.Button("GenerateImage"))
+                        if (GUILayout.Button("GenerateImage", UCL_GUIStyle.ButtonStyle))
                         {
                             m_GenMode = GenMode.GenTex2Img;
                         }
@@ -341,25 +330,40 @@ namespace SDU
 
             if (!string.IsNullOrEmpty(m_ProgressStr))
             {
-                GUILayout.Label(m_ProgressStr, UCL_GUIStyle.LabelStyle);
+                GUILayout.BeginHorizontal();
+                GUILayout.Label(m_ProgressStr, UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
+                if(m_ProgressVal > 0) GUILayout.HorizontalSlider(m_ProgressVal, 0f, 1f);
+                GUILayout.EndHorizontal();
             }
-            GUILayout.BeginHorizontal();
-            foreach(var aTexture in m_Textures)
+            if (!m_Textures.IsNullOrEmpty())
             {
-                var aSize = SDU_Util.GetTextureSize(512, aTexture);
-                GUILayout.Box(aTexture, GUILayout.Width(aSize.x), GUILayout.Height(aSize.y));
+                var aTexSize = SDU_Util.GetTextureSize(512, m_Textures[0]);
+                var aDataDic = m_Dic.GetSubDic("DataDic");
+                Vector2 aScrollPos = aDataDic.GetData("ScrollPos", Vector2.zero);
+                using (var aScrollScope = new GUILayout.ScrollViewScope(aScrollPos, GUILayout.Height(aTexSize.y + 32)))
+                {
+                    aDataDic.SetData("ScrollPos", aScrollScope.scrollPosition);
+                    GUILayout.BeginHorizontal();
+                    foreach (var aTexture in m_Textures)
+                    {
+                        var aSize = SDU_Util.GetTextureSize(512, aTexture);
+                        GUILayout.Box(aTexture, GUILayout.Width(aSize.x), GUILayout.Height(aSize.y));
+                    }
+                    GUILayout.EndHorizontal();
+                }
             }
-            GUILayout.EndHorizontal();
+
+
 
             using(var aScope = new GUILayout.HorizontalScope("box"))
             {
-                if (GUILayout.Button("Save", GUILayout.ExpandWidth(false)))
+                if (GUILayout.Button("Save", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
                 {
                     RunTimeData.SaveRunTimeData();
                 }
                 if (File.Exists(ConfigFilePath))
                 {
-                    if (GUILayout.Button("Load", GUILayout.ExpandWidth(false)))
+                    if (GUILayout.Button("Load", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
                     {
                         RunTimeData.ReloadRunTimeData();
                     }
@@ -412,14 +416,15 @@ namespace SDU
         public void StartServer()
         {
             m_ServerReady = false;
-            var aPythonRoot = CheckInstall(RunTimeData.Ins.m_InstallSetting.PythonInstallRoot, RunTimeData.Ins.m_InstallSetting.PythonZipPath, "Python");
-            var aEnvInstallRoot = CheckInstall(RunTimeData.Ins.m_InstallSetting.EnvInstallRoot, RunTimeData.Ins.m_InstallSetting.EnvZipPath, "Env");
-            var aWebUIRoot = CheckInstall(RunTimeData.Ins.m_InstallSetting.WebUIInstallRoot, RunTimeData.Ins.m_InstallSetting.WebUIZipPath, "WebUI");
-            File.WriteAllText(RunTimeData.Ins.m_InstallSetting.PythonInstallPathFilePath, aPythonRoot);
-            File.WriteAllText(RunTimeData.Ins.m_InstallSetting.WebUIInstallPathFilePath, aWebUIRoot);
-            File.WriteAllText(RunTimeData.Ins.m_InstallSetting.CommandlindArgsFilePath, RunTimeData.Ins.m_InstallSetting.CommandlindArgs);
+            var aInstallSetting = RunTimeData.Ins.m_InstallSetting;
+            var aPythonRoot = CheckInstall(aInstallSetting.PythonInstallRoot, aInstallSetting.PythonZipPath, "Python");
+            var aEnvInstallRoot = CheckInstall(aInstallSetting.EnvInstallRoot, aInstallSetting.EnvZipPath, "Env");
+            var aWebUIRoot = CheckInstall(aInstallSetting.WebUIInstallRoot, aInstallSetting.WebUIZipPath, "WebUI");
+            File.WriteAllText(aInstallSetting.PythonInstallPathFilePath, aPythonRoot);
+            File.WriteAllText(aInstallSetting.WebUIInstallPathFilePath, aWebUIRoot);
+            File.WriteAllText(aInstallSetting.CommandlindArgsFilePath, aInstallSetting.CommandlindArgs);
 
-            var aPythonExePath = RunTimeData.Ins.m_InstallSetting.PythonExePath;//System.IO.Path.Combine(aEnvInstallRoot, Data.PythonExePath);
+            var aPythonExePath = aInstallSetting.PythonExePath;//System.IO.Path.Combine(aEnvInstallRoot, Data.PythonExePath);
             UnityEngine.Debug.LogWarning($"PythonExePath:{aPythonExePath}");
             if (!System.IO.File.Exists(aPythonExePath))
             {
@@ -436,7 +441,7 @@ namespace SDU
             var aProcess = new System.Diagnostics.Process();
             
             //string aBatPath = System.IO.Path.Combine(Data.RootPath, Data.WebUIScriptBatPath);
-            string aRunPythonPath = RunTimeData.Ins.m_InstallSetting.RunPythonPath;
+            string aRunPythonPath = aInstallSetting.RunPythonPath;
             string aBatPath = RunTimeData.Ins.m_InstallSetting.RunBatPath;//System.IO.Path.Combine(aEnvInstallRoot, Data.WebUIScriptBatPath);
             UnityEngine.Debug.LogWarning($"RunPythonPath:{aRunPythonPath},BatPath:{aBatPath}");
 
@@ -514,7 +519,7 @@ namespace SDU
             UnityEngine.Debug.LogWarning($"DataReceived_:{iOutPut}");
 
         }
-        private string CheckInstall(string iInstallRoot, string iZipAbsolutePath,string iInstallTarget)
+        private string CheckInstall(string iInstallRoot, string iZipAbsolutePath, string iInstallTarget)
         {
             if (Directory.Exists(iInstallRoot))//Install done
             {

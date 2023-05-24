@@ -34,9 +34,14 @@ namespace SDU
         public int m_Width = 512;
         public int m_Height = 512;
         public int m_Steps = 20;
+        [UCL.Core.PA.UCL_Slider(1, 30)]
         public float m_CfgScale = 7;
         public long m_Seed = -1;
 
+        [UCL.Core.PA.UCL_IntSlider(1, 100)]
+        public int m_BatchCount = 1;
+        [UCL.Core.PA.UCL_IntSlider(1, 8)]
+        public int m_BatchSize = 1;
         //[UCL.Core.ATTR.UCL_HideOnGUI] 
         public ControlNetSettings m_ControlNetSettings = new ControlNetSettings();
 

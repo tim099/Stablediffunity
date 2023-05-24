@@ -62,11 +62,9 @@ namespace SDU
         }
         public class SDU_WebRequest : WebRequestWrapper
         {
-
-
-            public SDU_WebRequest(string url, SDU.SDU_WebRequest.Method iMethod) //: base(url, GetMethodVerb(iMethod), RequestHeaderList)
+            public SDU_WebRequest(string iURL, SDU.SDU_WebRequest.Method iMethod)
             {
-                m_Request = new UnityWebRequest(url, iMethod.GetMethodVerb());
+                m_Request = new UnityWebRequest(iURL, iMethod.GetMethodVerb());
 
                 SetRequestHeader(ContentType, ApplicationJson);
             }
@@ -79,13 +77,13 @@ namespace SDU
                 }
                 m_Request.SetRequestHeader(name, value);
             }
-            public async ValueTask<TResponses> SendWebRequestAsync<TResponses>(string iJson = null) where TResponses : IResponses, new()
+            public async ValueTask<T> SendWebRequestAsync<T>(string iJson = null) where T : new()
             {
                 CheckDone();
                 if (iJson != null)
                 {
-                    var bytes = Encoding.UTF8.GetBytes(iJson);
-                    WebRequest.uploadHandler = new UploadHandlerRaw(bytes);
+                    var aBytes = Encoding.UTF8.GetBytes(iJson);
+                    WebRequest.uploadHandler = new UploadHandlerRaw(aBytes);
                 }
 
                 WebRequest.downloadHandler = new DownloadHandlerBuffer();
@@ -95,11 +93,11 @@ namespace SDU
                 {
                     return default;
                 }
-                return JsonConvert.LoadDataFromJson<TResponses>(aResult);
+                return JsonConvert.LoadDataFromJson<T>(aResult);
             }
             public async ValueTask<UCL.Core.JsonLib.JsonData> SendWebRequestAsync(string iJson = null)
             {
-                string aResult = await SendWebRequestAsyncString(iJson);
+                string aResult = await SendWebRequestStringAsync(iJson);
                 if (string.IsNullOrEmpty(aResult) || aResult == "null")
                 {
                     return null;
@@ -109,7 +107,7 @@ namespace SDU
                     return UCL.Core.JsonLib.JsonData.ParseJson(aResult);
                 }
             }
-            public async ValueTask<string> SendWebRequestAsyncString(string iJson = null)
+            public async ValueTask<string> SendWebRequestStringAsync(string iJson = null)
             {
                 CheckDone();
 
@@ -510,13 +508,13 @@ namespace SDU
                             public string sha256;
                             public string filename;
                             public string config;
+
                             public string GetShortName() => model_name;
                         }
 
                         // method
                         public SdModels() : base(Url, Method, RequestHeaderList) { }
                         public SdModels(string url) : base(url, Method, RequestHeaderList) { }
-                        public SdModels(IUrl url) : base(url.Url, Method, RequestHeaderList) { }
 
                         public ValueTask<IList<Responses>> SendRequestAsync()
                         {
@@ -580,131 +578,6 @@ namespace SDU
             {
                 public static class V1
                 {
-                    public class Options : WebRequestWrapper
-                    {
-                        // static
-                        public static string Paths => "/sdapi/v1/options";
-                        public static string Url => $"{ServerUrl}{Paths}";
-                        public static IReadOnlyList<RequestHeader> RequestHeaderList { get; }
-
-                        static Options()
-                        {
-                            RequestHeaderList = new List<RequestHeader>() { new RequestHeader(ContentType, ApplicationJson), };
-                        }
-
-                        // interface
-                        public interface IUrl
-                        {
-                            public string Url { get; }
-                        }
-
-                        // internal class
-                        [Serializable]
-                        public class RequestBody : IRequestBody
-                        {
-                            public string sd_model_checkpoint;
-                        }
-
-                        [Serializable]
-                        public class Responses : IResponses
-                        {
-
-                        }
-
-                        // method
-                        public Options() : base(Url, Method, RequestHeaderList) { }
-                        public Options(IUrl url) : base(url.Url, Method, RequestHeaderList) { }
-                        public Options(string url) : base(url, Method, RequestHeaderList) { }
-                        public RequestBody GetRequestBody()
-                        {
-                            return new RequestBody();
-                        }
-
-                        public ValueTask<Responses> SendRequestAsync(RequestBody body)
-                        {
-                            return base.SendRequestAsync<RequestBody, Responses>(body);
-                        }
-                    }
-
-                    public class Txt2Img : WebRequestWrapper
-                    {
-                        // static
-                        public static string Paths => "/sdapi/v1/txt2img";
-                        public static string Url => $"{ServerUrl}{Paths}";
-                        public static IReadOnlyList<RequestHeader> RequestHeaderList { get; }
-
-                        static Txt2Img()
-                        {
-                            RequestHeaderList = new List<RequestHeader>() { new RequestHeader(ContentType, ApplicationJson), };
-                        }
-
-                        // interface
-                        public interface IUrl
-                        {
-                            public string Url { get; }
-                        }
-
-                        // internal class
-                        [Serializable]
-                        public class RequestBody : IRequestBody
-                        {
-                            public interface IDefault
-                            {
-                                public string Sampler { get; }
-                                public int Width { get; }
-                                public int Height { get; }
-                                public int Steps { get; }
-                                public float CfgScale { get; }
-                                public long Seed { get; }
-                            }
-
-                            public string sampler_index = "Euler a";
-                            public string prompt = "";
-                            public string negative_prompt = "";
-                            public long seed = -1;
-                            public int steps = 20;
-                            public float cfg_scale = 7;
-                            public int width = 960;
-                            public int height = 540;
-                            public float denoising_strength = 0.0f;
-                            public RequestBody() { }
-                            public RequestBody(IDefault def)
-                            {
-                                sampler_index = def.Sampler;
-                                width = def.Width;
-                                height = def.Height;
-                                seed = def.Seed;
-                                steps = def.Steps;
-                                cfg_scale = def.CfgScale;
-                            }
-                        }
-
-                        [Serializable]
-                        public class Responses : IResponses
-                        {
-                            public string[] images;
-
-                            public byte[] GetImage()
-                            {
-                                return GetImageByteArray(images);
-                            }
-                        }
-
-                        // method
-                        public Txt2Img() : base(Url, Method, RequestHeaderList) { }
-                        public Txt2Img(IUrl url) : base(url.Url, Method, RequestHeaderList) { }
-                        public Txt2Img(string url) : base(url, Method, RequestHeaderList) { }
-                        public RequestBody GetRequestBody(RequestBody.IDefault def)
-                        {
-                            return new RequestBody(def);
-                        }
-
-                        public ValueTask<Responses> SendRequestAsync(string iJson)
-                        {
-                            return base.SendRequestAsync<Responses>(iJson);
-                        }
-                    }
-
                     public class Img2Img : WebRequestWrapper
                     {
                         // static
@@ -865,104 +738,6 @@ namespace SDU
                         {
                             return base.SendRequestAsync<RequestBody, Responses>(body);
                         }
-                    }
-                }
-            }
-
-            public static class ControlNet
-            {
-                public class Txt2Img : WebRequestWrapper
-                {
-                    // static
-                    public static string Paths => "/controlnet/txt2img";
-                    public static string Url => $"{ServerUrl}{Paths}";
-                    public static IReadOnlyList<RequestHeader> RequestHeaderList { get; }
-
-                    static Txt2Img()
-                    {
-                        RequestHeaderList = new List<RequestHeader>() { new RequestHeader(ContentType, ApplicationJson), };
-                    }
-
-                    // interface
-                    public interface IUrl
-                    {
-                        public string Url { get; }
-                    }
-
-                    // internal class
-                    [Serializable]
-                    public class RequestBody : IRequestBody
-                    {
-                        public interface IDefault
-                        {
-                            public string Sampler { get; }
-                            public int Width { get; }
-                            public int Height { get; }
-                            public int Steps { get; }
-                            public float CfgScale { get; }
-                            public long Seed { get; }
-                        }
-
-                        public string[] controlnet_input_image;
-                        public string controlnet_module = "none";
-                        public string controlnet_model = "control_v11f1p_sd15_depth_fp16 [4b72d323]";
-                        public string sampler_index = "Euler a";
-                        public float controlnet_weight = 1.0f;
-                        public string prompt = "";
-                        public string negative_prompt = "";
-                        public long seed = -1;
-                        public int steps = 20;
-                        public float cfg_scale = 7;
-                        public int width = 960;
-                        public int height = 540;
-                        public float denoising_strength = 0.0f;
-                        public RequestBody()
-                        {
-
-                        }
-                        public RequestBody(IDefault def)
-                        {
-                            sampler_index = def.Sampler;
-                            width = def.Width;
-                            height = def.Height;
-                            seed = def.Seed;
-                            steps = def.Steps;
-                            cfg_scale = def.CfgScale;
-                        }
-
-                        public void SetImage(byte[] data)
-                        {
-                            controlnet_input_image = GetImageStringArray(data);
-                        }
-                    }
-
-                    [Serializable]
-                    public class Responses : IResponses
-                    {
-                        public string[] images;
-
-                        public byte[] GetImage()
-                        {
-                            return GetImageByteArray(images);
-                        }
-                    }
-
-                    // method
-                    public Txt2Img() : base(Url, Method, RequestHeaderList) { }
-                    public Txt2Img(string url) : base(url, Method, RequestHeaderList) { }
-                    public Txt2Img(IUrl url) : base(url.Url, Method, RequestHeaderList) { }
-
-                    public RequestBody GetRequestBody(RequestBody.IDefault def)
-                    {
-                        return new RequestBody(def);
-                    }
-                    public ValueTask<Responses> SendRequestAsync(string iJson)
-                    {
-                        return base.SendRequestAsync<Responses>(iJson);
-                    }
-                    public ValueTask<Responses> SendRequestAsync(RequestBody body)
-                    {
-                        return base.SendRequestAsync<RequestBody, Responses>(body);
                     }
                 }
             }

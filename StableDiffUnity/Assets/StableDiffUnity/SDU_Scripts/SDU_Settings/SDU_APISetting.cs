@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using UCL.Core;
+using UCL.Core.UI;
 using UnityEngine;
 namespace SDU
 {
@@ -7,26 +9,74 @@ namespace SDU
     {
         public ControlNetAPI m_ControlNetAPI = new ControlNetAPI();
         public StableDiffusionAPI m_StableDiffusionAPI = new StableDiffusionAPI();
+        public OpenWebURL m_OpenWebURL = new OpenWebURL();
+    }
+    [System.Serializable]
+    public class OpenWebURL : UCL.Core.UI.UCLI_FieldOnGUI
+    {
+        public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
+        {
+            if(GUILayout.Button("Open API Docs", UCL_GUIStyle.ButtonStyle))
+            {
+                System.Diagnostics.Process.Start(RunTimeData.SD_API.URL_Docs);
+            }
+            return this;
+        }
     }
     [System.Serializable]
     public class StableDiffusionAPI
     {
         public static string ServerUrl => SDU_StableDiffusionPage.ServerUrl;
 
-        public string m_ApiSdModels = "/sdapi/v1/sd-models";
+        
         public string m_ApiCmdFlags = "/sdapi/v1/cmd-flags";
-        public string m_ApiOptions = "/sdapi/v1/options";
+        
         public string m_ApiTxt2img = "/sdapi/v1/txt2img";
         public string m_ApiPngInfo = "/sdapi/v1/png-info";
-        public string m_ControlNetTxt2img = "/controlnet/txt2img";
-
+        #region Get
+        public string m_ApiSdModels = "/sdapi/v1/sd-models";
+        public string m_Docs = "/docs";
 
         public string URL_SdModels => ServerUrl + m_ApiSdModels;
-        public string URL_CmdFlags => ServerUrl + m_ApiCmdFlags;
+        public string URL_Docs => ServerUrl + m_Docs;
+        #endregion
+
+        #region Post
+        public string m_ApiOptions = "/sdapi/v1/options";
+        public string m_RefreshCheckpoints = "/sdapi/v1/refresh-checkpoints";
+
         public string URL_Options => ServerUrl + m_ApiOptions;
+
+
+        public string URL_RefreshCheckpoints => ServerUrl + m_RefreshCheckpoints;
+        #endregion
+
+
+        public string URL_CmdFlags => ServerUrl + m_ApiCmdFlags;
+        
         public string URL_Txt2img => ServerUrl + m_ApiTxt2img;
         public string URL_PngInfo => ServerUrl + m_ApiPngInfo;
-        public string URL_ControlNetTxt2img => ServerUrl + m_ControlNetTxt2img;
+
+        #region Client
+        public SDU_WebUIClient.SDU_WebRequest Client_Options =>
+            new SDU_WebUIClient.SDU_WebRequest(URL_Options, SDU_WebRequest.Method.Post);
+
+        public SDU_WebUIClient.SDU_WebRequest Client_RefreshCheckpoints => 
+            new SDU_WebUIClient.SDU_WebRequest(URL_RefreshCheckpoints, SDU_WebRequest.Method.Post);
+
+
+        public SDU_WebUIClient.SDU_WebRequest Client_Txt2img =>
+            new SDU_WebUIClient.SDU_WebRequest(URL_Txt2img, SDU_WebRequest.Method.Post);
+
+
+        public SDU_WebUIClient.SDU_WebRequest Client_Progress =>
+            new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/sdapi/v1/progress", SDU_WebRequest.Method.Get);
+        public SDU_WebUIClient.SDU_WebRequest Client_SdModels =>
+            new SDU_WebUIClient.SDU_WebRequest(URL_SdModels, SDU_WebRequest.Method.Get);
+
+        //public SDU_WebUIClient.SDU_WebRequest Client_Docs =>
+        //    new SDU_WebUIClient.SDU_WebRequest(URL_Docs, SDU_WebRequest.Method.Get);
+        #endregion
     }
 
     /// <summary>

@@ -19,6 +19,7 @@ namespace SDU
     [System.Serializable]
     public class RunTimeData : UCL.Core.JsonLib.UnityJsonSerializable
     {
+        #region static
         static public RunTimeData Ins
         {
             get
@@ -60,6 +61,10 @@ namespace SDU
             UCL.Core.FileLib.Lib.WriteAllText(SDU_StableDiffusionPage.ConfigFilePath, aJsonStr);
             //PlayerPrefs.SetString(RunTimeDataKey, aJsonStr);
         }
+        static public StableDiffusionAPI SD_API => Ins.m_APISetting.m_StableDiffusionAPI;
+        static public ControlNetAPI ControlNet_API => Ins.m_APISetting.m_ControlNetAPI;
+
+        #endregion
 
         public InstallSetting m_InstallSetting = new InstallSetting();
         public ResolutionSetting m_ResolutionSetting = new ResolutionSetting();
