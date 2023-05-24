@@ -49,7 +49,7 @@ namespace SDU
         {
 
             UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic.GetSubDic("WebUISetting"), iFieldName, false);
-            if (GUILayout.Button("Refresh Checkpoints"))
+            if (GUILayout.Button("Refresh Checkpoints", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
             {
                 UCL.Core.ServiceLib.UCL_UpdateService.AddAction(() =>
                 {

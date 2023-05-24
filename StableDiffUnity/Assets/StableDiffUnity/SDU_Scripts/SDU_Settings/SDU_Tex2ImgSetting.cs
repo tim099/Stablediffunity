@@ -25,14 +25,10 @@ namespace SDU
         [UCL.Core.PA.UCL_List("GetAllSamplerNames")] 
         public string m_SelectedSampler = "DPM++ 2M Karras";
 
-
-        //public List<string> GetAllLoraNames() => Data.m_WebUISettings.m_LoraNames;
-        //[UCL.Core.PA.UCL_Button("AddLora")]
-        //[UCL.Core.PA.UCL_List("GetAllLoraNames")] 
         [UCL.Core.ATTR.UCL_HideOnGUI] public string m_SelectedLoraModel;
 
         public string m_Prompt = "masterpiece, best quality, ultra-detailed,((black background)),1girl,";
-        public string m_NegativePrompt;
+        public string m_NegativePrompt = "(low quality, worst quality:1.4), ((bad fingers))";
         public int m_Width = 512;
         public int m_Height = 512;
         public int m_Steps = 20;
@@ -42,16 +38,45 @@ namespace SDU
 
         [UCL.Core.PA.UCL_IntSlider(1, 100)]
         public int m_BatchCount = 1;
+
         [UCL.Core.PA.UCL_IntSlider(1, 8)]
         public int m_BatchSize = 1;
         //[UCL.Core.ATTR.UCL_HideOnGUI] 
         public ControlNetSettings m_ControlNetSettings = new ControlNetSettings();
+        public JsonData GetConfigJson()
+        {
+            JsonData aJson = new JsonData();
 
+            aJson["sampler_index"] = m_SelectedSampler;
+            aJson["prompt"] = m_Prompt;
+            aJson["steps"] = m_Steps;
+            aJson["negative_prompt"] = m_NegativePrompt;
+            aJson["seed"] = m_Seed;
+            aJson["cfg_scale"] = m_CfgScale;
+            aJson["width"] = m_Width;
+            aJson["height"] = m_Height;
+            aJson["batch_size"] = m_BatchSize;
+
+            if (m_ControlNetSettings.m_EnableControlNet)
+            {
+                JsonData aAlwayson = new JsonData();
+                aJson["alwayson_scripts"] = aAlwayson;
+                {
+                    JsonData aControlnet = m_ControlNetSettings.GetConfigJson();//new JsonData();
+                    if (aControlnet != null)
+                    {
+                        aAlwayson["controlnet"] = aControlnet;
+                    }
+                }
+            }
+            return aJson;
+        }
         public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {
             using (var aScope = new GUILayout.HorizontalScope("box"))
             {
-                if (GUILayout.Button("Add Lora", GUILayout.ExpandWidth(false)))
+                //if(SDU_StableDiffusionPage.ge)
+                if (GUILayout.Button("Add Lora", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
                 {
                     m_Prompt += $"<lora:{m_SelectedLoraModel}:1>";
                 }
@@ -65,6 +90,13 @@ namespace SDU
                 }
             }
             UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic.GetSubDic("Tex2Img"), iFieldName, true);
+            if (!SDU_ImageGenerator.GeneratingImage)
+            {
+                if (GUILayout.Button("Generate Image", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
+                {
+                    SDU_ImageGenerator.GenerateImage(RunTimeData.Ins.m_Tex2ImgSettings);
+                }
+            }
             //m_ControlNetSettings.OnGUI(iDataDic.GetSubDic("ControlNetSettings"));
             return this;
         }
@@ -205,7 +237,7 @@ namespace SDU
                         GUILayout.Label(iFieldName, GUILayout.ExpandWidth(false));
                         if (Texture != null)
                         {
-                            if (GUILayout.Button("SaveImage"))
+                            if (GUILayout.Button("SaveImage", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
                             {
                                 UCL.Core.ServiceLib.UCL_UpdateService.AddAction(SaveImage);
                             }
@@ -216,7 +248,7 @@ namespace SDU
                         {
                             using (var aScope3 = new GUILayout.HorizontalScope("box"))
                             {
-                                if (GUILayout.Button("Capture Depth"))
+                                if (GUILayout.Button("Capture Depth", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
                                 {
                                     UCL.Core.ServiceLib.UCL_UpdateService.AddAction(() =>
                                     {
@@ -231,7 +263,7 @@ namespace SDU
                                         }
                                     });
                                 }
-                                if (GUILayout.Button("Capture Normal"))
+                                if (GUILayout.Button("Capture Normal", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
                                 {
                                     UCL.Core.ServiceLib.UCL_UpdateService.AddAction(() =>
                                     {
@@ -256,7 +288,7 @@ namespace SDU
                                 GUILayout.BeginHorizontal();
                                 if (File.Exists(m_LoadImageSetting.FilePath))
                                 {
-                                    if (GUILayout.Button("LoadImage", GUILayout.ExpandWidth(false)))
+                                    if (GUILayout.Button("LoadImage", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
                                     {
                                         UCL.Core.ServiceLib.UCL_UpdateService.AddAction(LoadImage);
                                     }
@@ -287,7 +319,7 @@ namespace SDU
         {
             try
             {
-                var aSavePath = SDU_StableDiffusionPage.GetSaveImagePath();
+                var aSavePath = SDU_ImageGenerator.GetSaveImagePath();
                 string aFolderPath = aSavePath.Item1;
                 string aFileName = $"Input_{aSavePath.Item2}.png";
                 string aFilePath = Path.Combine(aFolderPath, aFileName); // M HH:mm:ss

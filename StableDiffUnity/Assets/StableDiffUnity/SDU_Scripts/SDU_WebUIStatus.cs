@@ -45,7 +45,7 @@ namespace SDU
             }
         }
         public static SDU_WebUIStatus s_Ins = null;
-
+        public static bool s_ServerReady = false;
 
 
 
@@ -173,6 +173,7 @@ namespace SDU
             }
             finally
             {
+                s_ServerReady = true;
                 iEndAct?.Invoke();
                 Close();
             }

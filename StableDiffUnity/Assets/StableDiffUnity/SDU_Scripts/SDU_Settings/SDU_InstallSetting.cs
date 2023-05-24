@@ -65,23 +65,23 @@ namespace SDU
                     GUILayout.Label("Open Folder", GUILayout.ExpandWidth(false));
                     if (m_ShowOpenFolderToggle)
                     {
-                        if (GUILayout.Button("Open Env Folder"))
+                        if (GUILayout.Button("Open Env Folder", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
                         {
                             System.Diagnostics.Process.Start(EnvInstallRoot);
                         }
-                        if (GUILayout.Button("Open WebUI Folder"))
+                        if (GUILayout.Button("Open WebUI Folder", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
                         {
                             System.Diagnostics.Process.Start(WebUIInstallRoot);
                         }
-                        if (GUILayout.Button("Open Python Folder"))
+                        if (GUILayout.Button("Open Python Folder", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
                         {
                             System.Diagnostics.Process.Start(PythonInstallRoot);
                         }
-                        if (GUILayout.Button("Open Stable-diffusion models Folder"))
+                        if (GUILayout.Button("Open Stable-diffusion models Folder", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
                         {
                             System.Diagnostics.Process.Start(StableDiffusionModelsPath);
                         }
-                        if (GUILayout.Button("Open Lora Folder"))
+                        if (GUILayout.Button("Open Lora Folder", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
                         {
                             System.Diagnostics.Process.Start(StableDiffusionLoraPath);
                         }

@@ -30,7 +30,7 @@ namespace SDU
         {
             using (var aScope = new GUILayout.VerticalScope("box"))//, GUILayout.MaxWidth(320)
             {
-                if (GUILayout.Button("Install StableDiffusion"))
+                if (GUILayout.Button("Install StableDiffusion", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
                 {
                     SDU_StableDiffusionPage.Create();
                 }

@@ -92,13 +92,13 @@ namespace UnityChan
                 {
 					GUILayout.Label(aInfo.clip.name, GUILayout.ExpandWidth(false));
                 }
-				if (GUILayout.Button("Next Anim"))
+				if (GUILayout.Button("Next Anim", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
                 {
 					
 					anim.SetBool("Next", true);
 				}
 					
-				if (GUILayout.Button("Prev Anim"))
+				if (GUILayout.Button("Prev Anim", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
                 {
 					anim.SetBool("Back", true);
 				}
