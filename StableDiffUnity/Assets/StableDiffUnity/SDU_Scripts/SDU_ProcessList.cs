@@ -22,22 +22,33 @@ namespace SDU
         {
             try
             {
+                if (s_IsPreCheckProcess)
+                {
+                    CheckProcessEvent();
+                }
                 while (s_PidList.Count > 0)
                 {
-                    var aId = s_PidList[0];
-                    s_PidList.RemoveAt(0);
-                    var aProcess = Process.GetProcessById(aId);
-                    if (aProcess == null) continue;
-                    UnityEngine.Debug.LogWarning($"KillProcess Id:{aProcess.Id},ProcessName:{aProcess.ProcessName}");
-                    if (!aProcess.HasExited)
+                    try
                     {
-                        //aProcess.CloseMainWindow();
-                        aProcess.Kill();
-                        aProcess.WaitForExit();
+                        var aId = s_PidList[0];
+                        s_PidList.RemoveAt(0);
+                        var aProcess = Process.GetProcessById(aId);
+                        if (aProcess == null) continue;
+                        if (!aProcess.HasExited)
+                        {
+                            //aProcess.CloseMainWindow();
+                            UnityEngine.Debug.LogWarning($"KillProcess Id:{aProcess.Id},ProcessName:{aProcess.ProcessName}");
+                            aProcess.Kill();
+                            aProcess.WaitForExit();
+                        }
+                        else
+                        {
+                            UnityEngine.Debug.LogError($"KillProcess Process.HasExited, Id:{aId}");
+                        }
                     }
-                    else
+                    catch(Exception e)
                     {
-                        UnityEngine.Debug.LogError($"KillProcess Process.HasExited, Id:{aProcess.Id},ProcessName:{aProcess.ProcessName}");
+                        UnityEngine.Debug.LogException(e);
                     }
                 }
             }
@@ -58,9 +69,16 @@ namespace SDU
 
             return false;//Process Not End
         }
+        static bool s_IsPreCheckProcess = false;
         static List<int> s_PreCheckProcess = new List<int>();
         public static void PreCheckProcessEvent()
         {
+            if (s_IsPreCheckProcess)
+            {
+                UnityEngine.Debug.LogError("PreCheckProcessEvent() s_IsPreCheckProcess");
+                return;
+            }
+            s_IsPreCheckProcess = true;
             Process[] aProcesses = Process.GetProcesses();
             s_PreCheckProcess.Clear();
             foreach (var aProcess in aProcesses)
@@ -72,25 +90,39 @@ namespace SDU
         static List<string> s_TargetProcessName = new List<string>() { "python", "cmd" };
         public static void CheckProcessEvent()
         {
-            
-            foreach(var aProcessName in s_TargetProcessName)
+            if (!s_IsPreCheckProcess)
             {
-                Process[] aProcesses = Process.GetProcessesByName(aProcessName); //Process.GetProcesses();
-                foreach (var aProcess in aProcesses)
+                UnityEngine.Debug.LogError("CheckProcessEvent() !s_IsPreCheckProcess");
+                return;
+            }
+            try
+            {
+                foreach (var aProcessName in s_TargetProcessName)
                 {
-                    int aPid = aProcess.Id;
-                    if (!aProcess.HasExited && !s_PidList.Contains(aPid))
+                    Process[] aProcesses = Process.GetProcessesByName(aProcessName); //Process.GetProcesses();
+                    foreach (var aProcess in aProcesses)
                     {
-                        if (!s_PreCheckProcess.Contains(aPid))
+                        int aPid = aProcess.Id;
+                        if (!aProcess.HasExited && !s_PidList.Contains(aPid))
                         {
-                            //UnityEngine.Debug.LogWarning($"ProcessName:{aProcess.ProcessName},aPid:{aPid}");
-                            AddProcessEvent(aProcess);
+                            if (!s_PreCheckProcess.Contains(aPid))
+                            {
+                                //UnityEngine.Debug.LogWarning($"ProcessName:{aProcess.ProcessName},aPid:{aPid}");
+                                AddProcessEvent(aProcess);
+                            }
                         }
                     }
                 }
             }
-
-            s_PreCheckProcess.Clear();
+            catch(Exception e)
+            {
+                UnityEngine.Debug.LogException(e);
+            }
+            finally
+            {
+                s_IsPreCheckProcess = false;
+                s_PreCheckProcess.Clear();
+            }
         }
         public static void AddProcessEvent(System.Diagnostics.Process iProcess)
         {
@@ -104,7 +136,16 @@ namespace SDU
                 UnityEngine.Debug.LogError("AddProcessEvent iProcess.HasExited");
                 return;
             }
-            UnityEngine.Debug.LogWarning($"AddProcessEvent ,Id:{iProcess.Id})");//ProcessName:{iProcess.ProcessName}
+            try
+            {
+                UnityEngine.Debug.LogWarning($"AddProcessEvent ,Id:{iProcess.Id}");
+                //ProcessName:{iProcess.ProcessName}
+            }
+            catch(Exception e)
+            {
+                UnityEngine.Debug.LogError(e);
+            }
+           
             s_PidList.Add(iProcess.Id);
             iProcess.EnableRaisingEvents = true;
 
@@ -125,44 +166,6 @@ namespace SDU
 
         #region ProcessEvent
 
-        private static bool DoActionForListedProcess(Action<Process> processFound, Action<int> processNotFound)
-        {
-            bool foundAtLeastOne = false;
-
-            Span<int> buffer = stackalloc int[s_PidList.Count];
-
-            for (int i = 0; i < buffer.Length; i++)
-            {
-                buffer[i] = s_PidList[i];
-            }
-
-            Process[] Processes = Process.GetProcessesByName(s_ProcessName);
-
-            foreach (var id in buffer)
-            {
-                bool found = false;
-
-                foreach (Process process in Processes)
-                {
-                    if (process.Id == id)
-                    {
-                        if (processFound != null) { processFound(process); }
-
-                        found = true;
-                        foundAtLeastOne = true;
-                        continue;
-                    }
-                }
-
-                if (!found)
-                {
-                    if (processNotFound != null) { processNotFound(id); }
-                }
-            }
-
-            return foundAtLeastOne;
-        }
-
         public static void Init(Process iProcess)
         {
             iProcess.StartInfo.StandardOutputEncoding = System.Text.Encoding.GetEncoding("shift_jis");
@@ -179,20 +182,6 @@ namespace SDU
                 s_OnOutputDataReceivedAct?.Invoke(aData);
             }
         }
-
-        public static bool RestoreEventsForListedProcess()
-        {
-            return DoActionForListedProcess(RegisterEvents, x => s_PidList.Remove(x));
-        }
-
-        private static void RegisterEvents(Process process)
-        {
-            AddProcessEvent(process);
-
-            SDU_WebUIStatus.Ins.SetServerStarted(true);
-            SDU_WebUIStatus.Ins.ValidateConnectionContinuously().Forget();
-        }
-
         #endregion
     }
 }

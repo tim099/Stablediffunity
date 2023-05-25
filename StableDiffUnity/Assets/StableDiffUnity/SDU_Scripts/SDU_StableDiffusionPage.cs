@@ -58,7 +58,6 @@ namespace SDU
         UCL.Core.UCL_ObjectDictionary m_Dic = new UCL.Core.UCL_ObjectDictionary();
         int m_ProcessID = -1;
         //System.DateTime m_CheckProcessEndTime = DateTime.MinValue;
-        GenMode m_GenMode = GenMode.None;
 
         ~SDU_StableDiffusionPage()
         {
@@ -69,7 +68,7 @@ namespace SDU
         {
             base.Init(iGUIPageController);
             RunTimeData.LoadRunTimeData();
-            RunTimeData.Ins.m_AutoGenMode = GenMode.None;
+            CheckServerStarted();
         }
         public override void OnClose()
         {
@@ -101,36 +100,17 @@ namespace SDU
                 if (GUILayout.Button("StopServer", UCL_GUIStyle.ButtonStyle))
                 {
                     UnityEngine.Debug.Log($"Stop server. m_ProcessID:{m_ProcessID}");
-                    if (!SDU_WebUIStatus.s_ServerReady)
-                    {
-                        SDU_ProcessList.CheckProcessEvent();
-                    }
+                    SDU_WebUIStatus.Ins.Close();
                     SDU_ProcessList.KillAllProcess();
                     m_ProcessID = -1;
                 }
-                if (SDU_WebUIStatus.s_ServerReady)
+                if (SDU_WebUIStatus.ServerReady)
                 {
                     if (GUILayout.Button("Refresh Models", UCL_GUIStyle.ButtonStyle))
                     {
                         RefreshModels().Forget();
                     }
-                    if (!SDU_ImageGenerator.GeneratingImage)
-                    {
-                        m_GenMode = RunTimeData.Ins.m_AutoGenMode;
-                        if (GUILayout.Button("GenerateImage", UCL_GUIStyle.ButtonStyle))
-                        {
-                            m_GenMode = GenMode.GenTex2Img;
-                        }
-                    }
                 }
-            }
-
-            if (!string.IsNullOrEmpty(SDU_ImageGenerator.ProgressStr))
-            {
-                GUILayout.BeginHorizontal();
-                GUILayout.Label(SDU_ImageGenerator.ProgressStr, UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
-                if(SDU_ImageGenerator.ProgressVal > 0) GUILayout.HorizontalSlider(SDU_ImageGenerator.ProgressVal, 0f, 1f);
-                GUILayout.EndHorizontal();
             }
 
             using(var aScope = new GUILayout.HorizontalScope("box"))
@@ -156,23 +136,13 @@ namespace SDU
             }
 
             UCL.Core.UI.UCL_GUILayout.DrawObjectData(RunTimeData.Ins, m_Dic.GetSubDic("RunTimeData"), "Configs", false);
-            
-            RunTimeData.Ins.m_Tex2ImgSettings.OnGUI("Tex2Img", m_Dic.GetSubDic("Tex2ImgSettings"));
+            //UCL.Core.UI.UCL_GUILayout.DrawObjectData(m_Tex2ImgSettings
+            //RunTimeData.Ins.m_Tex2ImgSettings.OnGUI("Tex2Img", m_Dic.GetSubDic("Tex2ImgSettings"));
             //m_Tex2ImgSettings
-            if (!SDU_ImageGenerator.GeneratingImage)
-            {
-                switch (m_GenMode)
-                {
-                    case GenMode.GenTex2Img:
-                        {
-                            SDU_ImageGenerator.GenerateImage(RunTimeData.Ins.m_Tex2ImgSettings);
-                            break;
-                        }
-                }
-            }
 
             if (!UnityChan.IdleChanger.s_IdleChangers.IsNullOrEmpty())
             {
+                GUILayout.Space(20);
                 GUILayout.Box($"Change Motion");
                 for (int i = 0; i < UnityChan.IdleChanger.s_IdleChangers.Count; i++)
                 {
@@ -203,11 +173,31 @@ namespace SDU
             //{
             //    UnityChan.FaceUpdate.s_Ins.CustomOnGUI();
             //}
-
+        }
+        public void CheckServerStarted()
+        {
+            SDU_WebUIStatus.Ins.CheckServerReady((iServerReady) => {
+                try
+                {
+                    Debug.LogWarning($"iServerReady:{iServerReady}");
+                    if (iServerReady)
+                    {
+                        if (RunTimeData.Ins.m_AutoOpenWeb)
+                        {
+                            System.Diagnostics.Process.Start(RunTimeData.Ins.m_WebURL);
+                            UnityEngine.Debug.LogWarning($"Open WebURL:{RunTimeData.Ins.m_WebURL}");
+                        }
+                        RefreshModels().Forget();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogException(ex);
+                }
+            }).Forget();
         }
         public void StartServer()
         {
-            SDU_WebUIStatus.s_ServerReady = false;
             var aInstallSetting = RunTimeData.Ins.m_InstallSetting;
             var aPythonRoot = CheckInstall(aInstallSetting.PythonInstallRoot, aInstallSetting.PythonZipPath, "Python");
             var aEnvInstallRoot = CheckInstall(aInstallSetting.EnvInstallRoot, aInstallSetting.EnvZipPath, "Env");
@@ -224,12 +214,7 @@ namespace SDU
                 return;
             }
 
-            if (SDU_ProcessList.RestoreEventsForListedProcess())
-            {
-                UnityEngine.Debug.LogWarning($"Server alredy started.");
-                return;
-            }
-            SDU_ProcessList.PreCheckProcessEvent();
+            SDU_ProcessList.PreCheckProcessEvent();//check current exist process
             var aProcess = new System.Diagnostics.Process();
             
             //string aBatPath = System.IO.Path.Combine(Data.RootPath, Data.WebUIScriptBatPath);
@@ -269,18 +254,21 @@ namespace SDU
             UnityEngine.Debug.LogWarning($"Start server, m_ProcessID:{m_ProcessID}");
 
             SDU_WebUIStatus.Ins.SetServerStarted(true);
-            SDU_WebUIStatus.Ins.ValidateConnectionContinuously(()=> {
+            SDU_WebUIStatus.Ins.ValidateConnectionContinuously((iServerReady)=> {
                 try
                 {
-                    UnityEngine.Debug.LogWarning($"ValidateConnectionContinuously End");
-                    SDU_ProcessList.CheckProcessEvent();
-                    //aProcess.StandardOutput.ReadToEnd();
-                    if (RunTimeData.Ins.m_AutoOpenWeb)
+                    UnityEngine.Debug.LogWarning($"ValidateConnectionContinuously End, ServerReady:{iServerReady}");
+                    if (iServerReady)
                     {
-                        System.Diagnostics.Process.Start(RunTimeData.Ins.m_WebURL);
-                        UnityEngine.Debug.LogWarning($"Open WebURL:{RunTimeData.Ins.m_WebURL}");
+                        SDU_ProcessList.CheckProcessEvent();
+                        //aProcess.StandardOutput.ReadToEnd();
+                        if (RunTimeData.Ins.m_AutoOpenWeb)
+                        {
+                            System.Diagnostics.Process.Start(RunTimeData.Ins.m_WebURL);
+                            UnityEngine.Debug.LogWarning($"Open WebURL:{RunTimeData.Ins.m_WebURL}");
+                        }
+                        RefreshModels().Forget();
                     }
-                    RefreshModels().Forget();
                 }
                 catch(Exception ex)
                 {

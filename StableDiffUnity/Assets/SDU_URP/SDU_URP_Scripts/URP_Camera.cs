@@ -30,6 +30,13 @@ namespace SDU
         {
             s_Cameras.Remove(this);
         }
+        [UCL.Core.ATTR.UCL_FunctionButton]
+        public void Test()
+        {
+            if(s_Cameras == null) return;
+            if(s_Cameras.Contains(this)) return;
+            s_Cameras.Add(this);
+        }
         public BlitToCamera CreateDepthBlitRequest(int iWidth, int iHeight, Material iMat)
         {
             m_RT = RenderTexture.GetTemporary(iWidth, iHeight, 24, UnityEngine.Experimental.Rendering.GraphicsFormat.R32G32B32A32_SFloat);

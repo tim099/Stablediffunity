@@ -2,22 +2,18 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using UCL.Core;
 using UCL.Core.JsonLib;
 using UnityEngine;
 namespace SDU
 {
-    public enum GenMode
-    {
-        None,
-        GenTex2Img,
-    }
     [System.Serializable]
     public class Tex2ImgResults
     {
         public Dictionary<string, string> m_Infos = new Dictionary<string, string>();
     }
     [System.Serializable]
-    public class RunTimeData : UCL.Core.JsonLib.UnityJsonSerializable
+    public class RunTimeData : UCL.Core.JsonLib.UnityJsonSerializable, UCL.Core.UI.UCLI_FieldOnGUI
     {
         #region static
         static public RunTimeData Ins
@@ -63,7 +59,7 @@ namespace SDU
         }
         static public StableDiffusionAPI SD_API => Ins.m_APISetting.m_StableDiffusionAPI;
         static public ControlNetAPI ControlNet_API => Ins.m_APISetting.m_ControlNetAPI;
-
+        static public InstallSetting InstallSetting => Ins.m_InstallSetting;
         #endregion
 
         public InstallSetting m_InstallSetting = new InstallSetting();
@@ -80,8 +76,14 @@ namespace SDU
 
         public bool m_RedirectStandardOutput = false;
         public bool m_AutoOpenWeb = true;
-        public GenMode m_AutoGenMode = GenMode.None;
         public string m_WebURL = "http://127.0.0.1:7860";
-        [HideInInspector] public int m_OutPutFileID = 0;
+        [UCL.Core.ATTR.UCL_HideOnGUI] public int m_OutPutFileID = 0;
+
+        public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
+        {
+            UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic.GetSubDic("RunTimeData"), iFieldName, false);
+            UCL.Core.UI.UCL_GUILayout.DrawObjectData(m_Tex2ImgSettings, iDataDic.GetSubDic("Tex2Img"), "Tex2Img", false);
+            return this;
+        }
     }
 }

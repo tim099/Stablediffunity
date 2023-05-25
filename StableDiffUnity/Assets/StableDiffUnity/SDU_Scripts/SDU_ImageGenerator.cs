@@ -11,15 +11,16 @@ namespace SDU
 {
     public static class SDU_ImageGenerator
     {
+        public static bool IsAvaliable => SDU_WebUIStatus.ServerReady && !GeneratingImage;
         public static bool GeneratingImage { get; private set; } = false;
         public static string ProgressStr = string.Empty;
         public static float ProgressVal = 0;
-        static UCL.Core.UCL_ObjectDictionary m_Dic = new UCL.Core.UCL_ObjectDictionary();
+
         static bool m_StartGenerating = false;
         public readonly static List<Texture2D> m_Textures = new List<Texture2D>();
         public static void GenerateImage(Tex2ImgSetting iSetting)
         {
-            if (m_StartGenerating)
+            if (m_StartGenerating || !IsAvaliable)
             {
                 return;
             }
@@ -38,7 +39,7 @@ namespace SDU
             {
                 UCL.Core.FileLib.Lib.CreateDirectory(aPath);
             }
-            string aFileName = $"{RunTimeData.Ins.m_OutPutFileID.ToString()}_{System.DateTime.Now.ToString("HHmmssff")}";
+            string aFileName = $"{System.DateTime.Now.ToString("HHmmssff")}_{RunTimeData.Ins.m_OutPutFileID.ToString()}";
             RunTimeData.Ins.m_OutPutFileID = RunTimeData.Ins.m_OutPutFileID + 1;
             return Tuple.Create(aPath, aFileName);
         }
@@ -51,10 +52,15 @@ namespace SDU
             }
             m_Textures.Clear();
         }
-        private static async System.Threading.Tasks.ValueTask GenerateImageAsync(Tex2ImgSetting iSetting)
+        public static async System.Threading.Tasks.ValueTask GenerateImageAsync(Tex2ImgSetting iSetting)
         {
             RunTimeData.SaveRunTimeData();
-            if (GeneratingImage) return;
+            if (!IsAvaliable)
+            {
+                Debug.LogError($"GenerateImageAsync !IsAvaliable," +
+                    $"SDU_WebUIStatus.s_ServerReady:{SDU_WebUIStatus.ServerReady},GeneratingImage:{GeneratingImage}");
+                return;
+            }
             GeneratingImage = true;
             ProgressStr = "Generating Image Start";
             ClearTextures();
@@ -68,7 +74,7 @@ namespace SDU
                     {
                         JsonData aJson = new JsonData();
 
-                        aJson["sd_model_checkpoint"] = iSetting.m_SelectedModel;
+                        aJson["sd_model_checkpoint"] = iSetting.m_CheckPoint.m_CheckPoint;
                         string aJsonStr = aJson.ToJson();
                         var aResultJson = await client.SendWebRequestStringAsync(aJsonStr);
                         Debug.LogWarning($"aResultJson:{aResultJson}");

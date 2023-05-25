@@ -27,6 +27,7 @@ namespace SDU
         }
         public static Vector2Int GetTextureSize(int iMaxSize, Texture iTexture)
         {
+            if (iTexture == null) return Vector2Int.one;
             return GetTextureSize(iMaxSize, iTexture.width, iTexture.height);
         }
     }

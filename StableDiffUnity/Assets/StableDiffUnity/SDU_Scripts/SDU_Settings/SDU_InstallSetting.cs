@@ -8,6 +8,19 @@ using UnityEngine;
 
 namespace SDU
 {
+    public enum FolderEnum
+    {
+        Env,
+        WebUI,
+        Python,
+        /// <summary>
+        /// CheckPoint
+        /// </summary>
+        CheckPoints,
+
+        Lora,
+        Tex2ImgPreset,
+    }
     [System.Serializable]
     public class InstallSetting : UCL.Core.UI.UCLI_FieldOnGUI
     {
@@ -65,25 +78,12 @@ namespace SDU
                     GUILayout.Label("Open Folder", GUILayout.ExpandWidth(false));
                     if (m_ShowOpenFolderToggle)
                     {
-                        if (GUILayout.Button("Open Env Folder", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
+                        foreach(FolderEnum aEnum in Enum.GetValues(typeof(FolderEnum)))
                         {
-                            System.Diagnostics.Process.Start(EnvInstallRoot);
-                        }
-                        if (GUILayout.Button("Open WebUI Folder", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
-                        {
-                            System.Diagnostics.Process.Start(WebUIInstallRoot);
-                        }
-                        if (GUILayout.Button("Open Python Folder", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
-                        {
-                            System.Diagnostics.Process.Start(PythonInstallRoot);
-                        }
-                        if (GUILayout.Button("Open Stable-diffusion models Folder", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
-                        {
-                            System.Diagnostics.Process.Start(StableDiffusionModelsPath);
-                        }
-                        if (GUILayout.Button("Open Lora Folder", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
-                        {
-                            System.Diagnostics.Process.Start(StableDiffusionLoraPath);
+                            if (GUILayout.Button($"Open {aEnum} Folder", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
+                            {
+                                OpenFolder(aEnum);
+                            }
                         }
                         //C:\Users\Public\Documents\StableDiffUnity_V1\WebUI\models\Stable-diffusion
                     }
@@ -93,6 +93,29 @@ namespace SDU
 
             //m_ControlNetSettings.OnGUI(iDataDic.GetSubDic("ControlNetSettings"));
             return this;
+        }
+        public string GetFolderPath(FolderEnum iFolderEnum)
+        {
+            switch (iFolderEnum)
+            {
+                case FolderEnum.Env: return EnvInstallRoot;
+                case FolderEnum.WebUI: return WebUIInstallRoot;
+                case FolderEnum.Python: return PythonInstallRoot;
+                case FolderEnum.CheckPoints: return StableDiffusionModelsPath;
+                case FolderEnum.Lora: return StableDiffusionLoraPath;
+                case FolderEnum.Tex2ImgPreset: return Path.Combine(EnvInstallRoot, "Preset", "Tex2Img");
+            }
+            return string.Empty;
+        }
+        public void OpenFolder(FolderEnum iFolderEnum)
+        {
+            string aPath = GetFolderPath(iFolderEnum);
+            if (string.IsNullOrEmpty(aPath))
+            {
+                Debug.LogError($"OpenEnvFolder iFolderEnum:{iFolderEnum},string.IsNullOrEmpty(aPath)");
+                return;
+            }
+            System.Diagnostics.Process.Start(aPath);
         }
     }
 }

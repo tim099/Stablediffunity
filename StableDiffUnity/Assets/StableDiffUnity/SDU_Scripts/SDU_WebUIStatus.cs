@@ -40,19 +40,24 @@ namespace SDU
         {
             get
             {
-                if (s_Ins == null) s_Ins = new SDU_WebUIStatus(IPAddress.Any, 50007);
+                if (s_Ins == null) s_Ins = new SDU_WebUIStatus();
                 return s_Ins;
             }
         }
         public static SDU_WebUIStatus s_Ins = null;
+        public static bool ServerReady {
+            get => s_ServerReady;
+            set
+            {
+                //Debug.LogError($"Set ServerReady:{s_ServerReady}");
+                s_ServerReady = value;
+            }
+        }
         public static bool s_ServerReady = false;
 
-
-
-        public SDU_WebUIStatus(IPAddress adress, int port)
+        public SDU_WebUIStatus()
         {
             s_Ins = this;
-            s_EndPoint = new IPEndPoint(adress, port);
         }
         ~SDU_WebUIStatus()
         {
@@ -68,11 +73,6 @@ namespace SDU
 
         public bool ServerStarted => m_Args.ServerStarted;
         public string ServerAppId => m_Args.ServerAppId;
-        public bool ServerReady => m_Args.ServerReady;
-
-        
-
-        
 
         private void InvokeWebUIStatusChanged()
         {
@@ -90,17 +90,6 @@ namespace SDU
             InvokeWebUIStatusChanged();
         }
 
-        public void SetServerAppId(string id)
-        {
-            m_Args.ServerAppId = id;
-            InvokeWebUIStatusChanged();
-        }
-
-        public void SetServerReady(bool ready)
-        {
-            m_Args.ServerReady = ready;
-            InvokeWebUIStatusChanged();
-        }
 
         public void SetServerArgs(bool started, string id, bool ready)
         {
@@ -109,16 +98,6 @@ namespace SDU
             m_Args.ServerReady = ready;
             InvokeWebUIStatusChanged();
         }
-
-        public void ResetServerArgs()
-        {
-            m_Args.ServerStarted = false;
-            m_Args.ServerAppId = string.Empty;
-            m_Args.ServerReady = false;
-            InvokeWebUIStatusChanged();
-        }
-
-
 
         public async ValueTask<bool> ValidateConnection()
         {
@@ -143,11 +122,25 @@ namespace SDU
             catch (Exception e)
             {
                 UnityEngine.Debug.Log($"Checking ... {e.Message}");
+                //UnityEngine.Debug.LogException(e);
                 return false;
             }
         }
-
-        public async ValueTask ValidateConnectionContinuously(System.Action iEndAct = null)
+        public async ValueTask<bool> CheckServerReady(System.Action<bool> iEndAct = null)
+        {
+            //ServerReady = false;
+            try
+            {
+                ServerReady = await ValidateConnection();
+            }
+            finally
+            {
+                iEndAct?.Invoke(ServerReady);
+                //Close();
+            }
+            return ServerReady;
+        }
+        public async ValueTask ValidateConnectionContinuously(System.Action<bool> iEndAct = null)
         {
             if (m_CheckEnabled)
             {
@@ -161,8 +154,10 @@ namespace SDU
             {
                 while (m_CheckEnabled)
                 {
-                    if (await ValidateConnection())
+                    ServerReady = await ValidateConnection();
+                    if (ServerReady)
                     {
+                        //Debug.LogError($"s_ServerReady:{ServerReady}");
                         Close();
                     }
                     else
@@ -171,75 +166,23 @@ namespace SDU
                     }
                 }
             }
+            catch(System.Exception e)
+            {
+                Debug.LogException(e);
+            }
             finally
             {
-                s_ServerReady = true;
-                iEndAct?.Invoke();
+                iEndAct?.Invoke(ServerReady);
                 Close();
             }
         }
 
-        // UDP Client
-        private static IPEndPoint s_EndPoint;
         private UdpClient _client;
-        private bool _receiveEnabled = false;
-
-        public async ValueTask ConnectUdp()
-        {
-            if (_receiveEnabled)
-            {
-                UnityEngine.Debug.Log($"UdpClient already receiving.");
-                return;
-            }
-
-            try
-            {
-                _client = new(s_EndPoint);
-                _receiveEnabled = true;
-
-                while (_receiveEnabled)
-                {
-                    var result = await _client.ReceiveAsync();
-
-                    var str = Encoding.UTF8.GetString(result.Buffer);
-
-                    if (Regex.IsMatch(str, "^[0-9]+$"))
-                    {
-                        SetServerAppId(str);
-                        UnityEngine.Debug.Log($"Server PID : {ServerAppId}");
-                    }
-                    else
-                    {
-                        switch (str)
-                        {
-                            case "start":
-                                SetServerStarted(true);
-                                UnityEngine.Debug.Log("Server starting.");
-                                break;
-
-                            case "ready":
-                                Close();
-                                SetServerReady(true);
-                                UnityEngine.Debug.Log("Server ready.");
-                                break;
-                        }
-                    }
-                }
-            }
-            catch (ObjectDisposedException)
-            {
-                UnityEngine.Debug.LogWarning("UdpClient closed.");
-            }
-            finally
-            {
-                Close();
-            }
-        }
 
         public void Close()
         {
+            //Debug.LogError("SDU_WebUIStatus Close()");
             m_CheckEnabled = false;
-            _receiveEnabled = false;
 
             if (_client != null)
             {

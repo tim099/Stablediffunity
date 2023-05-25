@@ -10,14 +10,19 @@ namespace SDU
     {
         Rect m_GridRegion = new Rect();
         public SDU_EditorMenu m_Editor;
-        public void Init(SDU_EditorMenu iEditor)
-        {
-            m_Editor = iEditor;
-        }
+
         [UnityEditor.MenuItem("SDU/Menu")]
         public static void ShowMenu()
         {
             ShowWindow(new SDU_EditorMenu());
+        }
+        private void OnInspectorUpdate()
+        {
+            Repaint();
+        }
+        public void Init(SDU_EditorMenu iEditor)
+        {
+            m_Editor = iEditor;
         }
         public static SDU_MenuWindow ShowWindow(SDU_EditorMenu iTarget)
         {
