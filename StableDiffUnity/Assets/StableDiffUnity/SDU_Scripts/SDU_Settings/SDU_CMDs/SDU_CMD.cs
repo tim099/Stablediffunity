@@ -7,7 +7,7 @@ using UnityEngine;
 namespace SDU
 {
     public class SDU_CMD : UCL.Core.JsonLib.UnityJsonSerializable,
-        UCL.Core.UCLI_TypeList, UCL.Core.UI.UCLI_FieldOnGUI, UCL.Core.UCLI_ShortName
+        UCL.Core.UCLI_TypeList, UCL.Core.UCLI_GetTypeName, UCL.Core.UI.UCLI_FieldOnGUI, UCL.Core.UCLI_ShortName
     {
         static List<System.Type> s_Types = null;
         public IList<System.Type> GetAllTypes()
@@ -15,12 +15,14 @@ namespace SDU
             if(s_Types == null)
             {
                 s_Types = new List<System.Type>();
+                s_Types.Add(typeof(SDU_CMDGroup));
                 s_Types.Add(typeof(SDU_CMDGenerateImage));
                 s_Types.Add(typeof(SDU_CMDSetCheckPoint));
             }
             return s_Types;
         }
-        virtual public string GetShortName() => GetType().Name;
+        virtual public string GetTypeName(string iName) => iName.Replace("SDU_CMD", string.Empty);
+        virtual public string GetShortName() => GetTypeName(GetType().Name);
         virtual public async Task TriggerCMD(Tex2ImgSetting iTex2ImgSetting)
         {
             await Task.Delay(1);

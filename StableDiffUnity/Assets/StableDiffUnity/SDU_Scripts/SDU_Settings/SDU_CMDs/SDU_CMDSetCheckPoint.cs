@@ -7,12 +7,11 @@ namespace SDU
     public class SDU_CMDSetCheckPoint : SDU_CMD
     {
         public SDU_CheckPointSetting m_CheckPointSetting = new SDU_CheckPointSetting();
-        override public string GetShortName() => $"{GetType().Name}({m_CheckPointSetting.m_CheckPoint})";
+        override public string GetShortName() => $"{base.GetShortName()}({m_CheckPointSetting.m_CheckPoint})";
         override public async Task TriggerCMD(Tex2ImgSetting iTex2ImgSetting)
         {
             iTex2ImgSetting.m_CheckPoint.m_CheckPoint = m_CheckPointSetting.m_CheckPoint;
             await Task.Delay(1);
-            return;
         }
     }
 }
