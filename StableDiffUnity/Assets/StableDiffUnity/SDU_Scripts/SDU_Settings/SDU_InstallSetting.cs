@@ -44,15 +44,23 @@ namespace SDU
         public string RunPythonPath => Path.Combine(EnvInstallRoot, "run.py");
 
         public string OutputPath => Path.Combine(EnvInstallRoot, "Output");
-
+        #region DownloadSettings
+        public string DownloadSettingsPath => Path.Combine(EnvInstallRoot, "InstallSettings");
+        public string DownloadCheckPointSettingsPath => Path.Combine(DownloadSettingsPath, "CheckPoint");
+        public string DownloadLoraSettingsPath => Path.Combine(DownloadSettingsPath, "Lora");
+        #endregion
         //public string ConfigFilePath => Path.Combine(EnvInstallRoot, "Config.json");
         public string PythonInstallPathFilePath => Path.Combine(EnvInstallRoot, "PythonRoot.txt");
         public string WebUIInstallPathFilePath => Path.Combine(EnvInstallRoot, "WebUIInstallPath.txt");
         public string CommandlindArgsFilePath => Path.Combine(EnvInstallRoot, "CommandlindArgs.txt");
 
+        
+
         public string ModelsRootPath => Path.Combine(WebUIInstallRoot, "models");
         public string StableDiffusionModelsPath => Path.Combine(ModelsRootPath, "Stable-diffusion");
         public string StableDiffusionLoraPath => Path.Combine(ModelsRootPath, "Lora");
+
+
         /// <summary>
         /// inside Env folder
         /// </summary>

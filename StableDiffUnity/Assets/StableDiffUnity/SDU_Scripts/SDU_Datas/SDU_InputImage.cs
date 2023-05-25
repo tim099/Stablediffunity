@@ -39,7 +39,7 @@ namespace SDU
             {
                 if (string.IsNullOrEmpty(m_FolderPath))
                 {
-                    m_FolderPath = RunTimeData.Ins.m_InstallSetting.OutputPath;
+                    m_FolderPath = RunTimeData.InstallSetting.OutputPath;
                 }
                 //Debug.LogWarning($"m_FolderPath:{m_FolderPath}");
                 UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic, iFieldName, true);

@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -58,7 +59,7 @@ namespace SDU
             }
             return this;
         }
-        public async System.Threading.Tasks.Task RefreshSamplers()
+        public async UniTask RefreshSamplers()
         {
             try
             {
@@ -84,7 +85,7 @@ namespace SDU
                 Debug.LogException(e);
             }
         }
-        public async System.Threading.Tasks.Task RefreshCheckpoints()
+        public async UniTask RefreshCheckpoints()
         {
             try
             {
@@ -118,7 +119,7 @@ namespace SDU
             }
 
         }
-        public async System.Threading.Tasks.Task RefreshLora()
+        public async UniTask RefreshLora()
         {
             try
             {
@@ -148,7 +149,7 @@ namespace SDU
                 Debug.LogException(e);
             }
         }
-        public async System.Threading.Tasks.Task RefreshControlNetModels()
+        public async UniTask RefreshControlNetModels()
         {
             try
             {

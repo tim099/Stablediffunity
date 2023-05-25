@@ -60,6 +60,7 @@ namespace SDU
         static public StableDiffusionAPI SD_API => Ins.m_APISetting.m_StableDiffusionAPI;
         static public ControlNetAPI ControlNet_API => Ins.m_APISetting.m_ControlNetAPI;
         static public InstallSetting InstallSetting => Ins.m_InstallSetting;
+        public static string ServerUrl => Ins.m_WebURL;
         #endregion
 
         public InstallSetting m_InstallSetting = new InstallSetting();

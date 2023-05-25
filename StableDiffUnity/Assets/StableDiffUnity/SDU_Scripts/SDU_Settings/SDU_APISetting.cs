@@ -26,7 +26,7 @@ namespace SDU
     [System.Serializable]
     public class StableDiffusionAPI
     {
-        public static string ServerUrl => SDU_StableDiffusionPage.ServerUrl;
+        public static string ServerUrl => RunTimeData.ServerUrl;
 
         
         public string m_ApiCmdFlags = "/sdapi/v1/cmd-flags";
@@ -87,7 +87,7 @@ namespace SDU
     [System.Serializable]
     public class ControlNetAPI
     {
-        public static string ServerUrl => SDU_StableDiffusionPage.ServerUrl;
+        public static string ServerUrl => RunTimeData.ServerUrl;
 
         public const string ContentType = "application/json";
 
