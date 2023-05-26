@@ -35,28 +35,31 @@ namespace SDU
                 using (var aScope2 = new GUILayout.VerticalScope())
                 {
                     GUILayout.Label(iFieldName, UCL_GUIStyle.LabelStyle);
-                    using (var aScope3 = new GUILayout.HorizontalScope("box"))
+                    if (m_Show)
                     {
-                        if (GUILayout.Button("Refresh", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                        using (var aScope3 = new GUILayout.HorizontalScope("box"))
                         {
-                            RunTimeData.Ins.m_WebUISetting.RefreshControlNetModels().Forget();
+                            if (GUILayout.Button("Refresh", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                            {
+                                RunTimeData.Ins.m_WebUISetting.RefreshControlNetModels().Forget();
+                            }
+
+                            GUILayout.Label("Selected Model", UCL.Core.UI.UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
+
+                            var aNames = RunTimeData.Ins.m_WebUISetting.m_ModelNames;
+                            if (!aNames.IsNullOrEmpty())
+                            {
+                                m_SelectedModel = UCL_GUILayout.PopupAuto(m_SelectedModel, GetAllModels(), iDataDic, "Selected Model", 8);
+                            }
+
+                            if (GUILayout.Button("Open Folder", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                            {
+                                RunTimeData.InstallSetting.OpenFolder(FolderEnum.ControlNetModel);
+                            }
                         }
 
-                        GUILayout.Label(iFieldName, UCL.Core.UI.UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
-
-                        var aNames = RunTimeData.Ins.m_WebUISetting.m_ModelNames;
-                        if (!aNames.IsNullOrEmpty())
-                        {
-                            m_SelectedModel = UCL_GUILayout.PopupAuto(m_SelectedModel, GetAllModels(), iDataDic, "Selected Model", 8);
-                        }
-
-                        if (GUILayout.Button("Open Folder", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
-                        {
-                            RunTimeData.InstallSetting.OpenFolder(FolderEnum.ControlNetModel);
-                        }
+                        UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic, iFieldName, true);
                     }
-
-                    UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic, iFieldName, false);
                 }
             }
 
