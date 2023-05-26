@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using System.IO;
 using UnityEngine.Networking;
 using UCL.Core;
+using System.Threading;
 
 namespace SDU
 {
@@ -16,15 +17,17 @@ namespace SDU
             public float Progress { get; set;}
             public string ID { get; set; }
             public string FileName { get; set; }
-            public bool CancelDownload { get; set; } = false;
+            public bool CancelDownload => CancellationTokenSource.IsCancellationRequested;
 
+            public CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
             public void OnGUI(UCL_ObjectDictionary iDataDic)
             {
                 using (var aScope = new GUILayout.HorizontalScope("box"))
                 {
                     if (GUILayout.Button("Cancel Download", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
                     {
-                        CancelDownload = true;
+                        CancellationTokenSource.Cancel();
+                        //CancelDownload = true;
                     }
                     GUILayout.Label($"Downloading {FileName},Progress:{ProgressStr}");
                 }
@@ -69,13 +72,36 @@ namespace SDU
                 Directory.CreateDirectory(aDir);
             }
 
+            //using (var aHeader = UnityWebRequest.Head(iURL))
+            //{
+            //    //    aHeader.SetRequestHeader("Content-Type", "application/json");
+            //    await aHeader.SendWebRequest();//.WithCancellation(aHandle.CancellationTokenSource.Token);
+            //    long totalSize = long.Parse(aHeader.GetResponseHeader("Content-Length"));
+            //    Debug.LogError($"totalSize{totalSize},aHeader:{aHeader.result}");
+            //}
+
+
+            string aTmpFilePath = $"{iFilePath}.tmp";
+
             var aUnityWebRequest = new UnityWebRequest(iURL);
             aUnityWebRequest.method = UnityWebRequest.kHttpVerbGET;
-            var aDownloadHandlerFile = new DownloadHandlerFile(iFilePath);
-            aDownloadHandlerFile.removeFileOnAbort = true;
+
+            DownloadHandlerFile aDownloadHandlerFile = null;
+            if (File.Exists(aTmpFilePath))
+            {
+                var aFileInfo = new FileInfo(aTmpFilePath);
+                aUnityWebRequest.SetRequestHeader("Range", $"bytes={aFileInfo.Length}-");
+                Debug.Log($"Resume download bytes={aFileInfo.Length},aTmpFilePath:{aTmpFilePath}");
+                aDownloadHandlerFile = new DownloadHandlerFile(aTmpFilePath, true);
+            }
+            if(aDownloadHandlerFile == null)
+            {
+                aDownloadHandlerFile = new DownloadHandlerFile(aTmpFilePath);
+            }
+            //aDownloadHandlerFile.removeFileOnAbort = true;
             aUnityWebRequest.downloadHandler = aDownloadHandlerFile;
 
-            var aTask = aUnityWebRequest.SendWebRequest();
+            var aTask = aUnityWebRequest.SendWebRequest().WithCancellation(aHandle.CancellationTokenSource.Token);
             await UniTask.WaitUntil(() =>
             {
                 if (aHandle.CancelDownload)
@@ -99,6 +125,7 @@ namespace SDU
             {
                 case UnityWebRequest.Result.Success:
                     {
+                        System.IO.File.Move(aTmpFilePath, iFilePath);
                         Debug.Log($"DownloadFileAsync iURL:{iURL}");
                         break;
                     }
