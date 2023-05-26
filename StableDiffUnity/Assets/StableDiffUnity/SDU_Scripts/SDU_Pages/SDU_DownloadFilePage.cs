@@ -19,43 +19,9 @@ namespace SDU
         SDU_DownloadFileSetting m_DownloadFileSetting = new SDU_DownloadFileSetting();
         protected override void ContentOnGUI()
         {
-            string aDownloadFileSettingPath = RunTimeData.InstallSetting.DownloadLoraSettingsPath;
-            if (!Directory.Exists(aDownloadFileSettingPath))
-            {
-                Directory.CreateDirectory(aDownloadFileSettingPath);
-            }
-
             using (var aScope = new GUILayout.VerticalScope("box"))
             {
                 UCL.Core.UI.UCL_GUILayout.DrawObjectData(m_DownloadFileSetting, m_Dic.GetSubDic("DownloadFileSetting"));
-                if (GUILayout.Button("Save Setting"))
-                {
-                    JsonData aJson = JsonConvert.SaveDataToJsonUnityVer(m_DownloadFileSetting);
-                    File.WriteAllText(Path.Combine(aDownloadFileSettingPath, $"{m_DownloadFileSetting.m_FileName}.json"),
-                        aJson.ToJsonBeautify());
-                }
-                using (var aScope2 = new GUILayout.HorizontalScope())
-                {
-                    var aFiles = UCL.Core.FileLib.Lib.GetFilesName(aDownloadFileSettingPath, "*.json", SearchOption.TopDirectoryOnly);
-                    if (!aFiles.IsNullOrEmpty())
-                    {
-                        if (!string.IsNullOrEmpty(m_LoadSettingName))
-                        {
-                            var aPath = Path.Combine(aDownloadFileSettingPath, m_LoadSettingName);
-                            if (File.Exists(aPath))
-                            {
-                                if (GUILayout.Button("Load Setting"))
-                                {
-                                    var aJsonStr = File.ReadAllText(aPath);
-                                    JsonData aJson = JsonData.ParseJson(aJsonStr);
-                                    m_DownloadFileSetting = JsonConvert.LoadDataFromJsonUnityVer<SDU_DownloadFileSetting>(aJson);
-                                }
-                            }
-                        }
-                        m_LoadSettingName = UCL.Core.UI.UCL_GUILayout.PopupAuto(m_LoadSettingName, aFiles, m_Dic.GetSubDic("LoadSettingName"), "PopupAuto");
-                    }
-
-                }
             }
         }
 

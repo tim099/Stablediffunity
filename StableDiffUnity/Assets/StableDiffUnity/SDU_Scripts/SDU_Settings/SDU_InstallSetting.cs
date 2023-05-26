@@ -19,6 +19,7 @@ namespace SDU
         CheckPoints,
 
         Lora,
+
         Tex2ImgPreset,
     }
     [System.Serializable]
@@ -46,8 +47,7 @@ namespace SDU
         public string OutputPath => Path.Combine(EnvInstallRoot, "Output");
         #region DownloadSettings
         public string DownloadSettingsPath => Path.Combine(EnvInstallRoot, "InstallSettings");
-        public string DownloadCheckPointSettingsPath => Path.Combine(DownloadSettingsPath, "CheckPoint");
-        public string DownloadLoraSettingsPath => Path.Combine(DownloadSettingsPath, "Lora");
+
         #endregion
         //public string ConfigFilePath => Path.Combine(EnvInstallRoot, "Config.json");
         public string PythonInstallPathFilePath => Path.Combine(EnvInstallRoot, "PythonRoot.txt");
@@ -102,6 +102,15 @@ namespace SDU
             //m_ControlNetSettings.OnGUI(iDataDic.GetSubDic("ControlNetSettings"));
             return this;
         }
+        public string GetDownloadSettingsFolderPath(FolderEnum iFolderEnum)
+        {
+            switch (iFolderEnum)
+            {
+                case FolderEnum.CheckPoints: return Path.Combine(DownloadSettingsPath, "CheckPoint");
+                case FolderEnum.Lora: return Path.Combine(DownloadSettingsPath, "Lora");
+            }
+            return Path.Combine(DownloadSettingsPath, iFolderEnum.ToString());
+        }
         public string GetFolderPath(FolderEnum iFolderEnum)
         {
             switch (iFolderEnum)
@@ -114,6 +123,16 @@ namespace SDU
                 case FolderEnum.Tex2ImgPreset: return Path.Combine(EnvInstallRoot, "Preset", "Tex2Img");
             }
             return string.Empty;
+        }
+        public void OpenDownloadSettingsFolder(FolderEnum iFolderEnum)
+        {
+            string aPath = GetDownloadSettingsFolderPath(iFolderEnum);
+            if (string.IsNullOrEmpty(aPath))
+            {
+                Debug.LogError($"OpenDownloadSettingsFolder iFolderEnum:{iFolderEnum},string.IsNullOrEmpty(aPath)");
+                return;
+            }
+            System.Diagnostics.Process.Start(aPath);
         }
         public void OpenFolder(FolderEnum iFolderEnum)
         {

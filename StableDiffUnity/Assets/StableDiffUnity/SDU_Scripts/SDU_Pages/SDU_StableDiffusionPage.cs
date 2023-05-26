@@ -110,7 +110,11 @@ namespace SDU
                 }
             }
 
-            using(var aScope = new GUILayout.HorizontalScope("box"))
+            if (GUILayout.Button("Download File"))
+            {
+                SDU_DownloadFilePage.Create();
+            }
+            using (var aScope = new GUILayout.HorizontalScope("box"))
             {
                 if (GUILayout.Button("Save", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
                 {
@@ -136,10 +140,7 @@ namespace SDU
             //UCL.Core.UI.UCL_GUILayout.DrawObjectData(m_Tex2ImgSettings
             //RunTimeData.Ins.m_Tex2ImgSettings.OnGUI("Tex2Img", m_Dic.GetSubDic("Tex2ImgSettings"));
             //m_Tex2ImgSettings
-            if(GUILayout.Button("Download File"))
-            {
-                SDU_DownloadFilePage.Create();
-            }
+
             if (!UnityChan.IdleChanger.s_IdleChangers.IsNullOrEmpty())
             {
                 GUILayout.Space(20);
@@ -199,9 +200,9 @@ namespace SDU
         public void StartServer()
         {
             var aInstallSetting = RunTimeData.InstallSetting;
-            var aPythonRoot = CheckInstall(aInstallSetting.PythonInstallRoot, aInstallSetting.PythonZipPath, "Python");
-            var aEnvInstallRoot = CheckInstall(aInstallSetting.EnvInstallRoot, aInstallSetting.EnvZipPath, "Env");
-            var aWebUIRoot = CheckInstall(aInstallSetting.WebUIInstallRoot, aInstallSetting.WebUIZipPath, "WebUI");
+            var aPythonRoot = SDU_FileInstall.CheckInstall(aInstallSetting.PythonInstallRoot, aInstallSetting.PythonZipPath, "Python");
+            var aEnvInstallRoot = SDU_FileInstall.CheckInstall(aInstallSetting.EnvInstallRoot, aInstallSetting.EnvZipPath, "Env");
+            var aWebUIRoot = SDU_FileInstall.CheckInstall(aInstallSetting.WebUIInstallRoot, aInstallSetting.WebUIZipPath, "WebUI");
             File.WriteAllText(aInstallSetting.PythonInstallPathFilePath, aPythonRoot);
             File.WriteAllText(aInstallSetting.WebUIInstallPathFilePath, aWebUIRoot);
             File.WriteAllText(aInstallSetting.CommandlindArgsFilePath, aInstallSetting.CommandlindArgs);
@@ -292,32 +293,6 @@ namespace SDU
             }
             UnityEngine.Debug.LogWarning($"DataReceived_:{iOutPut}");
 
-        }
-        private string CheckInstall(string iInstallRoot, string iZipAbsolutePath, string iInstallTarget)
-        {
-            if (Directory.Exists(iInstallRoot))//Install done
-            {
-                return iInstallRoot;
-            }
-            try
-            {
-                Debug.LogWarning($"Installing {iInstallTarget}");
-                Debug.LogWarning($"zipAbsolutePath:{iZipAbsolutePath}");
-                if (!File.Exists(iZipAbsolutePath))
-                {
-                    Debug.LogError($"ZipAbsolutePath:{iZipAbsolutePath},not found.");
-                    return iInstallRoot;
-                }
-
-                System.IO.Compression.ZipFile.ExtractToDirectory(iZipAbsolutePath, iInstallRoot, true);
-
-                Debug.Log($"{iInstallTarget} installation finished");
-            }
-            catch (System.Exception ex)
-            {
-                Debug.LogException(ex);
-            }
-            return iInstallRoot;
         }
     }
 }
