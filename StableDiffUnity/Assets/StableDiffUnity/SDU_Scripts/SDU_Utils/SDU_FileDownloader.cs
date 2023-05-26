@@ -18,7 +18,7 @@ namespace SDU
             public string ID { get; set; }
             public string FileName { get; set; }
             public bool CancelDownload => CancellationTokenSource.IsCancellationRequested;
-
+            public UnityWebRequest.Result Result { get; set; } = UnityWebRequest.Result.InProgress;
             public CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
             public void OnGUI(UCL_ObjectDictionary iDataDic)
             {
@@ -48,7 +48,7 @@ namespace SDU
             }
             return s_DownloadingFiles[aID];
         }
-        public static async UniTask DownloadFileAsync(string iURL, string iFilePath)
+        public static async UniTask DownloadFileAsync(string iURL, string iFilePath, bool iRetryOnFail = false)
         {
             if (File.Exists(iFilePath))
             {
@@ -83,58 +83,77 @@ namespace SDU
 
             string aTmpFilePath = $"{iFilePath}.tmp";
 
-            var aUnityWebRequest = new UnityWebRequest(iURL);
-            aUnityWebRequest.method = UnityWebRequest.kHttpVerbGET;
+            using (var aUnityWebRequest = new UnityWebRequest(iURL))
+            {
+                aUnityWebRequest.method = UnityWebRequest.kHttpVerbGET;
 
-            DownloadHandlerFile aDownloadHandlerFile = null;
-            if (File.Exists(aTmpFilePath))
-            {
-                var aFileInfo = new FileInfo(aTmpFilePath);
-                aUnityWebRequest.SetRequestHeader("Range", $"bytes={aFileInfo.Length}-");
-                Debug.Log($"Resume download bytes={aFileInfo.Length},aTmpFilePath:{aTmpFilePath}");
-                aDownloadHandlerFile = new DownloadHandlerFile(aTmpFilePath, true);
-            }
-            if(aDownloadHandlerFile == null)
-            {
-                aDownloadHandlerFile = new DownloadHandlerFile(aTmpFilePath);
-            }
-            //aDownloadHandlerFile.removeFileOnAbort = true;
-            aUnityWebRequest.downloadHandler = aDownloadHandlerFile;
-
-            var aTask = aUnityWebRequest.SendWebRequest().WithCancellation(aHandle.CancellationTokenSource.Token);
-            await UniTask.WaitUntil(() =>
-            {
-                if (aHandle.CancelDownload)
+                DownloadHandlerFile aDownloadHandlerFile = null;
+                if (File.Exists(aTmpFilePath))
                 {
-                    Debug.LogWarning($"{aHandle.FileName} ,Cancel Download");
-                    aUnityWebRequest.Abort();
+                    var aFileInfo = new FileInfo(aTmpFilePath);
+                    aUnityWebRequest.SetRequestHeader("Range", $"bytes={aFileInfo.Length}-");
+                    Debug.Log($"Resume download bytes={aFileInfo.Length},aTmpFilePath:{aTmpFilePath}");
+                    aDownloadHandlerFile = new DownloadHandlerFile(aTmpFilePath, true);
+                }
+                if (aDownloadHandlerFile == null)
+                {
+                    aDownloadHandlerFile = new DownloadHandlerFile(aTmpFilePath);
+                }
+                //aDownloadHandlerFile.removeFileOnAbort = true;
+                aUnityWebRequest.downloadHandler = aDownloadHandlerFile;
+                
+                var aTask = aUnityWebRequest.SendWebRequest().WithCancellation(aHandle.CancellationTokenSource.Token);
+                await UniTask.WaitUntil(() =>
+                {
+                    aHandle.Result = aUnityWebRequest.result;
+                    if (aHandle.CancelDownload)
+                    {
+                        Debug.LogWarning($"{aHandle.FileName} ,Cancel Download");
+                        aUnityWebRequest.Abort();
+                        return true;
+                    }
+                    aHandle.Progress = aUnityWebRequest.downloadProgress;
+                    if (aUnityWebRequest.result == UnityWebRequest.Result.InProgress)
+                    {
+                        return false;
+                    }
                     return true;
-                }
-                aHandle.Progress = aUnityWebRequest.downloadProgress;
-                if (aUnityWebRequest.result == UnityWebRequest.Result.InProgress)
+                }, PlayerLoopTiming.FixedUpdate);
+
+                
+                
+
+                switch (aUnityWebRequest.result)
                 {
-                    return false;
+                    case UnityWebRequest.Result.Success:
+                        {
+                            aHandle.Progress = 1f;
+                            System.IO.File.Move(aTmpFilePath, iFilePath);
+                            Debug.Log($"DownloadFileAsync iURL:{iURL}");
+                            break;
+                        }
+                    case UnityWebRequest.Result.ConnectionError:
+                        {
+                            if (iRetryOnFail && !aHandle.CancelDownload)
+                            {
+                                UCL.Core.ServiceLib.UCL_UpdateService.AddDelayAction(3f, () =>
+                                {
+                                    DownloadFileAsync(iURL, iFilePath, iRetryOnFail).Forget();
+                                });
+                            }
+                            Debug.LogError($"DownloadFileAsync Fail, aUnityWebRequest.result:{aUnityWebRequest.result}");
+                            break;
+                        }
+                    default:
+                        {
+                            Debug.LogError($"DownloadFileAsync Fail, aUnityWebRequest.result:{aUnityWebRequest.result}");
+                            break;
+                        }
                 }
-                return true;
-            }, PlayerLoopTiming.FixedUpdate);
 
-            aHandle.Progress = 1f;
-            s_DownloadingFiles.Remove(aID);
-
-            switch (aUnityWebRequest.result)
-            {
-                case UnityWebRequest.Result.Success:
-                    {
-                        System.IO.File.Move(aTmpFilePath, iFilePath);
-                        Debug.Log($"DownloadFileAsync iURL:{iURL}");
-                        break;
-                    }
-                default:
-                    {
-                        Debug.LogError($"DownloadFileAsync Fail, aUnityWebRequest.result:{aUnityWebRequest.result}");
-                        break;
-                    }
+                s_DownloadingFiles.Remove(aID);
             }
+
         }
     }
 }

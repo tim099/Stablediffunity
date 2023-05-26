@@ -22,12 +22,13 @@ namespace SDU
         public string m_FileName = "NewFile";
         public string m_FileExtension = "safetensors";
         //public FolderEnum m_Folder = FolderEnum.Lora;
-        
+        public bool m_RetryDownloadOnFail = false;
 
         [UCL.Core.ATTR.UCL_HideOnGUI] public string m_WebPageURL;
         public string FolderPath => m_FolderSetting.Path;
         public string FilePath => Path.Combine(FolderPath, $"{m_FileName}.{m_FileExtension}");
         public SDU_FileDownloader.DownloadHandle DownloadHandle => SDU_FileDownloader.GetDownloadFileHandle(m_URL, FilePath);
+
         private bool m_Show = false;
         private bool m_Loaded = false;
         private string m_LoadSettingName;
@@ -85,7 +86,7 @@ namespace SDU
                             {
                                 if (GUILayout.Button("Download", UCL_GUIStyle.ButtonStyle))
                                 {
-                                    SDU_FileDownloader.DownloadFileAsync(m_URL, aFilePath).Forget();
+                                    SDU_FileDownloader.DownloadFileAsync(m_URL, aFilePath, m_RetryDownloadOnFail).Forget();
                                 }
                             }
                         }
