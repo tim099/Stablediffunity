@@ -13,6 +13,7 @@ namespace SDU
         Env,
         WebUI,
         Python,
+
         /// <summary>
         /// CheckPoint
         /// </summary>
@@ -21,6 +22,8 @@ namespace SDU
         Lora,
 
         Tex2ImgPreset,
+
+        ControlNetModel,
     }
     [System.Serializable]
     public class InstallSetting : UCL.Core.UI.UCLI_FieldOnGUI
@@ -121,6 +124,7 @@ namespace SDU
                 case FolderEnum.CheckPoints: return StableDiffusionModelsPath;
                 case FolderEnum.Lora: return StableDiffusionLoraPath;
                 case FolderEnum.Tex2ImgPreset: return Path.Combine(EnvInstallRoot, "Preset", "Tex2Img");
+                case FolderEnum.ControlNetModel: return Path.Combine(WebUIInstallRoot, "extensions", "sd-webui-controlnet", "models");
             }
             return string.Empty;
         }

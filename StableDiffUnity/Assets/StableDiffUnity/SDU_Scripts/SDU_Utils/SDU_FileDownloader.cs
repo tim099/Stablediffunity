@@ -4,6 +4,7 @@ using UnityEngine;
 using Cysharp.Threading.Tasks;
 using System.IO;
 using UnityEngine.Networking;
+using UCL.Core;
 
 namespace SDU
 {
@@ -14,8 +15,22 @@ namespace SDU
             public string ProgressStr => $"{(100f*Progress).ToString("0.00")}%";
             public float Progress { get; set;}
             public string ID { get; set; }
+            public string FileName { get; set; }
             public bool CancelDownload { get; set; } = false;
+
+            public void OnGUI(UCL_ObjectDictionary iDataDic)
+            {
+                using (var aScope = new GUILayout.HorizontalScope("box"))
+                {
+                    if (GUILayout.Button("Cancel Download", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                    {
+                        CancelDownload = true;
+                    }
+                    GUILayout.Label($"Downloading {FileName},Progress:{ProgressStr}");
+                }
+            }
         }
+        public static Dictionary<string, DownloadHandle> DownloadingFiles => s_DownloadingFiles;
         private static Dictionary<string, DownloadHandle> s_DownloadingFiles = new Dictionary<string, DownloadHandle>();
         public static string GetDownloadFileHandleID(string iURL, string iFilePath)
         {
@@ -45,6 +60,7 @@ namespace SDU
             }
             var aHandle = new DownloadHandle();
             aHandle.ID = aID;
+            aHandle.FileName = UCL.Core.FileLib.Lib.GetFileName(iFilePath);
             aHandle.Progress = 0;
             s_DownloadingFiles[aID] = aHandle;
             string aDir = Path.GetDirectoryName(iFilePath);
@@ -64,6 +80,7 @@ namespace SDU
             {
                 if (aHandle.CancelDownload)
                 {
+                    Debug.LogWarning($"{aHandle.FileName} ,Cancel Download");
                     aUnityWebRequest.Abort();
                     return true;
                 }

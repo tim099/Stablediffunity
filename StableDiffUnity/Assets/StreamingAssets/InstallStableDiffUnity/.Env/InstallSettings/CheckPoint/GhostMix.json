@@ -1,8 +1,9 @@
 {
 	"URL":"https://civitai.com/api/download/models/76907",
-	"FileName":"GhostMix",
-	"FileExtension":"safetensors",
 	"FolderSetting":{
 		"Folder":"CheckPoints"
-	}
+	},
+	"FileName":"GhostMix",
+	"FileExtension":"safetensors",
+	"WebPageURL":"https://civitai.com/models/36520/ghostmix"
 }

@@ -67,11 +67,23 @@ namespace SDU
                         {
                             if (File.Exists(aFilePath))
                             {
-                                GUILayout.Label($"File Downloaded:{aFilePath}");
+                                using (var aScope3 = new GUILayout.HorizontalScope())
+                                {
+                                    //if (GUILayout.Button("Resume Download", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                                    //{
+                                    //    SDU_FileDownloader.DownloadFileAsync(m_URL, aFilePath).Forget();
+                                    //}
+                                    if (GUILayout.Button("Copy Path", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                                    {
+                                        GUIUtility.systemCopyBuffer = aFilePath;
+                                    }
+                                    GUILayout.Label($"File Downloaded:{aFilePath}");
+
+                                }
                             }
                             else
                             {
-                                if (GUILayout.Button("Download"))
+                                if (GUILayout.Button("Download", UCL_GUIStyle.ButtonStyle))
                                 {
                                     SDU_FileDownloader.DownloadFileAsync(m_URL, aFilePath).Forget();
                                 }
@@ -79,11 +91,7 @@ namespace SDU
                         }
                         else
                         {
-                            if (GUILayout.Button("Cancel Download"))
-                            {
-                                aHandle.CancelDownload = true;
-                            }
-                            GUILayout.Label($"Progress:{aHandle.ProgressStr}");
+                            aHandle.OnGUI(iDataDic.GetSubDic("Handle"));
                         }
 
                         using (var aScope3 = new GUILayout.VerticalScope("box"))
@@ -128,19 +136,20 @@ namespace SDU
 
                             }
                         }
-                    }
-                    using (var aScope3 = new GUILayout.HorizontalScope())
-                    {
-                        GUILayout.Label("WebPageURL", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
-                        m_WebPageURL = GUILayout.TextField(m_WebPageURL);
-                        if (GUILayout.Button("Open Web", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                        using (var aScope3 = new GUILayout.HorizontalScope())
                         {
-                            TestURL(m_WebPageURL).Forget();
-                            //System.Diagnostics.Process.Start(m_WebPageURL);
-                        }
+                            GUILayout.Label("WebPageURL", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
+                            m_WebPageURL = GUILayout.TextField(m_WebPageURL);
+                            if (GUILayout.Button("Open Web", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                            {
+                                //TestURL(m_WebPageURL).Forget();
+                                System.Diagnostics.Process.Start(m_WebPageURL);
+                            }
 
-                        //System.Diagnostics.Process.Start(RunTimeData.Ins.m_WebURL);
+                            //System.Diagnostics.Process.Start(RunTimeData.Ins.m_WebURL);
+                        }
                     }
+
                 }
 
             }

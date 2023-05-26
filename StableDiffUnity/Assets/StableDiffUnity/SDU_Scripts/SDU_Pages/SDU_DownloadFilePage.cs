@@ -23,6 +23,11 @@ namespace SDU
             {
                 UCL.Core.UI.UCL_GUILayout.DrawObjectData(m_DownloadFileSetting, m_Dic.GetSubDic("DownloadFileSetting"));
             }
+            foreach(var aKey in SDU_FileDownloader.DownloadingFiles.Keys)
+            {
+                var aFileHandle = SDU_FileDownloader.DownloadingFiles[aKey];
+                aFileHandle.OnGUI(m_Dic.GetSubDic($"DownloadingFiles_{aKey}"));
+            }
         }
 
     }

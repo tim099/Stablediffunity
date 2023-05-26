@@ -11,6 +11,8 @@ using UCL.Core.JsonLib;
 using System.Linq;
 using System.Threading.Tasks;
 using UCL.Core;
+using Cysharp.Threading.Tasks;
+
 namespace SDU
 {
     [System.Serializable]
@@ -18,12 +20,46 @@ namespace SDU
     {
         public bool m_EnableControlNet = false;
         public List<string> GetAllModels() => RunTimeData.Ins.m_WebUISetting.m_ControlNetData.m_ModelList;
-        [UCL.Core.PA.UCL_List("GetAllModels")] public string m_SelectedModel;
+        //[UCL.Core.PA.UCL_List("GetAllModels")] 
+        [UCL.Core.ATTR.UCL_HideOnGUI]
+        public string m_SelectedModel;
 
         public SDU_InputImage m_InputImage = new SDU_InputImage();
+
+        private bool m_Show = false;
         public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {
-            UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic, iFieldName, false);
+            using (var aScope = new GUILayout.HorizontalScope())
+            {
+                m_Show = UCL_GUILayout.Toggle(m_Show);
+                using (var aScope2 = new GUILayout.VerticalScope())
+                {
+                    GUILayout.Label(iFieldName, UCL_GUIStyle.LabelStyle);
+                    using (var aScope3 = new GUILayout.HorizontalScope("box"))
+                    {
+                        if (GUILayout.Button("Refresh", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                        {
+                            RunTimeData.Ins.m_WebUISetting.RefreshControlNetModels().Forget();
+                        }
+
+                        GUILayout.Label(iFieldName, UCL.Core.UI.UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
+
+                        var aNames = RunTimeData.Ins.m_WebUISetting.m_ModelNames;
+                        if (!aNames.IsNullOrEmpty())
+                        {
+                            m_SelectedModel = UCL_GUILayout.PopupAuto(m_SelectedModel, GetAllModels(), iDataDic, "Selected Model", 8);
+                        }
+
+                        if (GUILayout.Button("Open Folder", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                        {
+                            RunTimeData.InstallSetting.OpenFolder(FolderEnum.ControlNetModel);
+                        }
+                    }
+
+                    UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic, iFieldName, false);
+                }
+            }
+
             return this;
         }
         public JsonData GetConfigJson()//byte[] iDepth = iDepthTexture.EncodeToPNG();
