@@ -130,14 +130,15 @@ namespace SDU
                                     {
                                         using (var aScope3 = new GUILayout.HorizontalScope())
                                         {
-                                            GUILayout.Label($"Downloaded Size:{SDU_FileDownloader.GetTmpFileSizeStr(aFilePath)}",
-                                                UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
                                             if (GUILayout.Button("Continue Download", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
                                             {
                                                 SDU_FileDownloader.DownloadFileAsync(m_URL, aFilePath, true).Forget();
                                             }
+                                            GUILayout.Label($"Downloaded Size:{SDU_FileDownloader.GetTmpFileSizeStr(aFilePath)}",
+                                                UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
+
                                             GUILayout.Space(60);
-                                            if (GUILayout.Button("Cancel Download", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                                            if (GUILayout.Button("Delete Downloaded Cache File", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
                                             {
                                                 SDU_FileDownloader.RemoveTmpFile(aFilePath);
                                             }
