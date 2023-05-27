@@ -1,0 +1,10 @@
+{
+	"URL":"https://civitai.com/api/download/models/78550",
+	"FolderSetting":{
+		"Folder":"CheckPoints"
+	},
+	"FileName":"GameIcon",
+	"FileExtension":"safetensors",
+	"RetryDownloadOnFail":"True",
+	"WebPageURL":"https://civitai.com/models/47800/game-icon-institutemode"
+}

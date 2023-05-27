@@ -1,0 +1,10 @@
+{
+	"URL":"https://civitai.com/api/download/models/59253",
+	"FolderSetting":{
+		"Folder":"CheckPoints"
+	},
+	"FileName":"IceRealistic",
+	"FileExtension":"safetensors",
+	"RetryDownloadOnFail":"True",
+	"WebPageURL":"https://civitai.com/models/51711/icerealistic"
+}
