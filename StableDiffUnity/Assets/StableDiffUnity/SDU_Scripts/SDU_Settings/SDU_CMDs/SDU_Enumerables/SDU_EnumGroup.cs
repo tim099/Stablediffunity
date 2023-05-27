@@ -13,7 +13,7 @@ namespace SDU
         override public string GetShortName()
         {
             if (m_CMDs.IsNullOrEmpty()) return base.GetShortName();
-            return $"[{m_CMDs.ConcatString((iCMD) => iCMD.GetShortName())}]";
+            return $"[{m_CMDs.ConcatString((iCMD) => iCMD.GetShortName())}]".CutToMaxLength(30);
         }
         override public SDU_Enumerator GetEnumerator()
         {

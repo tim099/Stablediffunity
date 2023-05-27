@@ -11,7 +11,7 @@ namespace SDU
         override public string GetShortName()
         {
             if (m_CMDs.IsNullOrEmpty()) return base.GetShortName();
-            return $"[{m_CMDs.ConcatString((iCMD) => iCMD.GetShortName())}]";
+            return $"[{m_CMDs.ConcatString((iCMD) => iCMD.GetShortName())}]".CutToMaxLengthRichText(25);
         }
         override public async Task TriggerCMD(Tex2ImgSetting iTex2ImgSetting)
         {

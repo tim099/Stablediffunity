@@ -62,7 +62,7 @@ namespace SDU
         public List<SDU_CMD> m_CMDs = new List<SDU_CMD>();
 
         private bool m_Show = true;
-
+        public bool RequireClearDic { get; set; } = false;
         public JsonData GetConfigJson()
         {
             const int MaxRes = 2048;
@@ -112,6 +112,7 @@ namespace SDU
         public override void DeserializeFromJson(JsonData iJson)
         {
             base.DeserializeFromJson(iJson);
+            RequireClearDic = true;
         }
         public async Task GenerateImage()
         {
@@ -130,6 +131,11 @@ namespace SDU
         }
         public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {
+            if (RequireClearDic)
+            {
+                RequireClearDic = false;
+                iDataDic.Clear();
+            }
             GUILayout.BeginHorizontal();
             m_Show = UCL_GUILayout.Toggle(m_Show);
             GUILayout.Label(iFieldName, UCL_GUIStyle.LabelStyle);

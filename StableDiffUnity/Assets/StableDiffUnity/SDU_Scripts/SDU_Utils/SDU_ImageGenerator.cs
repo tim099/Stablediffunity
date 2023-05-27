@@ -77,7 +77,7 @@ namespace SDU
                         aJson["sd_model_checkpoint"] = iSetting.m_CheckPoint.m_CheckPoint;
                         string aJsonStr = aJson.ToJson();
                         var aResultJson = await client.SendWebRequestStringAsync(aJsonStr);
-                        Debug.LogWarning($"aResultJson:{aResultJson}");
+                        //Debug.LogWarning($"aResultJson:{aResultJson}");
                     }
                     using (var aClient = RunTimeData.SD_API.Client_Txt2img)
                     {
