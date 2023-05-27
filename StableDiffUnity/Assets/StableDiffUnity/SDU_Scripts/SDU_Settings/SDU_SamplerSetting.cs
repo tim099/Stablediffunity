@@ -8,13 +8,14 @@ using UnityEngine;
 
 namespace SDU
 {
-    public class SDU_CheckPointSetting : UCL.Core.JsonLib.UnityJsonSerializable, UCL.Core.UI.UCLI_FieldOnGUI
+    public class SDU_SamplerSetting : UCL.Core.JsonLib.UnityJsonSerializable, UCL.Core.UI.UCLI_FieldOnGUI
     {
         [UCL.Core.ATTR.UCL_HideOnGUI]
-        public string m_CheckPoint;
-        public void Set(SDU_CheckPointSetting iCheckPoint)
+        public string m_SelectedSampler = "DPM++ 2M Karras";
+
+        public void Set(SDU_SamplerSetting iSamplerSetting)
         {
-            m_CheckPoint = iCheckPoint.m_CheckPoint;
+            m_SelectedSampler = iSamplerSetting.m_SelectedSampler;
         }
         public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {
@@ -22,20 +23,15 @@ namespace SDU
             {
                 if (GUILayout.Button("Refresh", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
                 {
-                    RunTimeData.Ins.m_WebUISetting.RefreshCheckpoints().Forget();
+                    RunTimeData.Ins.m_WebUISetting.RefreshSamplers().Forget();
                 }
 
                 GUILayout.Label(iFieldName, UCL.Core.UI.UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
 
-                var aNames = RunTimeData.Ins.m_WebUISetting.m_ModelNames;
+                var aNames = RunTimeData.Ins.m_WebUISetting.m_Samplers;
                 if (!aNames.IsNullOrEmpty())
                 {
-                    m_CheckPoint = UCL_GUILayout.PopupAuto(m_CheckPoint, aNames, iDataDic, "Selected Model", 8);
-                }
-
-                if (GUILayout.Button("Open Folder", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
-                {
-                    RunTimeData.InstallSetting.OpenFolder(FolderEnum.CheckPoints);
+                    m_SelectedSampler = UCL_GUILayout.PopupAuto(m_SelectedSampler, aNames, iDataDic, "Selected Sampler", 8);
                 }
             }
             return this;

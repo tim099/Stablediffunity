@@ -33,9 +33,8 @@ namespace SDU
         //public string m_SelectedModel;
 
         public SDU_CheckPointSetting m_CheckPoint = new SDU_CheckPointSetting();
-        public List<string> GetAllSamplerNames() => RunTimeData.Ins.m_WebUISetting.m_Samplers;
-        [UCL.Core.PA.UCL_List("GetAllSamplerNames")] 
-        public string m_SelectedSampler = "DPM++ 2M Karras";
+
+        public SDU_SamplerSetting m_Sampler = new SDU_SamplerSetting();
 
         [UCL.Core.ATTR.UCL_HideOnGUI] public string m_SelectedLoraModel;
         
@@ -80,8 +79,8 @@ namespace SDU
             {
                 m_Height += (8 - m_Height % 8);
             }
-            
-            aJson["sampler_index"] = m_SelectedSampler;
+
+            aJson["sampler_index"] = m_Sampler.m_SelectedSampler;//m_SelectedSampler;
             aJson["prompt"] = m_Prompt;
             aJson["steps"] = m_Steps;
             aJson["negative_prompt"] = m_NegativePrompt;

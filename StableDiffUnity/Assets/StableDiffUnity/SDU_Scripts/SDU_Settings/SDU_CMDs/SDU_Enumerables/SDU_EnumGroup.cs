@@ -2,9 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+
+
 namespace SDU
 {
-    public class SDU_CMDGroup : SDU_CMD
+    public class SDU_EnumGroup : SDU_Enumerable
     {
         public List<SDU_CMD> m_CMDs = new List<SDU_CMD>();
 
@@ -13,14 +15,9 @@ namespace SDU
             if (m_CMDs.IsNullOrEmpty()) return base.GetShortName();
             return $"[{m_CMDs.ConcatString((iCMD) => iCMD.GetShortName())}]";
         }
-        override public async Task TriggerCMD(Tex2ImgSetting iTex2ImgSetting)
+        override public SDU_Enumerator GetEnumerator()
         {
-            if (m_CMDs.IsNullOrEmpty()) return;
-            var aCMDs = m_CMDs.Clone();
-            foreach (var aCMD in aCMDs)
-            {
-                await aCMD.TriggerCMD(iTex2ImgSetting);
-            }
+            return new SDU_Enumerator(m_CMDs.Clone());
         }
     }
 }

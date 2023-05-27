@@ -18,6 +18,14 @@ namespace SDU
                 s_Types.Add(typeof(SDU_CMDGroup));
                 s_Types.Add(typeof(SDU_CMDGenerateImage));
                 s_Types.Add(typeof(SDU_CMDSetCheckPoint));
+                s_Types.Add(typeof(SDU_CMDSetSampler));
+                s_Types.Add(typeof(SDU_CMDSetPrompt));
+                s_Types.Add(typeof(SDU_CMDSetNegativePrompt));
+                s_Types.Add(typeof(SDU_CMDSetSize));
+                s_Types.Add(typeof(SDU_CMDSetSteps));
+
+                s_Types.Add(typeof(SDU_CMDForeach));
+                
             }
             return s_Types;
         }
@@ -30,7 +38,7 @@ namespace SDU
         }
         virtual public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {
-            UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic.GetSubDic("GenerateImageCMD"), iFieldName, false);
+            UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic, iFieldName, false);
             return this;
         }
     }
