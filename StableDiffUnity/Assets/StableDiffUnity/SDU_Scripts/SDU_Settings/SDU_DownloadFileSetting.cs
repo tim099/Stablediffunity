@@ -9,7 +9,7 @@ using UCL.Core.UI;
 
 namespace SDU
 {
-    public class SDU_DownloadFileSetting : UCL.Core.JsonLib.UnityJsonSerializable, UCL.Core.UI.UCLI_FieldOnGUI
+    public class SDU_DownloadFileSetting : UCL.Core.JsonLib.UnityJsonSerializable, UCL.Core.UI.UCLI_FieldOnGUI, UCLI_ShortName
     {
         public enum FileType
         {
@@ -19,16 +19,16 @@ namespace SDU
 
         public string m_URL;
         public SDU_FolderSetting m_FolderSetting = new SDU_FolderSetting();
+        [UCL.Core.ATTR.UCL_HideOnGUI]
         public string m_FileName = "NewFile";
         public string m_FileExtension = "safetensors";
-        //public FolderEnum m_Folder = FolderEnum.Lora;
-        public bool m_RetryDownloadOnFail = false;
+        //public bool m_AutoRetryDownload = true;
 
         [UCL.Core.ATTR.UCL_HideOnGUI] public string m_WebPageURL;
         public string FolderPath => m_FolderSetting.Path;
         public string FilePath => Path.Combine(FolderPath, $"{m_FileName}.{m_FileExtension}");
         public SDU_FileDownloader.DownloadHandle DownloadHandle => SDU_FileDownloader.GetDownloadFileHandle(m_URL, FilePath);
-
+        public string GetShortName() => $"DownloadFileSetting({m_FileName})";
         private bool m_Show = false;
         private bool m_Loaded = false;
         private string m_LoadSettingName;
@@ -57,57 +57,22 @@ namespace SDU
                 
                 using (var aScope2 = new GUILayout.VerticalScope("box"))
                 {
-                    GUILayout.Label(iFieldName, UCL_GUIStyle.LabelStyle);
+                    GUILayout.Label($"{iFieldName}({m_FileName})", UCL_GUIStyle.LabelStyle);
                     if (m_Show)
                     {
-                        var aFilePath = FilePath;
-
-                        var aHandle = DownloadHandle;
-                        UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic.GetSubDic("DownloadFileSetting"), iFieldName, true);
-                        if (aHandle == null)
-                        {
-                            if (File.Exists(aFilePath))
-                            {
-                                using (var aScope3 = new GUILayout.HorizontalScope())
-                                {
-                                    //if (GUILayout.Button("Resume Download", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
-                                    //{
-                                    //    SDU_FileDownloader.DownloadFileAsync(m_URL, aFilePath).Forget();
-                                    //}
-                                    if (GUILayout.Button("Copy Path", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
-                                    {
-                                        GUIUtility.systemCopyBuffer = aFilePath;
-                                    }
-                                    GUILayout.Label($"File Downloaded:{aFilePath}");
-
-                                }
-                            }
-                            else
-                            {
-                                if (GUILayout.Button("Download", UCL_GUIStyle.ButtonStyle))
-                                {
-                                    SDU_FileDownloader.DownloadFileAsync(m_URL, aFilePath, m_RetryDownloadOnFail).Forget();
-                                }
-                            }
-                        }
-                        else
-                        {
-                            aHandle.OnGUI(iDataDic.GetSubDic("Handle"));
-                        }
-
                         using (var aScope3 = new GUILayout.VerticalScope("box"))
                         {
                             using (var aScope4 = new GUILayout.HorizontalScope())
                             {
-                                if (GUILayout.Button("Save Setting", GUILayout.ExpandWidth(false)))
+                                if (GUILayout.Button("Save Setting", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
                                 {
                                     string aSaveFileName = $"{m_FileName}.json";
                                     m_LoadSettingName = aSaveFileName;
                                     File.WriteAllText(Path.Combine(aDownloadFileSettingPath, aSaveFileName),
                                         SerializeToJson().ToJsonBeautify());
                                 }
-
-                                if (GUILayout.Button("Open Folder"))
+                                m_FileName = GUILayout.TextField(m_FileName);
+                                if (GUILayout.Button("Open Folder", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
                                 {
                                     RunTimeData.InstallSetting.OpenDownloadSettingsFolder(m_FolderSetting.m_Folder);
                                 }
@@ -137,18 +102,80 @@ namespace SDU
 
                             }
                         }
-                        using (var aScope3 = new GUILayout.HorizontalScope())
+                        if (!string.IsNullOrEmpty(m_URL) && !string.IsNullOrEmpty(m_FileName))
                         {
-                            GUILayout.Label("WebPageURL", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
-                            m_WebPageURL = GUILayout.TextField(m_WebPageURL);
-                            if (GUILayout.Button("Open Web", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                            var aFilePath = FilePath;
+                            var aHandle = DownloadHandle;
+                            if (aHandle == null)
                             {
-                                //TestURL(m_WebPageURL).Forget();
-                                System.Diagnostics.Process.Start(m_WebPageURL);
-                            }
+                                if (File.Exists(aFilePath))
+                                {
+                                    using (var aScope3 = new GUILayout.HorizontalScope())
+                                    {
+                                        //if (GUILayout.Button("Resume Download", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                                        //{
+                                        //    SDU_FileDownloader.DownloadFileAsync(m_URL, aFilePath).Forget();
+                                        //}
+                                        if (GUILayout.Button("Copy Path", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                                        {
+                                            GUIUtility.systemCopyBuffer = aFilePath;
+                                        }
+                                        GUILayout.Label($"File Downloaded:{aFilePath}");
 
-                            //System.Diagnostics.Process.Start(RunTimeData.Ins.m_WebURL);
+                                    }
+                                }
+                                else
+                                {
+                                    if (SDU_FileDownloader.HasTmpFile(aFilePath))//Download interrupted
+                                    {
+                                        using (var aScope3 = new GUILayout.HorizontalScope())
+                                        {
+                                            GUILayout.Label($"Downloaded Size:{SDU_FileDownloader.GetTmpFileSizeStr(aFilePath)}",
+                                                UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
+                                            if (GUILayout.Button("Continue Download", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                                            {
+                                                SDU_FileDownloader.DownloadFileAsync(m_URL, aFilePath, true).Forget();
+                                            }
+                                            GUILayout.Space(60);
+                                            if (GUILayout.Button("Cancel Download", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                                            {
+                                                SDU_FileDownloader.RemoveTmpFile(aFilePath);
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (GUILayout.Button("Download", UCL_GUIStyle.ButtonStyle))
+                                        {
+                                            SDU_FileDownloader.DownloadFileAsync(m_URL, aFilePath, true).Forget();
+                                        }
+                                    }
+
+                                }
+                            }
+                            else
+                            {
+                                aHandle.OnGUI(iDataDic.GetSubDic("Handle"));
+                            }
+                            using (var aScope3 = new GUILayout.HorizontalScope())
+                            {
+                                GUILayout.Label("WebPageURL", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
+                                m_WebPageURL = GUILayout.TextField(m_WebPageURL);
+                                if (GUILayout.Button("Open Web", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                                {
+                                    //TestURL(m_WebPageURL).Forget();
+                                    System.Diagnostics.Process.Start(m_WebPageURL);
+                                }
+
+                                //System.Diagnostics.Process.Start(RunTimeData.Ins.m_WebURL);
+                            }
+                            GUILayout.Space(30);
                         }
+                        
+                        UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic.GetSubDic("DownloadFileSetting"), iFieldName, true);
+
+                        
+                        
                     }
 
                 }
