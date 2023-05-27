@@ -1,0 +1,9 @@
+{
+	"URL":"https://huggingface.co/lllyasviel/ControlNet/resolve/main/models/control_sd15_canny.pth",
+	"FolderSetting":{
+		"Folder":"ControlNetModel"
+	},
+	"FileName":"control_sd15_canny",
+	"FileExtension":"pth",
+	"WebPageURL":"https://huggingface.co/lllyasviel/ControlNet/tree/main/models"
+}

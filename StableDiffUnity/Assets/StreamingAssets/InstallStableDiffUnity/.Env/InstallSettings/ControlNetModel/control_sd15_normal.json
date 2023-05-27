@@ -1,0 +1,9 @@
+{
+	"URL":"https://huggingface.co/lllyasviel/ControlNet/resolve/main/models/control_sd15_normal.pth",
+	"FolderSetting":{
+		"Folder":"ControlNetModel"
+	},
+	"FileName":"control_sd15_normal",
+	"FileExtension":"pth",
+	"WebPageURL":"https://huggingface.co/lllyasviel/ControlNet/tree/main/models"
+}

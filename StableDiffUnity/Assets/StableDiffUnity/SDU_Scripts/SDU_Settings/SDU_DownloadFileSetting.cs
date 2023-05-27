@@ -120,7 +120,7 @@ namespace SDU
                                         {
                                             GUIUtility.systemCopyBuffer = aFilePath;
                                         }
-                                        GUILayout.Label($"File Downloaded:{aFilePath}");
+                                        GUILayout.Label($"File Downloaded: {aFilePath}");
 
                                     }
                                 }
@@ -158,21 +158,24 @@ namespace SDU
                             {
                                 aHandle.OnGUI(iDataDic.GetSubDic("Handle"));
                             }
-                            using (var aScope3 = new GUILayout.HorizontalScope())
-                            {
-                                GUILayout.Label("WebPageURL", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
-                                m_WebPageURL = GUILayout.TextField(m_WebPageURL);
-                                if (GUILayout.Button("Open Web", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
-                                {
-                                    //TestURL(m_WebPageURL).Forget();
-                                    System.Diagnostics.Process.Start(m_WebPageURL);
-                                }
 
-                                //System.Diagnostics.Process.Start(RunTimeData.Ins.m_WebURL);
-                            }
                             GUILayout.Space(30);
                         }
-                        
+                        else
+                        {
+                            GUILayout.Space(50);
+                        }
+                        using (var aScope3 = new GUILayout.HorizontalScope())
+                        {
+                            if (GUILayout.Button("Open Webpage", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                            {
+                                //TestURL(m_WebPageURL).Forget();
+                                System.Diagnostics.Process.Start(m_WebPageURL);
+                            }
+                            GUILayout.Label("WebPageURL", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
+                            m_WebPageURL = GUILayout.TextField(m_WebPageURL);
+                            //System.Diagnostics.Process.Start(RunTimeData.Ins.m_WebURL);
+                        }
                         UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic.GetSubDic("DownloadFileSetting"), iFieldName, true);
 
                         
@@ -182,10 +185,6 @@ namespace SDU
                 }
 
             }
-
-
-
-
 
             return this;
         }

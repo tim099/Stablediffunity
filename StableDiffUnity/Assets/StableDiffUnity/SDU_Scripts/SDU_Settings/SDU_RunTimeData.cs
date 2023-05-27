@@ -13,6 +13,11 @@ namespace SDU
         public Dictionary<string, string> m_Infos = new Dictionary<string, string>();
     }
     [System.Serializable]
+    public class HideOnGUIData
+    {
+        public SDU_DownloadFileSetting m_DownloadFileSetting = new SDU_DownloadFileSetting();
+    }
+    [System.Serializable]
     public class RunTimeData : UCL.Core.JsonLib.UnityJsonSerializable, UCL.Core.UI.UCLI_FieldOnGUI
     {
         #region static
@@ -74,6 +79,9 @@ namespace SDU
 
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public Tex2ImgResults m_Tex2ImgResults = new Tex2ImgResults();
+
+        [UCL.Core.ATTR.UCL_HideOnGUI]
+        public HideOnGUIData m_HideOnGUIData = new HideOnGUIData();
 
         public bool m_RedirectStandardOutput = false;
         public bool m_AutoOpenWeb = true;

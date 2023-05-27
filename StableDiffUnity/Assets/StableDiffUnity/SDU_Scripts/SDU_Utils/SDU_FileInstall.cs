@@ -45,12 +45,29 @@ namespace SDU
                 Debug.LogWarning($"iInstallRoot:{iInstallRoot},aInstallFrom:{aInstallFrom}");
                 if (!Directory.Exists(aInstallFrom))
                 {
+                    Directory.CreateDirectory(aInstallFrom);
                     Debug.LogError($"CheckInstallEnv iInstallRoot:{iInstallRoot}," +
                         $" !Directory.Exists(aInstallFrom) aInstallFrom:{aInstallFrom}");
                     return;
                 }
                 UCL.Core.FileLib.Lib.CopyDirectory(aInstallFrom, iInstallRoot);
             }
+        }
+        public static void SaveInstallEnvToStreammingAssets(string iInstallRoot)
+        {
+            if (!Directory.Exists(iInstallRoot))
+            {
+                return;
+            }
+
+            var aInstallTo = GetEnvInstallSourcePath(iInstallRoot);
+            if (Directory.Exists(aInstallTo))
+            {
+                Directory.Delete(aInstallTo, true);
+            }
+            Debug.LogWarning($"iInstallRoot:{iInstallRoot},aInstallTo:{aInstallTo}");
+
+            UCL.Core.FileLib.Lib.CopyDirectory(iInstallRoot, aInstallTo);
         }
     }
 }

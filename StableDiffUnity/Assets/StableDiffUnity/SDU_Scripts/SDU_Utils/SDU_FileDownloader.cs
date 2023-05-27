@@ -105,10 +105,7 @@ namespace SDU
                                                    //long totalSize = long.Parse(aHeader.GetResponseHeader("Content-Length"));
                                                    //Debug.LogError($"totalSize{totalSize},aHeader:{aHeader.result}");
                     var aHeaders = aHeader.GetResponseHeaders();
-                    foreach (var aKey in aHeaders.Keys)
-                    {
-                        Debug.Log($"{aKey},{aHeaders[aKey]},iURL:{iURL}");
-                    }
+                    Debug.Log(aHeaders.Keys.ConcatString((iKey) => $"{iKey}:{aHeaders[iKey]}", "\n"));
                 }
             }
             catch (System.Exception e)
@@ -140,7 +137,7 @@ namespace SDU
                 //aDownloadHandlerFile.removeFileOnAbort = true;
                 aUnityWebRequest.downloadHandler = aDownloadHandlerFile;
                 System.DateTime aCheckTime = System.DateTime.Now;
-                var aTask = aUnityWebRequest.SendWebRequest().WithCancellation(aHandle.CancellationTokenSource.Token);
+                var aTask = aUnityWebRequest.SendWebRequest();//.WithCancellation(aHandle.CancellationTokenSource.Token);
 
                 await UniTask.WaitUntil(() =>
                 {

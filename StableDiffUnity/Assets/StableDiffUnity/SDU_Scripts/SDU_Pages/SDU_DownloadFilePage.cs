@@ -16,9 +16,18 @@ namespace SDU
         public override string WindowName => $"SDU DownloadFile {SDU_EditorMenuPage.SDU_Version}";
         UCL.Core.UCL_ObjectDictionary m_Dic = new UCL.Core.UCL_ObjectDictionary();
         string m_LoadSettingName;
-        SDU_DownloadFileSetting m_DownloadFileSetting = new SDU_DownloadFileSetting();
+        SDU_DownloadFileSetting m_DownloadFileSetting => RunTimeData.Ins.m_HideOnGUIData.m_DownloadFileSetting;
         protected override void ContentOnGUI()
         {
+#if UNITY_EDITOR
+            if(GUILayout.Button("Save InstallSettings to StreamingAssets"))
+            {
+                string aPath = Path.Combine(RunTimeData.InstallSetting.EnvInstallRoot, "InstallSettings");
+                SDU_FileInstall.SaveInstallEnvToStreammingAssets(aPath);
+                //Application.streamingAssetsPath
+            }
+#endif
+
             using (var aScope = new GUILayout.VerticalScope("box"))
             {
                 UCL.Core.UI.UCL_GUILayout.DrawObjectData(m_DownloadFileSetting, m_Dic.GetSubDic("DownloadFileSetting"));
