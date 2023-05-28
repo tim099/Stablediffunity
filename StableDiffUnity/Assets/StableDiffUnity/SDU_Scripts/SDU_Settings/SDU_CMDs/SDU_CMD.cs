@@ -23,7 +23,7 @@ namespace SDU
                 s_Types.Add(typeof(SDU_CMDSetNegativePrompt));
                 s_Types.Add(typeof(SDU_CMDSetSize));
                 s_Types.Add(typeof(SDU_CMDSetSteps));
-
+                s_Types.Add(typeof(SDU_CMDCfgScale));
                 s_Types.Add(typeof(SDU_CMDForeach));
                 
             }
