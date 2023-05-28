@@ -50,6 +50,7 @@ namespace SDU
         public float m_CfgScale = 7;
 
         public long m_Seed = -1;
+        //[UCL.Core.PA.UCL_IntSlider(1, 12)] public int m_ClipSkip = 1;
 
         [UCL.Core.PA.UCL_IntSlider(1, 100)]
         public int m_BatchCount = 1;
@@ -87,6 +88,7 @@ namespace SDU
             aJson["steps"] = m_Steps;
             aJson["negative_prompt"] = m_NegativePrompt;
             aJson["seed"] = m_Seed;
+            //aJson["clip_skip"] = m_ClipSkip;
             aJson["cfg_scale"] = m_CfgScale;
             aJson["width"] = m_Width;
             aJson["height"] = m_Height;
