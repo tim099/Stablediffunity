@@ -31,14 +31,18 @@ namespace SDU
                 GenerateImageAsync(iSetting).Forget();
             });
         }
-        public static Tuple<string, string> GetSaveImagePath()
+        public static string DefaultImageOutputFolder()
         {
-            var aDate = DateTime.Now;
-            string aPath = Path.Combine(RunTimeData.InstallSetting.OutputPath, aDate.ToString("MM_dd_yyyy"));
+            string aPath = Path.Combine(RunTimeData.InstallSetting.OutputPath, DateTime.Now.ToString("MM_dd_yyyy"));
             if (!Directory.Exists(aPath))
             {
                 UCL.Core.FileLib.Lib.CreateDirectory(aPath);
             }
+            return aPath;
+        }
+        public static Tuple<string, string> GetSaveImagePath()
+        {
+            string aPath = DefaultImageOutputFolder();
             string aFileName = $"{System.DateTime.Now.ToString("HHmmssff")}_{RunTimeData.Ins.m_OutPutFileID.ToString()}";
             RunTimeData.Ins.m_OutPutFileID = RunTimeData.Ins.m_OutPutFileID + 1;
             return Tuple.Create(aPath, aFileName);
@@ -146,8 +150,9 @@ namespace SDU
                         {
                             throw new Exception($"SendWebRequestAsync, !responses.Contains(\"images\"),aResultJson:{aResultJson.ToJsonBeautify()}");
                         }
+                        var aImageOutputSetting = iSetting.m_ImageOutputSetting;
                         var aSavePath = GetSaveImagePath();
-                        string aPath = aSavePath.Item1;
+                        string aPath = aImageOutputSetting.OutputFolderPath;//aSavePath.Item1;
                         string aFileName = aSavePath.Item2;
                         RunTimeData.Ins.m_OutPutFileID = RunTimeData.Ins.m_OutPutFileID + 1;
 

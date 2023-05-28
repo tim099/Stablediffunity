@@ -11,6 +11,7 @@ namespace SDU
         override public string GetShortName() => $"{base.GetShortName()}({m_Prompt.CutToMaxLength(20)})";
         override public async Task TriggerCMD(Tex2ImgSetting iTex2ImgSetting)
         {
+            iTex2ImgSetting.RequireClearDic = true;
             iTex2ImgSetting.m_Prompt = m_Prompt;
             await Task.Delay(1);
         }

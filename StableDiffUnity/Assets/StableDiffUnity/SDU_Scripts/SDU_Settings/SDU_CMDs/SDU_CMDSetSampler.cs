@@ -10,6 +10,7 @@ namespace SDU
         override public string GetShortName() => $"{base.GetShortName()}({m_Sampler.m_SelectedSampler})";
         override public async Task TriggerCMD(Tex2ImgSetting iTex2ImgSetting)
         {
+            iTex2ImgSetting.RequireClearDic = true;
             iTex2ImgSetting.m_Sampler.Set(m_Sampler);
             await Task.Delay(1);
         }

@@ -16,6 +16,7 @@ namespace SDU
         override public async Task TriggerCMD(Tex2ImgSetting iTex2ImgSetting)
         {
             if (m_CMDs.IsNullOrEmpty()) return;
+            iTex2ImgSetting.RequireClearDic = true;
             var aCMDs = m_CMDs.Clone();
             foreach (var aCMD in aCMDs)
             {
