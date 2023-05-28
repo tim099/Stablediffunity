@@ -15,15 +15,15 @@ MonoBehaviour:
   m_OutputBuildLog: 0
   m_DefaultSetting: {fileID: 11400000, guid: 2052cf5e61fab874c987e84fd5425bd5, type: 2}
   m_ProductName: SDU_URP
-  m_ApplicationIdentifier: SDU_URP
+  m_ApplicationIdentifier: SDU-URP
   m_BuildTargetGroup: 1
   m_BuildTarget: 19
   m_BuildOption: 0
   m_Icons: []
-  m_DefaultIcon: {fileID: 0}
+  m_DefaultIcon: {fileID: 2800000, guid: 1c91dd3c4f437fc48b60ba014fc499e4, type: 3}
   m_BuildAppBundle: 0
   m_OutputPath: Build/StableDiffUnity_URP
-  m_OutputName: SDU_URP.exe
+  m_OutputName: StableDiffUnity.exe
   m_ScenesInBuild:
   - {fileID: 102900000, guid: 37111521abe374e459de84c98b0ecff2, type: 3}
   m_KeyStoreSetting:
@@ -32,8 +32,8 @@ MonoBehaviour:
     m_KeyaliasName: 
     m_KeyaliasPass: 
   m_VersionSetting:
-    m_BundleVersion: 1.0.4
-    m_BundleVersionCode: 4
-    m_BuildNumber: 4
+    m_BundleVersion: 1.0.7
+    m_BundleVersionCode: 7
+    m_BuildNumber: 7
   m_ScriptingDefineSymbols: 
   m_PreBuildProcess: []
