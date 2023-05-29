@@ -6,12 +6,8 @@ namespace SDU
 {
     public static class SDU_FileInstall
     {
-        public static string CheckInstall(string iInstallRoot, string iZipAbsolutePath, string iInstallTarget)
+        public static string Install(string iInstallRoot, string iZipAbsolutePath, string iInstallTarget)
         {
-            if (Directory.Exists(iInstallRoot))//Install done
-            {
-                return iInstallRoot;
-            }
             try
             {
                 Debug.LogWarning($"Installing {iInstallTarget}");
@@ -22,7 +18,7 @@ namespace SDU
                     return iInstallRoot;
                 }
 
-                System.IO.Compression.ZipFile.ExtractToDirectory(iZipAbsolutePath, iInstallRoot, true);
+                System.IO.Compression.ZipFile.ExtractToDirectory(iZipAbsolutePath, iInstallRoot, false);
 
                 Debug.Log($"{iInstallTarget} installation finished");
             }
@@ -30,6 +26,17 @@ namespace SDU
             {
                 Debug.LogException(ex);
             }
+            return iInstallRoot;
+        }
+        public static string CheckInstall(string iInstallRoot, string iZipAbsolutePath, string iInstallTarget)
+        {
+            if (Directory.Exists(iInstallRoot))//Install done
+            {
+                Debug.LogWarning($"CheckInstall Directory.Exists(iInstallRoot) iInstallRoot:{iInstallRoot}" +
+                    $"\n,iInstallTarget:{iZipAbsolutePath}");
+                return iInstallRoot;
+            }
+            Install(iInstallRoot, iZipAbsolutePath, iInstallTarget);
             return iInstallRoot;
         }
         public static string GetEnvInstallSourcePath(string iInstallRoot)

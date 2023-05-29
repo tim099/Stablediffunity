@@ -203,24 +203,32 @@ namespace SDU
             var aPythonRoot = SDU_FileInstall.CheckInstall(aInstallSetting.PythonInstallRoot, aInstallSetting.PythonZipPath, "Python");
             var aEnvInstallRoot = SDU_FileInstall.CheckInstall(aInstallSetting.EnvInstallRoot, aInstallSetting.EnvZipPath, "Env");
             var aWebUIRoot = SDU_FileInstall.CheckInstall(aInstallSetting.WebUIInstallRoot, aInstallSetting.WebUIZipPath, "WebUI");
-            File.WriteAllText(aInstallSetting.PythonInstallPathFilePath, aPythonRoot);
-            File.WriteAllText(aInstallSetting.WebUIInstallPathFilePath, aWebUIRoot);
-            File.WriteAllText(aInstallSetting.CommandlindArgsFilePath, aInstallSetting.CommandlindArgs);
+
 
             var aPythonExePath = aInstallSetting.PythonExePath;//System.IO.Path.Combine(aEnvInstallRoot, Data.PythonExePath);
             UnityEngine.Debug.LogWarning($"PythonExePath:{aPythonExePath}");
             if (!System.IO.File.Exists(aPythonExePath))
             {
-                Debug.LogError($"File not found, path:{aPythonExePath}");
-                return;
+                Debug.LogError($"File not found, path:{aPythonExePath}, try reinstall");
+                SDU_FileInstall.Install(aInstallSetting.PythonInstallRoot, aInstallSetting.PythonZipPath, "Python");
+                //return;
             }
+            string aBatPath = RunTimeData.InstallSetting.RunBatPath;//System.IO.Path.Combine(aEnvInstallRoot, Data.WebUIScriptBatPath);
+            if (!File.Exists(aBatPath))
+            {
+                SDU_FileInstall.Install(aInstallSetting.EnvInstallRoot, aInstallSetting.EnvZipPath, "Env");
+            }
+
+            File.WriteAllText(aInstallSetting.PythonInstallPathFilePath, aPythonRoot);
+            File.WriteAllText(aInstallSetting.WebUIInstallPathFilePath, aWebUIRoot);
+            File.WriteAllText(aInstallSetting.CommandlindArgsFilePath, aInstallSetting.CommandlindArgs);
 
             SDU_ProcessList.PreCheckProcessEvent();//check current exist process
             var aProcess = new System.Diagnostics.Process();
             
             //string aBatPath = System.IO.Path.Combine(Data.RootPath, Data.WebUIScriptBatPath);
             string aRunPythonPath = aInstallSetting.RunPythonPath;
-            string aBatPath = RunTimeData.InstallSetting.RunBatPath;//System.IO.Path.Combine(aEnvInstallRoot, Data.WebUIScriptBatPath);
+
             UnityEngine.Debug.LogWarning($"RunPythonPath:{aRunPythonPath},BatPath:{aBatPath}");
 
             aProcess.StartInfo.FileName = aPythonExePath;
