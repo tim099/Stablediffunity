@@ -12,6 +12,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UCL.Core;
 using Cysharp.Threading.Tasks;
+using System.Threading;
 
 namespace SDU
 {
@@ -19,7 +20,6 @@ namespace SDU
     [System.Serializable]
     public class Tex2ImgSetting : UCL.Core.JsonLib.UnityJsonSerializable, UCL.Core.UI.UCLI_FieldOnGUI
     {
-        static bool s_TriggeringCMD = false;
         #region Save & Load Setting
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public string m_ID = "Default";
@@ -122,17 +122,6 @@ namespace SDU
         {
             await SDU_ImageGenerator.GenerateImageAsync(this);
         }
-        public async Task TriggerCMDs()
-        {
-            if (s_TriggeringCMD) return;
-            s_TriggeringCMD = true;
-            for (int i = 0; i < m_CMDs.Count; i++)
-            {
-                var aCMD = m_CMDs[i];
-                await aCMD.TriggerCMD(this);
-            }
-            s_TriggeringCMD = false;
-        }
         public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {
             //iDataDic
@@ -219,23 +208,29 @@ namespace SDU
             
             if (SDU_WebUIStatus.ServerReady)
             {
-                if (SDU_ImageGenerator.IsAvaliable)
+                if (!SDU_CMDService.TriggeringCMD)
                 {
                     if (GUILayout.Button("Generate Image", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
                     {
-                        GenerateImage().Forget();
+                        var aCMD = new SDU_CMDGenerateImage();
+                        var aCMDs = new List<SDU_CMD>() { aCMD };
+                        SDU_CMDService.TriggerCMDs(this, aCMDs, new CancellationTokenSource()).Forget();
+                        //GenerateImage().Forget();
                     }
-                }
-                if (!m_CMDs.IsNullOrEmpty() && !s_TriggeringCMD)
-                {
-                    if (GUILayout.Button("Trigger CMDs", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
+                    if (!m_CMDs.IsNullOrEmpty())
                     {
-                        UCL.Core.ServiceLib.UCL_UpdateService.AddAction(() =>
+                        if (GUILayout.Button("Trigger CMDs", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
                         {
-                            TriggerCMDs().Forget();
-                        });
+                            UCL.Core.ServiceLib.UCL_UpdateService.AddAction(() =>
+                            {
+                                SDU_CMDService.TriggerCMDs(this, m_CMDs, new CancellationTokenSource()).Forget();
+                                //TriggerCMDs().Forget();
+                            });
+                        }
                     }
                 }
+                
+                SDU_CMDService.OnGUI(iDataDic.GetSubDic("SDU_CMDService"));
             }
 
             if (!string.IsNullOrEmpty(SDU_ImageGenerator.ProgressStr))

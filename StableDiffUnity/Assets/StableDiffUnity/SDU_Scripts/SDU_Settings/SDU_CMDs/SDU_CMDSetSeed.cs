@@ -9,7 +9,7 @@ namespace SDU
     {
         public long m_Seed = -1;
         override public string GetShortName() => $"{base.GetShortName()}({m_Seed})";
-        override public async Task TriggerCMD(Tex2ImgSetting iTex2ImgSetting)
+        override public async Task TriggerCMD(Tex2ImgSetting iTex2ImgSetting, System.Threading.CancellationToken iCancellationToken)
         {
             iTex2ImgSetting.RequireClearDic = true;
             iTex2ImgSetting.m_Seed = m_Seed;

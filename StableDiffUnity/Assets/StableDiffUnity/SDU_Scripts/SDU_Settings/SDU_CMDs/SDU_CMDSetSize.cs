@@ -10,7 +10,7 @@ namespace SDU
         public int m_Width = 512;
         public int m_Height = 512;
         override public string GetShortName() => $"{base.GetShortName()}({m_Width},{m_Height})";
-        override public async Task TriggerCMD(Tex2ImgSetting iTex2ImgSetting)
+        override public async Task TriggerCMD(Tex2ImgSetting iTex2ImgSetting, System.Threading.CancellationToken iCancellationToken)
         {
             Debug.LogWarning($"SDU_CMDSetSize:{m_Width},{m_Height}");
             iTex2ImgSetting.RequireClearDic = true;

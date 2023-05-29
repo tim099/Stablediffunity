@@ -177,9 +177,6 @@ namespace SDU
                             //System.Diagnostics.Process.Start(RunTimeData.Ins.m_WebURL);
                         }
                         UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic.GetSubDic("DownloadFileSetting"), iFieldName, true);
-
-                        
-                        
                     }
 
                 }

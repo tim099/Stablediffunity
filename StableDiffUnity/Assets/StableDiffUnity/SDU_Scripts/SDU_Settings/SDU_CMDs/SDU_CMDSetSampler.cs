@@ -8,7 +8,7 @@ namespace SDU
     {
         public SDU_SamplerSetting m_Sampler = new SDU_SamplerSetting();
         override public string GetShortName() => $"{base.GetShortName()}({m_Sampler.m_SelectedSampler})";
-        override public async Task TriggerCMD(Tex2ImgSetting iTex2ImgSetting)
+        override public async Task TriggerCMD(Tex2ImgSetting iTex2ImgSetting, System.Threading.CancellationToken iCancellationToken)
         {
             iTex2ImgSetting.RequireClearDic = true;
             iTex2ImgSetting.m_Sampler.Set(m_Sampler);

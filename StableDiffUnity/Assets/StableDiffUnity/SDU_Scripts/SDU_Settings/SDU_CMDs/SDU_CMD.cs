@@ -27,13 +27,13 @@ namespace SDU
                 s_Types.Add(typeof(SDU_CMDSetSeed));
 
                 s_Types.Add(typeof(SDU_CMDForeach));
-                
+                s_Types.Add(typeof(SDU_CMDControlNet));
             }
             return s_Types;
         }
         virtual public string GetTypeName(string iName) => iName.Replace("SDU_CMD", string.Empty);
         virtual public string GetShortName() => GetTypeName(GetType().Name);
-        virtual public async Task TriggerCMD(Tex2ImgSetting iTex2ImgSetting)
+        virtual public async Task TriggerCMD(Tex2ImgSetting iTex2ImgSetting, System.Threading.CancellationToken iCancellationToken)
         {
             await Task.Delay(1);
             return;

@@ -16,7 +16,7 @@ using Cysharp.Threading.Tasks;
 namespace SDU
 {
     [System.Serializable]
-    public class ControlNetSettings : UCL.Core.UI.UCLI_FieldOnGUI
+    public class ControlNetSettings : UCL.Core.JsonLib.UnityJsonSerializable, UCL.Core.UI.UCLI_FieldOnGUI
     {
         public bool m_EnableControlNet = false;
         public List<string> GetAllModels() => RunTimeData.Ins.m_WebUISetting.m_ControlNetData.m_ModelList;
@@ -27,8 +27,18 @@ namespace SDU
         public SDU_InputImage m_InputImage = new SDU_InputImage();
 
         private bool m_Show = false;
+        public bool RequireClearDic { get; set; } = false;
+        public override void DeserializeFromJson(JsonData iJson)
+        {
+            base.DeserializeFromJson(iJson);
+            RequireClearDic = true;
+        }
         public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {
+            if (RequireClearDic)
+            {
+                iDataDic.Clear();
+            }
             using (var aScope = new GUILayout.HorizontalScope())
             {
                 m_Show = UCL_GUILayout.Toggle(m_Show);

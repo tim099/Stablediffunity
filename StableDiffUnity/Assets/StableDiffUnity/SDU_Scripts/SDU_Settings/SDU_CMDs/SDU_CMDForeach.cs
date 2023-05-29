@@ -15,23 +15,26 @@ namespace SDU
             if (m_CMDs.IsNullOrEmpty()) return base.GetShortName();
             return $"Foreach({m_Enumerables.ConcatString((iCMD) => iCMD.GetShortName())})".CutToMaxLength(30) + $"[{m_CMDs.Count}]";
         }
-        override public async Task TriggerCMD(Tex2ImgSetting iTex2ImgSetting)
+        override public async Task TriggerCMD(Tex2ImgSetting iTex2ImgSetting, System.Threading.CancellationToken iCancellationToken)
         {
             if (m_CMDs.IsNullOrEmpty()) return;
             var aEnumerables = m_Enumerables.Clone();
             var aCMDs = m_CMDs.Clone();
             foreach (var aEnumerable in aEnumerables)
             {
+                if (iCancellationToken.IsCancellationRequested) break;
                 foreach (SDU_CMD aEnumCMD in aEnumerable)
                 {
+                    if (iCancellationToken.IsCancellationRequested) break;
                     try
                     {
-                        await aEnumCMD.TriggerCMD(iTex2ImgSetting);
+                        await aEnumCMD.TriggerCMD(iTex2ImgSetting, iCancellationToken);
                         foreach (var aCMD in aCMDs)
                         {
+                            if (iCancellationToken.IsCancellationRequested) break;
                             try
                             {
-                                await aCMD.TriggerCMD(iTex2ImgSetting);
+                                await aCMD.TriggerCMD(iTex2ImgSetting, iCancellationToken);
                             }
                             catch (System.Exception e)
                             {
