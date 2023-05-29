@@ -37,6 +37,7 @@ namespace SDU
         {
             if (RequireClearDic)
             {
+                RequireClearDic = false;
                 iDataDic.Clear();
             }
             using (var aScope = new GUILayout.HorizontalScope())
@@ -56,10 +57,10 @@ namespace SDU
 
                             GUILayout.Label("Selected Model", UCL.Core.UI.UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
 
-                            var aNames = RunTimeData.Ins.m_WebUISetting.m_ModelNames;
+                            var aNames = RunTimeData.Ins.m_WebUISetting.m_ControlNetData.m_ModelList;
                             if (!aNames.IsNullOrEmpty())
                             {
-                                m_SelectedModel = UCL_GUILayout.PopupAuto(m_SelectedModel, GetAllModels(), iDataDic, "Selected Model", 8);
+                                m_SelectedModel = UCL_GUILayout.PopupAuto(m_SelectedModel, aNames, iDataDic, "Selected Model", 8);
                             }
 
                             if (GUILayout.Button("Open Folder", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
