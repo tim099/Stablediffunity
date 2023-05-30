@@ -32,6 +32,7 @@ namespace SDU
         [UCL.Core.PA.Conditional("m_OutputFolder", false, OutputFolder.Custom)]
         //[UCL.Core.PA.UCL_FolderExplorer(ExplorerType.None)]
         public string m_CustomOutputFolder = string.Empty;
+        public bool m_OutputControlNetInputImage = false;
 
         public string OutputFolderPath
         {

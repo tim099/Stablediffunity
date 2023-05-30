@@ -12,8 +12,12 @@ namespace SDU
         override public async Task TriggerCMD(Tex2ImgSetting iTex2ImgSetting, System.Threading.CancellationToken iCancellationToken)
         {
             iTex2ImgSetting.m_ControlNetSettings.RequireClearDic = true;
-
-            await Task.Delay(1);
+            var aCMDs = m_ControlNetCMDs.Clone();
+            foreach (var aCMD in aCMDs)
+            {
+                if (iCancellationToken.IsCancellationRequested) break;
+                await aCMD.TriggerCMD(iTex2ImgSetting, iCancellationToken);
+            }
         }
     }
 }

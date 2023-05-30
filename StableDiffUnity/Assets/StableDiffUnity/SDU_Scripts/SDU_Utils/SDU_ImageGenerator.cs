@@ -158,7 +158,7 @@ namespace SDU
 
                         var aFileTasks = new List<Task>();
                         var aImages = aResultJson["images"];
-
+                        bool aRemoveLastImageOutput = iSetting.m_ControlNetSettings.m_EnableControlNet && !aImageOutputSetting.m_OutputControlNetInputImage;
                         Debug.LogWarning($"aImages.Count:{aImages.Count}");
                         for (int i = 0; i < aImages.Count; i++)
                         {
@@ -172,11 +172,18 @@ namespace SDU
                             var aImageBytes = Convert.FromBase64String(aSplitStr[0]);
                             var aTexture = UCL.Core.TextureLib.Lib.CreateTexture(aImageBytes);
 
+                            if (aRemoveLastImageOutput && i == aImages.Count - 1)
+                            {
 
-                            string aFilePath = Path.Combine(aPath, $"{aFileName}_{i}.png"); // M HH:mm:ss
-                            Debug.Log($"aPath:{aPath},aFilePath:{aFilePath}");
+                            }
+                            else
+                            {
+                                string aFilePath = Path.Combine(aPath, $"{aFileName}_{i}.png"); // M HH:mm:ss
+                                Debug.Log($"aPath:{aPath},aFilePath:{aFilePath}");
 
-                            aFileTasks.Add(File.WriteAllBytesAsync(aFilePath, aTexture.EncodeToPNG()));
+                                aFileTasks.Add(File.WriteAllBytesAsync(aFilePath, aTexture.EncodeToPNG()));
+                            }
+
                             m_Textures.Add(aTexture);
                         }
 
