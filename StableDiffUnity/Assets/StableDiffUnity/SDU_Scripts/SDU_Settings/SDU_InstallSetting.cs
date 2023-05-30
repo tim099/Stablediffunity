@@ -29,7 +29,15 @@ namespace SDU
     public class InstallSetting : UCL.Core.UI.UCLI_FieldOnGUI
     {
         public static string DefaultInstallRoot => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments), "StableDiffUnity_V1");
-        
+        public static List<string> EnvRequiredFiles = new List<string>() { RunBatName, RunPythonName, "environment.bat",
+            "webui-user.bat"};
+        public static List<string> PythonRequiredFiles = new List<string>() { PythonExeName };
+        public static List<string> WebUIRequiredFiles = new List<string>() { "webui.bat", "webui.py", "launch.py",
+            "webui.sh"};
+        public const string PythonExeName = "python.exe";
+        public const string RunBatName = "run.bat";
+        public const string RunPythonName = "run.py";
+
         public string EnvInstallRoot = Path.Combine(DefaultInstallRoot, "Env");
         public string WebUIInstallRoot = Path.Combine(DefaultInstallRoot, "WebUI");
         public string PythonInstallRoot = Path.Combine(DefaultInstallRoot, "Python");
@@ -45,7 +53,7 @@ namespace SDU
         public string EnvZipPath => Path.Combine(InstallStableDiffusionRoot, m_EnvZipFileName);
         public string WebUIZipPath => Path.Combine(InstallStableDiffusionRoot, m_WebUIZipFileName);
         public string PythonZipPath => Path.Combine(InstallStableDiffusionRoot, m_PythonZipFileName);
-        public string RunPythonPath => Path.Combine(EnvInstallRoot, "run.py");
+        public string RunPythonPath => Path.Combine(EnvInstallRoot, RunPythonName);
 
         public string OutputPath => Path.Combine(EnvInstallRoot, "Output");
         #region DownloadSettings
@@ -67,12 +75,12 @@ namespace SDU
         /// <summary>
         /// inside Env folder
         /// </summary>
-        public string RunBatPath => Path.Combine(EnvInstallRoot, "run.bat");
+        public string RunBatPath => Path.Combine(EnvInstallRoot, RunBatName);
         /// <summary>
         /// PythonExePath inside Env folder
         /// </summary>
-        public string PythonExePath => Path.Combine(PythonInstallRoot, @"python.exe");
-
+        public string PythonExePath => Path.Combine(PythonInstallRoot, PythonExeName);
+        
         public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {
             using(var aScope = new GUILayout.VerticalScope())//"box"

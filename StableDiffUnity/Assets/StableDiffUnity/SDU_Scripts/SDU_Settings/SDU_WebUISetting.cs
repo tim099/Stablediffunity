@@ -59,6 +59,15 @@ namespace SDU
             }
             return this;
         }
+        public async UniTask RefreshModels()
+        {
+            List<UniTask> aTasks = new List<UniTask>();
+            aTasks.Add(RefreshCheckpoints());
+            aTasks.Add(RefreshSamplers());
+            aTasks.Add(RefreshLora());
+            aTasks.Add(RefreshControlNetModels());
+            await UniTask.WhenAll(aTasks);
+        }
         public async UniTask RefreshSamplers()
         {
             try

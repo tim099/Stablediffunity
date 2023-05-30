@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
@@ -10,12 +11,17 @@ namespace SDU
     [UCL.Core.ATTR.EnableUCLEditor]
     public class URP_Camera : MonoBehaviour
     {
+        public enum CaptureMode
+        {
+            Depth,
+            Normal,
+        }
+
         public static URP_Camera CurCamera => s_Cameras.IsNullOrEmpty() ? null : s_Cameras[0];
         public static List<URP_Camera> s_Cameras = new List<URP_Camera>();
         //public static List<RenderTexture> s_RenderTextures = new List<RenderTexture>();
         public RenderTexture m_RT;
-        public RenderTexture m_RT2;
-        public Texture2D m_Texture;
+
         public Camera m_Camera;
         public Volume m_Volume;
         public Material m_DepthMaterial;
@@ -37,54 +43,34 @@ namespace SDU
             if(s_Cameras.Contains(this)) return;
             s_Cameras.Add(this);
         }
-        public BlitToCamera CreateDepthBlitRequest(int iWidth, int iHeight, Material iMat)
+        public Texture2D CaptureImage(int iWidth, int iHeight, ref Texture2D iTexture, CaptureMode iCaptureMode)
         {
-            m_RT = RenderTexture.GetTemporary(iWidth, iHeight, 24, UnityEngine.Experimental.Rendering.GraphicsFormat.R32G32B32A32_SFloat);
-            m_RT.antiAliasing = 8;
-            var aBlitRequest = new BlitToCamera()
+            switch(iCaptureMode)
             {
-                RemoveAfterBlit = true,
-                Camera = m_Camera,
-                RenderAction = (BlitData iBlitData) =>
-                {
-                    var aCmd = iBlitData.Cmd;
-                    var aCameraData = iBlitData.RenderingData.cameraData;
-                    int width = aCameraData.cameraTargetDescriptor.width;
-                    int height = aCameraData.cameraTargetDescriptor.height;
-
-                    int aDesID = iBlitData.GetTemporaryRT(width, height, 0, FilterMode.Point, RenderTextureFormat.Default).id;//s_KeepFrameBuffer;
-
-                    iMat.SetFloat("_Weight", 1f);//depth.weight.value
-                    iMat.SetMatrix("_ViewToWorld", aCameraData.camera.cameraToWorldMatrix);
-
-                    aCmd.SetGlobalTexture("_MainTex", aDesID);
-                    aCmd.Blit(iBlitData.Renderer.cameraColorTarget, m_RT, iMat, 0);
-                },
-                RenderPassEvent = UnityEngine.Rendering.Universal.RenderPassEvent.BeforeRenderingPostProcessing,
-            };
-            URP_BlitRendererFeature.AddBlitRequest(aBlitRequest);
-            return aBlitRequest;
+                case CaptureMode.Depth:
+                    {
+                        return CaptureImage(iWidth, iHeight, m_DepthMaterial, ref iTexture);
+                    }
+                    case CaptureMode.Normal:
+                    {
+                        return CaptureImage(iWidth, iHeight, m_NormalMaterial, ref iTexture);
+                    }
+            }
+            return CaptureImage(iWidth, iHeight, m_DepthMaterial, ref iTexture);
         }
-        public Texture2D CreateDepthImage(int iWidth, int iHeight)
+        public Texture2D CaptureImage(int iWidth, int iHeight, Material iMat, ref Texture2D iTexture)
         {
-            return CreateImage(iWidth, iHeight, m_DepthMaterial);
-        }
-        public Texture2D CreateNormalImage(int iWidth, int iHeight)
-        {
-            return CreateImage(iWidth, iHeight, m_NormalMaterial);
-        }
-        public Texture2D CreateImage(int iWidth, int iHeight, Material iMat)
-        {
+            //Debug.LogWarning($"CaptureImage iWidth:{iWidth},iHeight:{iHeight}.iMat:{iMat.name}");
             //var texture = new Texture2D(iWidth, iHeight, TextureFormat.RGB24, false);
             if (m_RT != null)
             {
                 RenderTexture.ReleaseTemporary(m_RT);
             }
-
+            RenderTexture aRenderTarget = null;
             try
             {
-                m_RT = RenderTexture.GetTemporary(iWidth, iHeight, 24, UnityEngine.Experimental.Rendering.GraphicsFormat.R32G32B32A32_SFloat);
-                m_RT2 = RenderTexture.GetTemporary(iWidth, iHeight, 24, UnityEngine.Experimental.Rendering.GraphicsFormat.R32G32B32A32_SFloat);
+                m_RT = RenderTexture.GetTemporary(iWidth, iHeight, 24, GraphicsFormat.R32G32B32A32_SFloat);
+                aRenderTarget = RenderTexture.GetTemporary(iWidth, iHeight, 24, GraphicsFormat.R32G32B32A32_SFloat);
                 //m_RT.antiAliasing = 8;
                 var aBlitRequest = new BlitToCamera()
                 {
@@ -109,77 +95,39 @@ namespace SDU
                 };
                 URP_BlitRendererFeature.AddBlitRequest(aBlitRequest);
 
-                if (m_Texture != null)
+                var aFormat = TextureFormat.RGB24;
+                if (iTexture != null)
                 {
-                    if(m_Texture.width != iWidth || m_Texture.height != iHeight)
+                    if(iTexture.width != iWidth || iTexture.height != iHeight
+                        || iTexture.format != aFormat)
                     {
-                        Debug.LogWarning($"Refresh m_Texture m_Texture size:({m_Texture.width},{m_Texture.height}), to: ({iWidth},{iHeight})");
-                        GameObject.DestroyImmediate(m_Texture);
-                        m_Texture = null;
+                        Debug.LogWarning($"Refresh m_Texture m_Texture size:" +
+                            $"({iTexture.width},{iTexture.height}) Format:{iTexture.format}" +
+                            $", to: ({iWidth},{iHeight}) Format:{aFormat}");
+                        GameObject.DestroyImmediate(iTexture);
+                        iTexture = null;
                     }
                 }
-                if(m_Texture == null)
+                if(iTexture == null)
                 {
-                    m_Texture = new Texture2D(iWidth, iHeight, TextureFormat.RGB24, false);
+                    iTexture = new Texture2D(iWidth, iHeight, aFormat, false);
                 }
                 
-                m_Camera.targetTexture = m_RT2;
+                m_Camera.targetTexture = aRenderTarget;
                 m_Camera.Render();
                 RenderTexture.active = m_RT;
-                m_Texture.ReadPixels(new Rect(0, 0, iWidth, iHeight), 0, 0);
-                m_Texture.Apply();
+                iTexture.ReadPixels(new Rect(0, 0, iWidth, iHeight), 0, 0);
+                iTexture.Apply();
             }
             finally
             {
                 m_Camera.targetTexture = null;
-                RenderTexture.ReleaseTemporary(m_RT);
-                RenderTexture.ReleaseTemporary(m_RT2);
+                //RenderTexture.ReleaseTemporary(m_RT);
+                if(aRenderTarget != null) RenderTexture.ReleaseTemporary(aRenderTarget);
                 RenderTexture.active = null;
             }
-            //var pipeline = ((UniversalRenderPipelineAsset)GraphicsSettings.renderPipelineAsset);
 
-            //FieldInfo propertyInfo = pipeline.GetType().GetField("m_RendererDataList", BindingFlags.Instance | BindingFlags.NonPublic);
-            //var scriptableRendererData = ((ScriptableRendererData[])propertyInfo?.GetValue(pipeline))?[0];
-            //var rendererFeature = ScriptableRendererFeature.CreateInstance<MainRendererFeature>();
-            //scriptableRendererData.rendererFeatures.Add(rendererFeature);
-            //scriptableRendererData.SetDirty();
-
-            //var volume = m_Volume;
-            //URP_DepthVolume depth = null;
-            //volume.profile.TryGet<URP_DepthVolume>(out depth);
-
-            //if (depth is null)
-            //{
-            //    depth = volume.profile.Add<URP_DepthVolume>();
-            //}
-
-            //depth.active = true;
-            //depth.weight.overrideState = true;
-            //depth.weight.value = 1f;
-            //var size = new Vector2Int(iWidth, iHeight);
-            //var render = new RenderTexture(size.x, size.y, 24, UnityEngine.Experimental.Rendering.GraphicsFormat.R32G32B32A32_SFloat);
-            //render.antiAliasing = 8;
-            //var texture = new Texture2D(size.x, size.y, TextureFormat.RGB24, false);
-            //if (m_Camera == null) m_Camera = Camera.main;
-
-            //try
-            //{
-            //    m_Camera.targetTexture = render;
-            //    m_Camera.Render();
-            //    RenderTexture.active = render;
-            //    texture.ReadPixels(new Rect(0, 0, size.x, size.y), 0, 0);
-            //    texture.Apply();
-            //}
-            //finally
-            //{
-            //    m_Camera.targetTexture = null;
-            //    RenderTexture.active = null;
-            //}
-
-            //volume.profile.Remove<URP_DepthVolume>();
-            //scriptableRendererData.rendererFeatures.Remove(rendererFeature);
-
-            return m_Texture;
+            return iTexture;
         }
     }
 }

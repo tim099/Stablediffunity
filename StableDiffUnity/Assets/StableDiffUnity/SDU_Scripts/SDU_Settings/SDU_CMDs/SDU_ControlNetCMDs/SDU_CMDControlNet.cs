@@ -7,7 +7,7 @@ namespace SDU
 {
     public class SDU_CMDControlNet : SDU_CMD
     {
-
+        public List<SDU_ControlNetCMD> m_ControlNetCMDs = new List<SDU_ControlNetCMD>();
         override public string GetShortName() => $"{base.GetShortName()}";
         override public async Task TriggerCMD(Tex2ImgSetting iTex2ImgSetting, System.Threading.CancellationToken iCancellationToken)
         {

@@ -18,8 +18,7 @@ namespace SDU
                     return iInstallRoot;
                 }
 
-                System.IO.Compression.ZipFile.ExtractToDirectory(iZipAbsolutePath, iInstallRoot, false);
-
+                System.IO.Compression.ZipFile.ExtractToDirectory(iZipAbsolutePath, iInstallRoot, true);
                 Debug.Log($"{iInstallTarget} installation finished");
             }
             catch (System.Exception ex)
@@ -28,15 +27,36 @@ namespace SDU
             }
             return iInstallRoot;
         }
-        public static string CheckInstall(string iInstallRoot, string iZipAbsolutePath, string iInstallTarget)
+        public static string CheckInstall(string iInstallRoot, string iZipAbsolutePath, string iInstallTarget
+            ,List<string> iRequiredFiles = null)
         {
+            bool aRequireInstall = true;
             if (Directory.Exists(iInstallRoot))//Install done
             {
-                Debug.LogWarning($"CheckInstall Directory.Exists(iInstallRoot) iInstallRoot:{iInstallRoot}" +
-                    $"\n,iInstallTarget:{iZipAbsolutePath}");
-                return iInstallRoot;
+                Debug.LogWarning($"CheckInstall Directory.Exists iInstallRoot:{iInstallRoot}" +
+                    $"\n,iInstallTarget:{iInstallTarget}");
+                aRequireInstall = false;
+                if (!iRequiredFiles.IsNullOrEmpty())
+                {
+                    foreach(var aFile in iRequiredFiles)
+                    {
+                        string aPath = Path.Combine(iInstallRoot, aFile);
+                        Debug.LogWarning($"CheckInstall aPath:{aPath}");
+                        if (!File.Exists(aPath))
+                        {
+                            aRequireInstall = true;
+                            Debug.LogWarning($"CheckInstall iInstallTarget:{iInstallTarget},!File.Exists:{aPath}");
+                            break;
+                        }
+                    }
+                }
+                //return iInstallRoot;
             }
-            Install(iInstallRoot, iZipAbsolutePath, iInstallTarget);
+            if (aRequireInstall)
+            {
+                Install(iInstallRoot, iZipAbsolutePath, iInstallTarget);
+            }
+            
             return iInstallRoot;
         }
         public static string GetEnvInstallSourcePath(string iInstallRoot)

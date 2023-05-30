@@ -51,8 +51,7 @@ namespace SDU
             [UCL.Core.ATTR.UCL_HideOnGUI]
             public bool m_ShowImageDetail = false;
             public bool m_SaveImageAfterCapture = true;
-            public Texture2D Texture { get; set; }
-            public Texture2D LoadFromFileTexture { get; set; }
+            [HideInInspector] public Texture2D Texture;
 
             public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
             {
@@ -73,16 +72,27 @@ namespace SDU
                 return this;
             }
         }
+        public enum AutoCaptureMode
+        {
+            Off,
+            AutoCaptureDepth,
+            AutoCaptureNormal,
+        }
+
+        [UCL.Core.ATTR.UCL_HideOnGUI]
         public LoadImageSetting m_LoadImageSetting = new LoadImageSetting();
+
+        [UCL.Core.ATTR.UCL_HideOnGUI]
         public ImageSetting m_ImageSetting = new ImageSetting();
+
+        public AutoCaptureMode m_AutoCaptureMode = AutoCaptureMode.Off;
 
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public bool m_ShowImageDetail = false;
-        //[UCL.Core.ATTR.UCL_HideOnGUI]
 
+        private bool m_StartCapture = false;//m_AutoCaptureMode
         public Texture2D Texture { get => m_ImageSetting.Texture; set => m_ImageSetting.Texture = value; }
-        private Texture2D LoadFromFileTexture
-        { get => m_ImageSetting.LoadFromFileTexture; set => m_ImageSetting.LoadFromFileTexture = value; }
+
         public string GetShortName()
         {
             return $"{m_LoadImageSetting.m_FileName}";//InputImage File:
@@ -126,33 +136,11 @@ namespace SDU
                             {
                                 if (GUILayout.Button("Capture Depth", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
                                 {
-                                    UCL.Core.ServiceLib.UCL_UpdateService.AddAction(() =>
-                                    {
-                                        if (aCam != null)
-                                        {
-                                            var aSetting = RunTimeData.Ins.m_Tex2ImgSettings;
-                                            Texture = aCam.CreateDepthImage(aSetting.m_Width, aSetting.m_Height);
-                                        }
-                                        if (m_ImageSetting.m_SaveImageAfterCapture)
-                                        {
-                                            SaveImage();
-                                        }
-                                    });
+                                    CaptureImage(URP_Camera.CaptureMode.Depth, m_ImageSetting.m_SaveImageAfterCapture);
                                 }
                                 if (GUILayout.Button("Capture Normal", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
                                 {
-                                    UCL.Core.ServiceLib.UCL_UpdateService.AddAction(() =>
-                                    {
-                                        if (aCam != null)
-                                        {
-                                            var aSetting = RunTimeData.Ins.m_Tex2ImgSettings;
-                                            Texture = aCam.CreateNormalImage(aSetting.m_Width, aSetting.m_Height);
-                                        }
-                                        if (m_ImageSetting.m_SaveImageAfterCapture)
-                                        {
-                                            SaveImage();
-                                        }
-                                    });
+                                    CaptureImage(URP_Camera.CaptureMode.Normal, m_ImageSetting.m_SaveImageAfterCapture);
                                 }
                             }
                         }
@@ -161,6 +149,9 @@ namespace SDU
                         {
                             try
                             {
+                                UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic.GetSubDic("InputImage"), "InputImage", true);
+
+
                                 GUILayout.BeginHorizontal();
                                 if (File.Exists(m_LoadImageSetting.FilePath))
                                 {
@@ -174,6 +165,7 @@ namespace SDU
                                 GUILayout.EndHorizontal();
 
                                 UCL.Core.UI.UCL_GUILayout.DrawObjectData(m_ImageSetting, iDataDic.GetSubDic("ImageSetting"), "ImageSetting", false);
+                                
                             }
                             catch (System.Exception e)
                             {
@@ -186,10 +178,62 @@ namespace SDU
                 }
 
             }
-
+            if(m_AutoCaptureMode != AutoCaptureMode.Off && !m_StartCapture)
+            {
+                switch (m_AutoCaptureMode)
+                {
+                    case AutoCaptureMode.AutoCaptureDepth:
+                        {
+                            CaptureImage(URP_Camera.CaptureMode.Depth, false);
+                            break;
+                        }
+                    case AutoCaptureMode.AutoCaptureNormal:
+                        {
+                            CaptureImage(URP_Camera.CaptureMode.Normal, false);
+                            break;
+                        }
+                }
+            }
 
 
             return this;
+        }
+        public void CaptureImage(URP_Camera.CaptureMode iCaptureMod, bool iSaveAfterCapture)
+        {
+            //Debug.LogWarning($"CaptureImage iCaptureMod:{iCaptureMod}");
+            if (m_StartCapture)
+            {
+                return;
+            }
+            m_StartCapture = true;
+            UCL.Core.ServiceLib.UCL_UpdateService.AddAction(() =>
+            {
+                try
+                {
+                    var aCam = URP_Camera.CurCamera;
+                    if (aCam != null)
+                    {
+                        var aSetting = RunTimeData.Ins.m_Tex2ImgSettings;
+                        aCam.CaptureImage(aSetting.m_Width, aSetting.m_Height, ref m_ImageSetting.Texture, iCaptureMod);
+                        if (iSaveAfterCapture)
+                        {
+                            SaveImage();
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogWarning("UCL_UpdateService, CaptureImage aCam == null");
+                    }
+                }
+                catch(System.Exception e)
+                {
+                    Debug.LogException(e);
+                }
+                finally
+                {
+                    m_StartCapture = false;
+                }
+            });
         }
         public void SaveImage()
         {
@@ -228,11 +272,11 @@ namespace SDU
                 var aTexture = UCL.Core.TextureLib.Lib.CreateTexture(aBytes);
                 if (aTexture != null)
                 {
-                    if (LoadFromFileTexture != null)
+                    if (Texture != null)
                     {
-                        GameObject.DestroyImmediate(LoadFromFileTexture);
+                        GameObject.DestroyImmediate(Texture);
                     }
-                    Texture = LoadFromFileTexture = aTexture;
+                    Texture = aTexture;
                 }
             }
             catch (Exception ex)
