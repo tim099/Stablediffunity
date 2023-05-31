@@ -13,27 +13,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 namespace SDU
 {
-    public interface IWebUIStatus
-    {
-        public interface IArgs
-        {
-            bool ServerStarted { get; }
-            string ServerAppId { get; }
-            bool ServerReady { get; }
-        }
-
-        public bool ServerStarted { get; }
-        public string ServerAppId { get; }
-        public bool ServerReady { get; }
-
-        public event EventHandler<IArgs> Changed;
-    }
-    public class SDU_Args : EventArgs, IWebUIStatus.IArgs
-    {
-        public bool ServerStarted { get; set; } = false;
-        public string ServerAppId { get; set; } = string.Empty;
-        public bool ServerReady { get; set; } = false;
-    }
     public class SDU_WebUIStatus
     {
         public static SDU_WebUIStatus Ins
@@ -67,56 +46,27 @@ namespace SDU
         /// Get.AppId
         /// </summary>
         bool m_CheckEnabled = false;
-        private SDU_Args m_Args = new();
-        public event EventHandler<IWebUIStatus.IArgs> Changed;
-
-
-        public bool ServerStarted => m_Args.ServerStarted;
-        public string ServerAppId => m_Args.ServerAppId;
-
-        private void InvokeWebUIStatusChanged()
-        {
-            Debug.LogWarning($"InvokeWebUIStatusChanged ServerStarted:{m_Args.ServerStarted},ServerAppId:{m_Args.ServerAppId}" +
-                $",ServerReady:{m_Args.ServerReady}");
-            if (Changed != null) 
-            {
-                Changed.Invoke(this, m_Args); 
-            }
-        }
-
-        public void SetServerStarted(bool started)
-        {
-            m_Args.ServerStarted = started;
-            InvokeWebUIStatusChanged();
-        }
-
-
-        public void SetServerArgs(bool started, string id, bool ready)
-        {
-            m_Args.ServerStarted = started;
-            m_Args.ServerAppId = id;
-            m_Args.ServerReady = ready;
-            InvokeWebUIStatusChanged();
-        }
+        string m_ServerAppId;
+        public string ServerAppId => m_ServerAppId;
 
         public async ValueTask<bool> ValidateConnection()
         {
             try
             {
-                var aGetAppID = new SDU_WebUIClient.Get.AppId();
-                var aResult = await aGetAppID.SendRequestAsync();
-
-                if (Regex.IsMatch(aResult.app_id, "^[0-9]+$"))
+                using(var aClient = RunTimeData.SD_API.Client_AppID)
                 {
-                    SetServerArgs(ServerStarted, aResult.app_id, true);
-                    UnityEngine.Debug.LogWarning($"Server AppId : {ServerAppId}");
+                    var aResult = await aClient.SendWebRequestAsync();
+                    if (aResult.Contains("app_id"))
+                    {
+                        m_ServerAppId = aResult["app_id"].GetString();
+                    }
+                    else
+                    {
+                        m_ServerAppId = string.Empty;
+                    }
+                    //Debug.LogWarning($"ValidateConnection Result:{aResult}");
                 }
-                else
-                {
-                    SetServerArgs(ServerStarted, string.Empty, true);
-                }
-
-                UnityEngine.Debug.LogWarning($"Check done.");
+                UnityEngine.Debug.LogWarning($"Check done. ServerAppId:{m_ServerAppId}");
                 return true;
             }
             catch (Exception e)
@@ -159,11 +109,9 @@ namespace SDU
                     {
                         //Debug.LogError($"s_ServerReady:{ServerReady}");
                         Close();
+                        break;
                     }
-                    else
-                    {
-                        await Task.Delay(3000);
-                    }
+                    await Task.Delay(1000);
                 }
             }
             catch(System.Exception e)
@@ -177,18 +125,11 @@ namespace SDU
             }
         }
 
-        private UdpClient _client;
 
         public void Close()
         {
             //Debug.LogError("SDU_WebUIStatus Close()");
             m_CheckEnabled = false;
-
-            if (_client != null)
-            {
-                _client.Close();
-                _client = null;
-            }
         }
 
     }

@@ -33,7 +33,10 @@ namespace SDU
         //[UCL.Core.PA.UCL_FolderExplorer(ExplorerType.None)]
         public string m_CustomOutputFolder = string.Empty;
         public bool m_OutputControlNetInputImage = false;
+        public bool m_OutputGenerateImageSetting = false;
 
+        [UCL.Core.ATTR.UCL_HideOnGUI] 
+        public int m_OutPutFileID = 0;
         public string OutputFolderPath
         {
             get
@@ -67,7 +70,19 @@ namespace SDU
         {
             var aDic = iDataDic.GetSubDic("ImageOutputSetting");
             UCL_GUILayout.DrawField(this, aDic, iFieldName, false);
-            //bool aIsShowField = aDic.GetData(UCL_GUILayout.IsShowFieldKey, false);
+            bool aIsShowField = aDic.GetData(UCL_GUILayout.IsShowFieldKey, false);
+            if (aIsShowField)
+            {
+                using (var aScope = new GUILayout.HorizontalScope("box"))
+                {
+                    GUILayout.Label($"Out Image ID: {m_OutPutFileID}", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
+                    if (GUILayout.Button("Reset ID", UCL_GUIStyle.ButtonStyle))
+                    {
+                        m_OutPutFileID = 0;
+                    }
+                }
+            }
+
             return this;
         }
     }

@@ -4,24 +4,23 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using UCL.Core.UI;
 using UnityEngine;
 namespace SDU
 {
     public static class SDU_Server
     {
+        public static bool s_CheckingServerStarted = false;
+        public static System.DateTime m_PrevCheckServerTime = DateTime.MinValue;
+        /// <summary>
+        /// AutoCheck every 30 Seconds
+        /// </summary>
+        public const float AutoCheckServerInterval = 30.0f;
         public static int StartServer()
         {
             int aProcessID = -1;
             var aInstallSetting = RunTimeData.InstallSetting;
-            var aPythonRoot = SDU_FileInstall.CheckInstall(aInstallSetting.PythonInstallRoot,
-                aInstallSetting.PythonZipPath, "Python", InstallSetting.PythonRequiredFiles);
-
-            var aEnvInstallRoot = SDU_FileInstall.CheckInstall(aInstallSetting.EnvInstallRoot,
-                aInstallSetting.EnvZipPath, "Env", InstallSetting.EnvRequiredFiles);
-
-            var aWebUIRoot = SDU_FileInstall.CheckInstall(aInstallSetting.WebUIInstallRoot,
-                aInstallSetting.WebUIZipPath, "WebUI", InstallSetting.WebUIRequiredFiles);
-
+            SDU_FileInstall.CheckAndInstall(aInstallSetting);
 
             var aPythonExePath = aInstallSetting.PythonExePath;//System.IO.Path.Combine(aEnvInstallRoot, Data.PythonExePath);
             UnityEngine.Debug.LogWarning($"PythonExePath:{aPythonExePath}");
@@ -37,8 +36,8 @@ namespace SDU
                 return aProcessID;
             }
 
-            File.WriteAllText(aInstallSetting.PythonInstallPathFilePath, aPythonRoot);
-            File.WriteAllText(aInstallSetting.WebUIInstallPathFilePath, aWebUIRoot);
+            File.WriteAllText(aInstallSetting.PythonInstallPathFilePath, aInstallSetting.PythonInstallRoot);
+            File.WriteAllText(aInstallSetting.WebUIInstallPathFilePath, aInstallSetting.WebUIInstallRoot);
             File.WriteAllText(aInstallSetting.CommandlindArgsFilePath, aInstallSetting.CommandlindArgs);
 
             SDU_ProcessList.PreCheckProcessEvent();//check current exist process
@@ -79,7 +78,6 @@ namespace SDU
             aProcessID = aProcess.Id;
             UnityEngine.Debug.LogWarning($"Start server, ProcessID:{aProcessID}");
 
-            SDU_WebUIStatus.Ins.SetServerStarted(true);
             SDU_WebUIStatus.Ins.ValidateConnectionContinuously((iServerReady) =>
             {
                 try
@@ -110,11 +108,30 @@ namespace SDU
         private static void OnOutputDataReceived(string iOutPut)
         {
             UnityEngine.Debug.LogWarning($"DataReceived_:{iOutPut}");
+        }
+        public static void OnGUI(UCL.Core.UCL_ObjectDictionary iDic)
+        {
+            if (!s_CheckingServerStarted)
+            {
+                if((System.DateTime.Now - m_PrevCheckServerTime).TotalSeconds > AutoCheckServerInterval)
+                {
+                    CheckServerStarted();
+                }
+                if (GUILayout.Button("Check Sevrver Started", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                {
+                    CheckServerStarted();
+                }
+            }
 
         }
-
         public static void CheckServerStarted()
         {
+            if (s_CheckingServerStarted)
+            {
+                return;
+            }
+            m_PrevCheckServerTime = System.DateTime.Now;
+            s_CheckingServerStarted = true;
             SDU_WebUIStatus.Ins.CheckServerReady((iServerReady) => {
                 try
                 {
@@ -132,6 +149,10 @@ namespace SDU
                 catch (Exception ex)
                 {
                     Debug.LogException(ex);
+                }
+                finally
+                {
+                    s_CheckingServerStarted = false;
                 }
             }).Forget();
         }

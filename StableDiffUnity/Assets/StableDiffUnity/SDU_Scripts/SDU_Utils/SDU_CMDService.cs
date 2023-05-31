@@ -22,7 +22,7 @@ namespace SDU
             s_CancellationTokenSource = iCancellationTokenSource;
             s_TriggeringCMD = true;
             s_TriggerCMDAt = 0;
-            s_CMDs = iCMDs.Clone();
+            s_CMDs = iCMDs;//.Clone();
             CancellationToken aCancellationToken = s_CancellationTokenSource.Token;
             for (int i = 0; i < s_CMDs.Count; i++)
             {

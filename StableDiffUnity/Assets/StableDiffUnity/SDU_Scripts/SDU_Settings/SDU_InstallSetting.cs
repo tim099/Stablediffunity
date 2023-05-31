@@ -38,21 +38,23 @@ namespace SDU
         public const string RunBatName = "run.bat";
         public const string RunPythonName = "run.py";
 
+        public const string EnvZipFileName = "Env_V1.0.zip";
+        public const string WebUIZipFileName = "WebUI1.2.1.zip";
+        public const string PythonZipFileName = "Python_310.zip";
+
         public string EnvInstallRoot = Path.Combine(DefaultInstallRoot, "Env");
         public string WebUIInstallRoot = Path.Combine(DefaultInstallRoot, "WebUI");
         public string PythonInstallRoot = Path.Combine(DefaultInstallRoot, "Python");
         public string CommandlindArgs = "--api --xformers";
 
-        public string m_EnvZipFileName = "Env_V1.0.zip";
-        public string m_WebUIZipFileName = "WebUI1.2.1.zip";
-        public string m_PythonZipFileName = "Python_310.zip";
+
 
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public bool m_ShowOpenFolderToggle = false;
         public string InstallStableDiffusionRoot => Path.Combine(Application.streamingAssetsPath, "InstallStableDiffUnity");
-        public string EnvZipPath => Path.Combine(InstallStableDiffusionRoot, m_EnvZipFileName);
-        public string WebUIZipPath => Path.Combine(InstallStableDiffusionRoot, m_WebUIZipFileName);
-        public string PythonZipPath => Path.Combine(InstallStableDiffusionRoot, m_PythonZipFileName);
+        public string EnvZipPath => Path.Combine(InstallStableDiffusionRoot, EnvZipFileName);
+        public string WebUIZipPath => Path.Combine(InstallStableDiffusionRoot, WebUIZipFileName);
+        public string PythonZipPath => Path.Combine(InstallStableDiffusionRoot, PythonZipFileName);
         public string RunPythonPath => Path.Combine(EnvInstallRoot, RunPythonName);
 
         public string OutputPath => Path.Combine(EnvInstallRoot, "Output");
@@ -132,7 +134,8 @@ namespace SDU
                 case FolderEnum.CheckPoints: return StableDiffusionModelsPath;
                 case FolderEnum.Lora: return StableDiffusionLoraPath;
                 case FolderEnum.Tex2ImgPreset: return Path.Combine(EnvInstallRoot, "Preset", "Tex2Img");
-                case FolderEnum.ControlNetModel: return Path.Combine(WebUIInstallRoot, "extensions", "sd-webui-controlnet", "models");
+                //case FolderEnum.ControlNetModel: return Path.Combine(WebUIInstallRoot, "extensions", "sd-webui-controlnet", "models");
+                case FolderEnum.ControlNetModel: return Path.Combine(WebUIInstallRoot, "models", "ControlNet");
             }
             return string.Empty;
         }

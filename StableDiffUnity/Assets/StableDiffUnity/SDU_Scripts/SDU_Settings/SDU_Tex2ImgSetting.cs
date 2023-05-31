@@ -215,16 +215,19 @@ namespace SDU
                         var aCMD = new SDU_CMDGenerateImage();
                         var aCMDs = new List<SDU_CMD>() { aCMD };
                         SDU_CMDService.TriggerCMDs(this, aCMDs, new CancellationTokenSource()).Forget();
-                        //GenerateImage().Forget();
                     }
                     if (!m_CMDs.IsNullOrEmpty())
                     {
                         if (GUILayout.Button("Trigger CMDs", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
                         {
+                            var aCMDs = new List<SDU_CMD>();
+                            foreach(var aCMD in m_CMDs)
+                            {
+                                aCMDs.Append(aCMD.GetCMDList());
+                            }
                             UCL.Core.ServiceLib.UCL_UpdateService.AddAction(() =>
                             {
-                                SDU_CMDService.TriggerCMDs(this, m_CMDs, new CancellationTokenSource()).Forget();
-                                //TriggerCMDs().Forget();
+                                SDU_CMDService.TriggerCMDs(this, aCMDs, new CancellationTokenSource()).Forget();
                             });
                         }
                     }
@@ -233,13 +236,8 @@ namespace SDU
                 SDU_CMDService.OnGUI(iDataDic.GetSubDic("SDU_CMDService"));
             }
 
-            if (!string.IsNullOrEmpty(SDU_ImageGenerator.ProgressStr))
-            {
-                GUILayout.BeginHorizontal();
-                GUILayout.Label(SDU_ImageGenerator.ProgressStr, UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
-                if (SDU_ImageGenerator.ProgressVal > 0) GUILayout.HorizontalSlider(SDU_ImageGenerator.ProgressVal, 0f, 1f);
-                GUILayout.EndHorizontal();
-            }
+            SDU_ImageGenerator.OnGUI(iDataDic.GetSubDic("SDU_ImageGenerator"));
+
             //m_ControlNetSettings.OnGUI(iDataDic.GetSubDic("ControlNetSettings"));
             return this;
         }

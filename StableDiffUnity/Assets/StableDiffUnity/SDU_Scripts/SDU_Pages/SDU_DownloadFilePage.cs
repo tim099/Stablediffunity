@@ -5,6 +5,8 @@ using Cysharp.Threading.Tasks;
 using UCL.Core.JsonLib;
 using UCL.Core.EditorLib.Page;
 using System.IO;
+using UCL.Core.UI;
+
 namespace SDU
 {
     public class SDU_DownloadFilePage : UCL_EditorPage
@@ -17,6 +19,11 @@ namespace SDU
         UCL.Core.UCL_ObjectDictionary m_Dic = new UCL.Core.UCL_ObjectDictionary();
         string m_LoadSettingName;
         SDU_DownloadFileSetting m_DownloadFileSetting => RunTimeData.Ins.m_HideOnGUIData.m_DownloadFileSetting;
+        public override void Init(UCL_GUIPageController iGUIPageController)
+        {
+            base.Init(iGUIPageController);
+            SDU_FileInstall.CheckAndInstall(RunTimeData.InstallSetting);
+        }
         protected override void ContentOnGUI()
         {
 #if UNITY_EDITOR

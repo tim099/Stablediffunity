@@ -86,7 +86,7 @@ namespace SDU
         public bool m_RedirectStandardOutput = false;
         public bool m_AutoOpenWeb = true;
         public string m_WebURL = "http://127.0.0.1:7860";
-        [UCL.Core.ATTR.UCL_HideOnGUI] public int m_OutPutFileID = 0;
+        //[UCL.Core.ATTR.UCL_HideOnGUI] public int m_OutPutFileID = 0;
 
         public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {

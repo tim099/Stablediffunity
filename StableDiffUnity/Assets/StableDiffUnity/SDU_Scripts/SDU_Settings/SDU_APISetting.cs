@@ -68,7 +68,8 @@ namespace SDU
         public SDU_WebUIClient.SDU_WebRequest Client_Txt2img =>
             new SDU_WebUIClient.SDU_WebRequest(URL_Txt2img, SDU_WebRequest.Method.Post);
 
-
+        public SDU_WebUIClient.SDU_WebRequest Client_AppID =>
+            new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/app_id", SDU_WebRequest.Method.Get);
         public SDU_WebUIClient.SDU_WebRequest Client_Progress =>
             new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/sdapi/v1/progress", SDU_WebRequest.Method.Get);
         public SDU_WebUIClient.SDU_WebRequest Client_Samplers =>

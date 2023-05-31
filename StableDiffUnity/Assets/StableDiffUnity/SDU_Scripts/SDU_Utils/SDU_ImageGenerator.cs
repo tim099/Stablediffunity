@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using UCL.Core;
 using UCL.Core.JsonLib;
+using UCL.Core.UI;
 using UnityEngine;
 
 
@@ -16,18 +18,29 @@ namespace SDU
         public static string ProgressStr = string.Empty;
         public static float ProgressVal = 0;
 
-        static bool m_StartGenerating = false;
-        public readonly static List<Texture2D> m_Textures = new List<Texture2D>();
+        static bool s_StartGenerating = false;
+        public readonly static List<Texture2D> s_Textures = new List<Texture2D>();
+
+        public static void OnGUI(UCL_ObjectDictionary iDataDic)
+        {
+            if (!string.IsNullOrEmpty(ProgressStr))
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.Label(ProgressStr, UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
+                if (ProgressVal > 0) GUILayout.HorizontalSlider(ProgressVal, 0f, 1f);
+                GUILayout.EndHorizontal();
+            }
+        }
         public static void GenerateImage(Tex2ImgSetting iSetting)
         {
-            if (m_StartGenerating || !IsAvaliable)
+            if (s_StartGenerating || !IsAvaliable)
             {
                 return;
             }
-            m_StartGenerating = true;
+            s_StartGenerating = true;
             UCL.Core.ServiceLib.UCL_UpdateService.AddAction(() =>
             {
-                m_StartGenerating = false;
+                s_StartGenerating = false;
                 GenerateImageAsync(iSetting).Forget();
             });
         }
@@ -40,21 +53,25 @@ namespace SDU
             }
             return aPath;
         }
-        public static Tuple<string, string> GetSaveImagePath()
+        public static Tuple<string, string> GetSaveImagePath(SDU_ImageOutputSetting iSetting = null)
         {
             string aPath = DefaultImageOutputFolder();
-            string aFileName = $"{System.DateTime.Now.ToString("HHmmssff")}_{RunTimeData.Ins.m_OutPutFileID.ToString()}";
-            RunTimeData.Ins.m_OutPutFileID = RunTimeData.Ins.m_OutPutFileID + 1;
+            if(iSetting == null)
+            {
+                iSetting = RunTimeData.Ins.m_Tex2ImgSettings.m_ImageOutputSetting;
+            }
+            string aFileID = (++iSetting.m_OutPutFileID).ToString();
+            string aFileName = $"{System.DateTime.Now.ToString("HHmmssff")}_{aFileID}";
             return Tuple.Create(aPath, aFileName);
         }
         public static void ClearTextures()
         {
-            if (m_Textures.IsNullOrEmpty()) return;
-            foreach (var aTexture in m_Textures)
+            if (s_Textures.IsNullOrEmpty()) return;
+            foreach (var aTexture in s_Textures)
             {
                 GameObject.DestroyImmediate(aTexture);
             }
-            m_Textures.Clear();
+            s_Textures.Clear();
         }
         public static async System.Threading.Tasks.ValueTask GenerateImageAsync(Tex2ImgSetting iSetting)
         {
@@ -151,15 +168,22 @@ namespace SDU
                             throw new Exception($"SendWebRequestAsync, !responses.Contains(\"images\"),aResultJson:{aResultJson.ToJsonBeautify()}");
                         }
                         var aImageOutputSetting = iSetting.m_ImageOutputSetting;
-                        var aSavePath = GetSaveImagePath();
+                        var aSavePath = GetSaveImagePath(aImageOutputSetting);
                         string aPath = aImageOutputSetting.OutputFolderPath;//aSavePath.Item1;
                         string aFileName = aSavePath.Item2;
-                        RunTimeData.Ins.m_OutPutFileID = RunTimeData.Ins.m_OutPutFileID + 1;
 
                         var aFileTasks = new List<Task>();
                         var aImages = aResultJson["images"];
                         bool aRemoveLastImageOutput = iSetting.m_ControlNetSettings.m_EnableControlNet && !aImageOutputSetting.m_OutputControlNetInputImage;
                         Debug.LogWarning($"aImages.Count:{aImages.Count}");
+                        if (aImageOutputSetting.m_OutputGenerateImageSetting)
+                        {
+                            var aSettingJson = iSetting.SerializeToJson();
+                            string aFilePath = Path.Combine(aPath, $"{aFileName}.json"); // M HH:mm:ss
+                            Debug.Log($"aPath:{aPath},aFilePath:{aFilePath}");
+
+                            aFileTasks.Add(File.WriteAllTextAsync(aFilePath, aSettingJson.ToJsonBeautify()));
+                        }
                         for (int i = 0; i < aImages.Count; i++)
                         {
                             var aImageStr = aImages[i].GetString();
@@ -184,7 +208,7 @@ namespace SDU
                                 aFileTasks.Add(File.WriteAllBytesAsync(aFilePath, aTexture.EncodeToPNG()));
                             }
 
-                            m_Textures.Add(aTexture);
+                            s_Textures.Add(aTexture);
                         }
 
 

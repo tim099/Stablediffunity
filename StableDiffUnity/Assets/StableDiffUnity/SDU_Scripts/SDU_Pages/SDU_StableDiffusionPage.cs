@@ -49,7 +49,7 @@ namespace SDU
         public override string WindowName => $"StableDiffUnity GUI {SDU_EditorMenuPage.SDU_Version}";
         protected override bool ShowCloseButton => false;
 
-
+        
         UCL.Core.UCL_ObjectDictionary m_Dic = new UCL.Core.UCL_ObjectDictionary();
         int m_ProcessID = -1;
 
@@ -73,30 +73,50 @@ namespace SDU
         }
         protected override void ContentOnGUI()
         {
-            GUILayout.Label($"StableDiffusion Time:{System.DateTime.Now.ToString("HH:mm:ss.ff")}", UCL_GUIStyle.LabelStyle);
+            using(var aScope = new GUILayout.HorizontalScope())
+            {
+                SDU_Server.OnGUI(m_Dic.GetSubDic("SDU_Server"));
+
+                string aServerStateStr = string.Empty;
+                if (SDU_WebUIStatus.ServerReady)
+                {
+                    aServerStateStr = "Server Ready.".RichTextColor(Color.green);
+                }
+                else if (SDU_Server.s_CheckingServerStarted)
+                {
+                    aServerStateStr = "Checking Server Started.".RichTextColor(Color.cyan);
+                }
+                else
+                {
+                    aServerStateStr = "Server Not found!!Please Start Server.".RichTextColor(Color.yellow);
+                }
+                GUILayout.Label($"{aServerStateStr} Time:{System.DateTime.Now.ToString("HH:mm:ss")}", UCL_GUIStyle.LabelStyle);
+            }
+
             if(!SDU_ProcessList.ProcessStarted)
             {
-                if (GUILayout.Button("StartServer", UCL_GUIStyle.ButtonStyle))
+                if (GUILayout.Button("Start Server", UCL_GUIStyle.ButtonStyle))
                 {
                     m_ProcessID = SDU_Server.StartServer();
                 }
             }
             else
             {
-                if (GUILayout.Button("StopServer", UCL_GUIStyle.ButtonStyle))
+                if (GUILayout.Button("Stop Server", UCL_GUIStyle.ButtonStyle))
                 {
                     UnityEngine.Debug.Log($"Stop server. m_ProcessID:{m_ProcessID}");
                     SDU_WebUIStatus.Ins.Close();
                     SDU_ProcessList.KillAllProcess();
+                    SDU_WebUIStatus.ServerReady = false;
                     m_ProcessID = -1;
                 }
-                if (SDU_WebUIStatus.ServerReady)
-                {
-                    if (GUILayout.Button("Refresh Models", UCL_GUIStyle.ButtonStyle))
-                    {
-                        RunTimeData.Ins.m_WebUISetting.RefreshModels().Forget();
-                    }
-                }
+                //if (SDU_WebUIStatus.ServerReady)
+                //{
+                //    if (GUILayout.Button("Refresh Models", UCL_GUIStyle.ButtonStyle))
+                //    {
+                //        RunTimeData.Ins.m_WebUISetting.RefreshModels().Forget();
+                //    }
+                //}
             }
 
             if (GUILayout.Button("Download File"))
@@ -138,7 +158,7 @@ namespace SDU
                     aIdleChanger.CustomOnGUI(i);
                 }
             }
-            var aTextures = SDU_ImageGenerator.m_Textures;
+            var aTextures = SDU_ImageGenerator.s_Textures;
             if (!aTextures.IsNullOrEmpty())
             {
                 var aTexSize = SDU_Util.GetTextureSize(512, aTextures[0]);

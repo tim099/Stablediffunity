@@ -302,41 +302,6 @@ namespace SDU
         {
             public static string Method => UnityWebRequest.kHttpVerbGET;
 
-            public class AppId : WebRequestWrapper
-            {
-                // static
-                public static string Paths => "/app_id";
-                public static string Url => $"{ServerUrl}{Paths}";
-                public static IReadOnlyList<RequestHeader> RequestHeaderList { get; }
-
-                static AppId()
-                {
-                    RequestHeaderList = new List<RequestHeader>() { new RequestHeader(ContentType, ApplicationJson), };
-                }
-
-                // interface
-                public interface IUrl
-                {
-                    public string Url { get; }
-                }
-
-                // internal class
-                [Serializable]
-                public class Responses : IResponses
-                {
-                    public string app_id;
-                }
-
-                // method
-                public AppId() : base(Url, Method, RequestHeaderList) { }
-                public AppId(IUrl url) : base(url.Url, Method, RequestHeaderList) { }
-
-                public ValueTask<Responses> SendRequestAsync()
-                {
-                    return base.SendRequestAsync<Responses>();
-                }
-            }
-
             public static class SdApi
             {
                 public static class V1

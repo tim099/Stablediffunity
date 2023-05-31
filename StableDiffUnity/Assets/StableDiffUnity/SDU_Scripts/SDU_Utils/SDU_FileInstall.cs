@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Rendering;
+
 namespace SDU
 {
     public static class SDU_FileInstall
@@ -26,6 +28,14 @@ namespace SDU
                 Debug.LogException(ex);
             }
             return iInstallRoot;
+        }
+        public static void CheckAndInstall(InstallSetting iInstallSetting)
+        {
+            CheckInstall(iInstallSetting.PythonInstallRoot, iInstallSetting.PythonZipPath, "Python", InstallSetting.PythonRequiredFiles);
+
+            CheckInstall(iInstallSetting.EnvInstallRoot, iInstallSetting.EnvZipPath, "Env", InstallSetting.EnvRequiredFiles);
+
+            CheckInstall(iInstallSetting.WebUIInstallRoot, iInstallSetting.WebUIZipPath, "WebUI", InstallSetting.WebUIRequiredFiles);
         }
         public static string CheckInstall(string iInstallRoot, string iZipAbsolutePath, string iInstallTarget
             ,List<string> iRequiredFiles = null)

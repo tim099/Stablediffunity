@@ -17,7 +17,7 @@ namespace SDU
             {
                 s_Types = new List<System.Type>();
                 s_Types.Add(typeof(SDU_ControlNetCMDSetEnable));
-
+                s_Types.Add(typeof(SDU_ControlNetCMDSetInputImage));
             }
             return s_Types;
         }

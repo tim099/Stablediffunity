@@ -18,6 +18,7 @@ namespace SDU
         }
         private void OnInspectorUpdate()
         {
+            //Debug.LogWarning($"OnInspectorUpdate() Time:{System.DateTime.Now.ToString("HH:mm:ss")}");
             Repaint();
         }
         public void Init(SDU_EditorMenu iEditor)
