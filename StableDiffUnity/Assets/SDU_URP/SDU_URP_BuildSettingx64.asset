@@ -20,7 +20,7 @@ MonoBehaviour:
   m_BuildTarget: 19
   m_BuildOption: 0
   m_Icons: []
-  m_DefaultIcon: {fileID: 2800000, guid: 1c91dd3c4f437fc48b60ba014fc499e4, type: 3}
+  m_DefaultIcon: {fileID: 2800000, guid: 1c52b8840a65aff4c965047c73da3f5b, type: 3}
   m_BuildAppBundle: 0
   m_OutputPath: Build/StableDiffUnity_URP
   m_OutputName: StableDiffUnity.exe
@@ -32,8 +32,8 @@ MonoBehaviour:
     m_KeyaliasName: 
     m_KeyaliasPass: 
   m_VersionSetting:
-    m_BundleVersion: 1.0.7
-    m_BundleVersionCode: 7
-    m_BuildNumber: 7
+    m_BundleVersion: 1.0.9
+    m_BundleVersionCode: 9
+    m_BuildNumber: 9
   m_ScriptingDefineSymbols: 
   m_PreBuildProcess: []
