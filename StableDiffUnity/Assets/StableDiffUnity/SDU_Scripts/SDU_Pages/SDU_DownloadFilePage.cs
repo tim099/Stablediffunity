@@ -17,8 +17,7 @@ namespace SDU
         protected override bool ShowCloseButton => false;
         public override string WindowName => $"SDU DownloadFile {SDU_EditorMenuPage.SDU_Version}";
         UCL.Core.UCL_ObjectDictionary m_Dic = new UCL.Core.UCL_ObjectDictionary();
-        string m_LoadSettingName;
-        SDU_DownloadFileSetting m_DownloadFileSetting => RunTimeData.Ins.m_HideOnGUIData.m_DownloadFileSetting;
+        SDU_DownloadFileSetting DownloadFileSetting => RunTimeData.Ins.m_HideOnGUIData.m_DownloadFileSetting;
         public override void Init(UCL_GUIPageController iGUIPageController)
         {
             base.Init(iGUIPageController);
@@ -37,7 +36,7 @@ namespace SDU
 
             using (var aScope = new GUILayout.VerticalScope("box"))
             {
-                UCL.Core.UI.UCL_GUILayout.DrawObjectData(m_DownloadFileSetting, m_Dic.GetSubDic("DownloadFileSetting"));
+                UCL.Core.UI.UCL_GUILayout.DrawObjectData(DownloadFileSetting, m_Dic.GetSubDic("DownloadFileSetting"));
             }
             foreach(var aKey in SDU_FileDownloader.DownloadingFiles.Keys)
             {

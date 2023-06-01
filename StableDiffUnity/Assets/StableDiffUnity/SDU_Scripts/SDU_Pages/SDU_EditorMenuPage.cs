@@ -34,7 +34,11 @@ namespace SDU
                 {
                     SDU_StableDiffusionPage.Create();
                 }
-
+                GUILayout.Space(10);
+                if (GUILayout.Button("Compress Image"))
+                {
+                    SDU_CompressImagePage.Create();
+                }
 #if !UNITY_EDITOR
                 GUILayout.Space(30);
                 if (GUILayout.Button("Exit SDU"))

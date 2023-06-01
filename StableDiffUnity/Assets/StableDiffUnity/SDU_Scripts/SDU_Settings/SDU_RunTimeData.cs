@@ -16,6 +16,7 @@ namespace SDU
     public class HideOnGUIData
     {
         public SDU_DownloadFileSetting m_DownloadFileSetting = new SDU_DownloadFileSetting();
+        public SDU_CompressImageSetting m_CompressImageSetting = new SDU_CompressImageSetting();
     }
     [System.Serializable]
     public class RunTimeData : UCL.Core.JsonLib.UnityJsonSerializable, UCL.Core.UI.UCLI_FieldOnGUI
