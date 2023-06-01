@@ -206,7 +206,7 @@ namespace SDU
             UCL.Core.UI.UCL_GUILayout.DrawField(this, aDataDic.GetSubDic("Tex2Img"), iFieldName, true);
             UCL.Core.UI.UCL_GUILayout.DrawObjectData(m_CMDs, iDataDic.GetSubDic("CMDs"), "CMDs", false);
             
-            if (SDU_WebUIStatus.ServerReady)
+            if (SDU_Server.ServerReady)
             {
                 if (!SDU_CMDService.TriggeringCMD)
                 {

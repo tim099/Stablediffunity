@@ -155,13 +155,21 @@ namespace SDU
         private static void OnExited(object sender, EventArgs e)
         {
             var process = (System.Diagnostics.Process)sender;
+            UnityEngine.Debug.LogWarning($"OnExited (process.Id:{process.Id})");
+
+            if (s_PidList.IsNullOrEmpty())
+            {
+                return;
+            }
 
             if (s_PidList.Contains(process.Id))
             {
                 s_PidList.Remove(process.Id);
             }
-
-            UnityEngine.Debug.LogWarning($"OnExited (process.Id:{process.Id})");
+            if (s_PidList.IsNullOrEmpty())
+            {
+                SDU_Server.Close();
+            }
         }
 
         #region ProcessEvent

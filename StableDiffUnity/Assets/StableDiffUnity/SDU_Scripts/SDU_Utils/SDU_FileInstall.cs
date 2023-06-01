@@ -51,7 +51,7 @@ namespace SDU
                     foreach(var aFile in iRequiredFiles)
                     {
                         string aPath = Path.Combine(iInstallRoot, aFile);
-                        Debug.LogWarning($"CheckInstall aPath:{aPath}");
+                        //Debug.LogWarning($"CheckInstall aPath:{aPath}");
                         if (!File.Exists(aPath))
                         {
                             aRequireInstall = true;

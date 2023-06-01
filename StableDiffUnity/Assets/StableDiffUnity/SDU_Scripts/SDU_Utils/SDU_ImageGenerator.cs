@@ -13,7 +13,7 @@ namespace SDU
 {
     public static class SDU_ImageGenerator
     {
-        public static bool IsAvaliable => SDU_WebUIStatus.ServerReady && !GeneratingImage;
+        public static bool IsAvaliable => SDU_Server.ServerReady && !GeneratingImage;
         public static bool GeneratingImage { get; private set; } = false;
         public static string ProgressStr = string.Empty;
         public static float ProgressVal = 0;
@@ -79,7 +79,7 @@ namespace SDU
             if (!IsAvaliable)
             {
                 Debug.LogError($"GenerateImageAsync !IsAvaliable," +
-                    $"SDU_WebUIStatus.s_ServerReady:{SDU_WebUIStatus.ServerReady},GeneratingImage:{GeneratingImage}");
+                    $"SDU_WebUIStatus.s_ServerReady:{SDU_Server.ServerReady},GeneratingImage:{GeneratingImage}");
                 return;
             }
             GeneratingImage = true;

@@ -25,6 +25,13 @@ namespace SDU
         public string m_SelectedModel;
 
         public SDU_InputImage m_InputImage = new SDU_InputImage();
+        [UCL.Core.PA.UCL_Slider(0f, 2f)]
+        public float m_ControlWeight = 1f;
+
+        [UCL.Core.PA.UCL_Slider(0f, 1f)]
+        public float m_StartingControlStep = 0f;
+        [UCL.Core.PA.UCL_Slider(0f, 1f)]
+        public float m_EndingControlStep = 1f;
 
         private bool m_Show = false;
         public bool RequireClearDic { get; set; } = false;
@@ -87,11 +94,16 @@ namespace SDU
                 JsonData aArgs = new JsonData();
                 aData["args"] = aArgs;
                 {
-                    var aSetting = RunTimeData.Ins.m_Tex2ImgSettings.m_ControlNetSettings;
                     JsonData aArg1 = new JsonData();
-                    //aArg1["module"] = "depth";
                     aArg1["input_image"] = m_InputImage.GetTextureBase64String();
-                    aArg1["model"] = aSetting.m_SelectedModel;//"control_sd15_depth"
+                    aArg1["model"] = m_SelectedModel;//"control_sd15_depth"
+                    //int aWeight = Mathf.RoundToInt(m_ControlWeight * 20f);
+                    //string aWeightStr = (aWeight/20f).ToString("0.00");
+                    //Debug.LogError($"aWeightStr:{aWeightStr}");
+                    aArg1["weight"] = m_ControlWeight;//aWeightStr;
+                    aArg1["guidance_start"] = m_StartingControlStep;
+                    aArg1["guidance_end"] = m_EndingControlStep;
+                    //aArg1["starting/ending"] = $"({m_StartingControlStep}/{m_EndingControlStep})";
                     aArgs.Add(aArg1);
                 }
             }

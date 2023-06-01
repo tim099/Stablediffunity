@@ -4,18 +4,52 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using UCL.Core.JsonLib;
 using UCL.Core.UI;
 using UnityEngine;
 namespace SDU
 {
     public static class SDU_Server
     {
-        public static bool s_CheckingServerStarted = false;
-        public static System.DateTime m_PrevCheckServerTime = DateTime.MinValue;
         /// <summary>
         /// AutoCheck every 30 Seconds
         /// </summary>
         public const float AutoCheckServerInterval = 30.0f;
+
+        public static bool s_CheckingServerStarted = false;
+        public static System.DateTime m_PrevCheckServerTime = DateTime.MinValue;
+        
+        public static string ServerAppId => s_ServerAppId;
+        public static bool ServerReady
+        {
+            get => s_ServerReady;
+            set
+            {
+                //Debug.LogError($"Set ServerReady:{s_ServerReady}");
+                s_ServerReady = value;
+            }
+        }
+        public static bool s_ServerReady = false;
+
+        private static string s_ServerAppId;
+        private static bool s_CheckEnabled = false;
+
+        public static void OnGUI(UCL.Core.UCL_ObjectDictionary iDic)
+        {
+            if (!s_CheckingServerStarted)
+            {
+                if ((System.DateTime.Now - m_PrevCheckServerTime).TotalSeconds > AutoCheckServerInterval)
+                {
+                    CheckServerStarted(!ServerReady);
+                }
+                if (GUILayout.Button("Check Sevrver Started", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                {
+                    CheckServerStarted();
+                }
+            }
+
+        }
         public static int StartServer()
         {
             int aProcessID = -1;
@@ -78,7 +112,7 @@ namespace SDU
             aProcessID = aProcess.Id;
             UnityEngine.Debug.LogWarning($"Start server, ProcessID:{aProcessID}");
 
-            SDU_WebUIStatus.Ins.ValidateConnectionContinuously((iServerReady) =>
+            ValidateConnectionContinuously((iServerReady) =>
             {
                 try
                 {
@@ -109,22 +143,91 @@ namespace SDU
         {
             UnityEngine.Debug.LogWarning($"DataReceived_:{iOutPut}");
         }
-        public static void OnGUI(UCL.Core.UCL_ObjectDictionary iDic)
+
+        public static async UniTask<bool> CheckServerReady(System.Action<bool> iEndAct = null)
         {
-            if (!s_CheckingServerStarted)
+            //ServerReady = false;
+            try
             {
-                if((System.DateTime.Now - m_PrevCheckServerTime).TotalSeconds > AutoCheckServerInterval)
+                ServerReady = await ValidateConnection();
+            }
+            finally
+            {
+                iEndAct?.Invoke(ServerReady);
+                //Close();
+            }
+            return ServerReady;
+        }
+        public static async UniTask<bool> ValidateConnection()
+        {
+            try
+            {
+                using (var aClient = RunTimeData.SD_API.Client_AppID)
                 {
-                    CheckServerStarted();
+                    var aResultStr = await aClient.SendWebRequestStringAsync();
+                    var aResult = JsonData.ParseJson(aResultStr);
+                    if (aResult.Contains("app_id"))
+                    {
+                        var aResultAppID = aResult["app_id"];
+                        ulong aAppID = aResultAppID.GetULong();
+                        s_ServerAppId = aAppID.ToString();
+                        //Debug.LogError($"{aResultAppID.JsonType},m_Obj:{aResultAppID.Obj.GetType().Name},aAppID:{aAppID}");
+                    }
+                    else
+                    {
+                        s_ServerAppId = string.Empty;
+                    }
+                    Debug.LogWarning($"ValidateConnection Result:{aResultStr}");
                 }
-                if (GUILayout.Button("Check Sevrver Started", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
-                {
-                    CheckServerStarted();
-                }
+                UnityEngine.Debug.LogWarning($"Check done. ServerAppId:{s_ServerAppId}");
+                return true;
+            }
+            catch (Exception e)
+            {
+                UnityEngine.Debug.Log($"Checking ... {e.Message}");
+                //UnityEngine.Debug.LogException(e);
+                return false;
+            }
+        }
+        public static async UniTask ValidateConnectionContinuously(System.Action<bool> iEndAct = null)
+        {
+            if (s_CheckEnabled)
+            {
+                UnityEngine.Debug.LogWarning($"Check already active.");
+                return;
             }
 
+            s_CheckEnabled = true;
+
+            try
+            {
+                while (s_CheckEnabled)
+                {
+                    ServerReady = await ValidateConnection();
+                    if (ServerReady)
+                    {
+                        break;
+                    }
+                    await Task.Delay(1000);
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogException(e);
+            }
+            finally
+            {
+                s_CheckEnabled = false;
+                iEndAct?.Invoke(ServerReady);
+            }
         }
-        public static void CheckServerStarted()
+        public static void Close()
+        {
+            //Debug.LogError("SDU_WebUIStatus Close()");
+            s_CheckEnabled = false;
+            s_ServerReady = false;
+        }
+        public static void CheckServerStarted(bool iRefreshModels = true)
         {
             if (s_CheckingServerStarted)
             {
@@ -132,7 +235,7 @@ namespace SDU
             }
             m_PrevCheckServerTime = System.DateTime.Now;
             s_CheckingServerStarted = true;
-            SDU_WebUIStatus.Ins.CheckServerReady((iServerReady) => {
+            CheckServerReady((iServerReady) => {
                 try
                 {
                     Debug.LogWarning($"iServerReady:{iServerReady}");
@@ -143,7 +246,10 @@ namespace SDU
                             System.Diagnostics.Process.Start(RunTimeData.Ins.m_WebURL);
                             UnityEngine.Debug.LogWarning($"Open WebURL:{RunTimeData.Ins.m_WebURL}");
                         }
-                        RunTimeData.Ins.m_WebUISetting.RefreshModels().Forget();
+                        if (iRefreshModels)
+                        {
+                            RunTimeData.Ins.m_WebUISetting.RefreshModels().Forget();
+                        }
                     }
                 }
                 catch (Exception ex)

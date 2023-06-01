@@ -75,8 +75,8 @@ namespace SDU
         public enum AutoCaptureMode
         {
             Off,
-            AutoCaptureDepth,
-            AutoCaptureNormal,
+            AutoCaptureImage,
+            AutoCaptureAndSaveImage,
         }
 
         [UCL.Core.ATTR.UCL_HideOnGUI]
@@ -86,6 +86,9 @@ namespace SDU
         public ImageSetting m_ImageSetting = new ImageSetting();
 
         public AutoCaptureMode m_AutoCaptureMode = AutoCaptureMode.Off;
+
+        [UCL.Core.ATTR.UCL_HideOnGUI]
+        public URP_Camera.CaptureMode m_CaptureMode = URP_Camera.CaptureMode.Depth;
 
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public bool m_ShowImageDetail = false;
@@ -121,41 +124,58 @@ namespace SDU
                     {
                         GUILayout.BeginHorizontal();
                         GUILayout.Label(iFieldName, GUILayout.ExpandWidth(false));
-                        if (Texture != null)
-                        {
-                            if (GUILayout.Button("SaveImage", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
-                            {
-                                UCL.Core.ServiceLib.UCL_UpdateService.AddAction(SaveImage);
-                            }
-                        }
-                        GUILayout.EndHorizontal();
+
                         var aCam = URP_Camera.CurCamera;
                         if (aCam != null)
                         {
-                            using (var aScope3 = new GUILayout.HorizontalScope("box"))
+                            using (var aScope3 = new GUILayout.HorizontalScope())//"box"
                             {
-                                if (GUILayout.Button("Capture Depth", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
+                                if (GUILayout.Button("Capture Image", UCL.Core.UI.UCL_GUIStyle.ButtonStyle,
+                                    GUILayout.ExpandWidth(false)))
                                 {
-                                    CaptureImage(URP_Camera.CaptureMode.Depth, m_ImageSetting.m_SaveImageAfterCapture);
+                                    CaptureImage(m_CaptureMode, m_ImageSetting.m_SaveImageAfterCapture);
                                 }
-                                if (GUILayout.Button("Capture Normal", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
-                                {
-                                    CaptureImage(URP_Camera.CaptureMode.Normal, m_ImageSetting.m_SaveImageAfterCapture);
-                                }
+                                m_CaptureMode = UCL_GUILayout.PopupAuto(m_CaptureMode, iDataDic.GetSubDic("CaptureMode"),
+                                    "CaptureMode");
                             }
                         }
+                        GUILayout.EndHorizontal();
+
 
                         if (m_ShowImageDetail)
                         {
+
                             try
                             {
-                                UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic.GetSubDic("InputImage"), "InputImage", true);
+                                
 
+                                if (Texture != null)
+                                {
+                                    using (var aScope3 = new GUILayout.HorizontalScope())
+                                    {
+                                        if (GUILayout.Button("Save Image", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                                        {
+                                            UCL.Core.ServiceLib.UCL_UpdateService.AddAction(SaveImage);
+                                        }
+                                        if (GUILayout.Button("Open Output Folder", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
+                                        {
+                                            var aSavePath = SDU_ImageGenerator.GetSaveImagePath();
+                                            string aFolderPath = aSavePath.Item1;
+                                            if (!Directory.Exists(aFolderPath))
+                                            {
+                                                Directory.CreateDirectory(aFolderPath);
+                                            }
+                                            System.Diagnostics.Process.Start(aFolderPath);
+                                            //RunTimeData.Ins.m_Tex2ImgSettings.m_ImageOutputSetting.OpenFolder();
+                                        }
+                                    }
+
+                                }
 
                                 GUILayout.BeginHorizontal();
                                 if (File.Exists(m_LoadImageSetting.FilePath))
                                 {
-                                    if (GUILayout.Button("LoadImage", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                                    if (GUILayout.Button("Load Image", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
                                     {
                                         UCL.Core.ServiceLib.UCL_UpdateService.AddAction(LoadImage);
                                     }
@@ -164,6 +184,7 @@ namespace SDU
                                 UCL.Core.UI.UCL_GUILayout.DrawObjectData(m_LoadImageSetting, iDataDic.GetSubDic("LoadImageSetting"), "LoadImageSetting", false);
                                 GUILayout.EndHorizontal();
 
+                                UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic.GetSubDic("InputImage"), "InputImage", true);
                                 UCL.Core.UI.UCL_GUILayout.DrawObjectData(m_ImageSetting, iDataDic.GetSubDic("ImageSetting"), "ImageSetting", false);
                                 
                             }
@@ -182,14 +203,14 @@ namespace SDU
             {
                 switch (m_AutoCaptureMode)
                 {
-                    case AutoCaptureMode.AutoCaptureDepth:
+                    case AutoCaptureMode.AutoCaptureImage:
                         {
-                            CaptureImage(URP_Camera.CaptureMode.Depth, false);
+                            CaptureImage(m_CaptureMode, false);
                             break;
                         }
-                    case AutoCaptureMode.AutoCaptureNormal:
+                    case AutoCaptureMode.AutoCaptureAndSaveImage:
                         {
-                            CaptureImage(URP_Camera.CaptureMode.Normal, false);
+                            CaptureImage(m_CaptureMode, true);
                             break;
                         }
                 }
@@ -294,7 +315,18 @@ namespace SDU
         }
         public string GetTextureBase64String()
         {
-            if (Texture == null) return string.Empty;
+            if (Texture == null)
+            {
+                if (File.Exists(m_LoadImageSetting.FilePath))
+                {
+                    LoadImage();
+                }
+
+                if (Texture == null)//Load Fail
+                {
+                    return string.Empty;
+                }
+            }
             byte[] iBytes = Texture.EncodeToPNG();
             return Convert.ToBase64String(iBytes);
         }

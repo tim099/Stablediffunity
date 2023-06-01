@@ -19,7 +19,7 @@ namespace SDU
             {
                 s_Types = new List<System.Type>();
                 s_Types.Add(typeof(SDU_EnumGroup));
-
+                s_Types.Add(typeof(SDU_EnumControlNetInputImages));
             }
             return s_Types;
         }

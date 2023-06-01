@@ -68,7 +68,7 @@ namespace SDU
         {
             SDU_ImageGenerator.ClearTextures();
             RunTimeData.SaveRunTimeData();
-            SDU_WebUIStatus.Ins.Close();
+            //SDU_Server.Close();
             base.OnClose();
         }
         protected override void ContentOnGUI()
@@ -78,7 +78,7 @@ namespace SDU
                 SDU_Server.OnGUI(m_Dic.GetSubDic("SDU_Server"));
 
                 string aServerStateStr = string.Empty;
-                if (SDU_WebUIStatus.ServerReady)
+                if (SDU_Server.ServerReady)
                 {
                     aServerStateStr = "Server Ready.".RichTextColor(Color.green);
                 }
@@ -105,18 +105,10 @@ namespace SDU
                 if (GUILayout.Button("Stop Server", UCL_GUIStyle.ButtonStyle))
                 {
                     UnityEngine.Debug.Log($"Stop server. m_ProcessID:{m_ProcessID}");
-                    SDU_WebUIStatus.Ins.Close();
+                    SDU_Server.Close();
                     SDU_ProcessList.KillAllProcess();
-                    SDU_WebUIStatus.ServerReady = false;
                     m_ProcessID = -1;
                 }
-                //if (SDU_WebUIStatus.ServerReady)
-                //{
-                //    if (GUILayout.Button("Refresh Models", UCL_GUIStyle.ButtonStyle))
-                //    {
-                //        RunTimeData.Ins.m_WebUISetting.RefreshModels().Forget();
-                //    }
-                //}
             }
 
             if (GUILayout.Button("Download File"))
