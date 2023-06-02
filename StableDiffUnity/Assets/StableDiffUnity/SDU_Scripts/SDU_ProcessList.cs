@@ -16,6 +16,7 @@ namespace SDU
         public static System.Action<string> s_OnOutputDataReceivedAct = null;
         public static System.Text.StringBuilder s_ServerOutput = new();
         public static string s_ProcessName = "python";
+        public static int s_ProcessID = -1;
         public static bool ProcessStarted => s_PidList.Count > 0;
         public static List<int> s_PidList = new List<int>();
         public static void KillAllProcess()
@@ -56,6 +57,11 @@ namespace SDU
             {
                 UnityEngine.Debug.LogException(e);
             }
+            finally
+            {
+                s_ProcessID = -1;
+            }
+
         }
         public static bool CheckProcessEnd(int iID)
         {

@@ -20,17 +20,9 @@ namespace SDU
             }
             return aList;
         }
-        override public async Task TriggerCMD(Tex2ImgSetting iTex2ImgSetting, System.Threading.CancellationToken iCancellationToken)
+        override public async Task TriggerCMD(SDU_ImgSetting iTex2ImgSetting, System.Threading.CancellationToken iCancellationToken)
         {
             await Task.Delay(1);
-            //if (m_CMDs.IsNullOrEmpty()) return;
-            //iTex2ImgSetting.RequireClearDic = true;
-            //var aCMDs = m_CMDs.Clone();
-            //foreach (var aCMD in aCMDs)
-            //{
-            //    if (iCancellationToken.IsCancellationRequested) break;
-            //    await aCMD.TriggerCMD(iTex2ImgSetting, iCancellationToken);
-            //}
         }
     }
 }

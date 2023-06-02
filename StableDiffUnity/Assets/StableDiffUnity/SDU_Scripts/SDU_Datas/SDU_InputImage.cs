@@ -42,7 +42,17 @@ namespace SDU
                     m_FolderPath = RunTimeData.InstallSetting.OutputPath;
                 }
                 //Debug.LogWarning($"m_FolderPath:{m_FolderPath}");
+                GUILayout.BeginHorizontal();
                 UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic, iFieldName, true);
+                if (GUILayout.Button("Open", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                {
+                    if (!Directory.Exists(m_FolderPath))
+                    {
+                        UCL.Core.FileLib.Lib.CreateDirectory(m_FolderPath);
+                    }
+                    System.Diagnostics.Process.Start(m_FolderPath);
+                }
+                GUILayout.EndHorizontal();
                 return this;
             }
         }

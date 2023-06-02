@@ -16,7 +16,7 @@ namespace SDU
         static int s_TriggerCMDAt = 0;
         static List<SDU_CMD> s_CMDs = null;
         static CancellationTokenSource s_CancellationTokenSource;
-        public static async Task TriggerCMDs(Tex2ImgSetting iTarget, List<SDU_CMD> iCMDs, CancellationTokenSource iCancellationTokenSource)
+        public static async Task TriggerCMDs(SDU_ImgSetting iTarget, List<SDU_CMD> iCMDs, CancellationTokenSource iCancellationTokenSource)
         {
             if (s_TriggeringCMD) return;
             s_CancellationTokenSource = iCancellationTokenSource;

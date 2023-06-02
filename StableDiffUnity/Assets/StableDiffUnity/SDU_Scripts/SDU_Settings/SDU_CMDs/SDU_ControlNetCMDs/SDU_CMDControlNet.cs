@@ -20,7 +20,7 @@ namespace SDU
             }
             return aList;
         }
-        override public async Task TriggerCMD(Tex2ImgSetting iTex2ImgSetting, System.Threading.CancellationToken iCancellationToken)
+        override public async Task TriggerCMD(SDU_ImgSetting iTex2ImgSetting, System.Threading.CancellationToken iCancellationToken)
         {
             iTex2ImgSetting.m_ControlNetSettings.RequireClearDic = true;
             var aCMDs = m_ControlNetCMDs.Clone();

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UCL.Core;
+using UCL.Core.UI;
 using UnityEngine;
 
 
@@ -22,6 +23,7 @@ namespace SDU
         Lora,
 
         Tex2ImgPreset,
+        Img2ImgPreset,
 
         ControlNetModel,
     }
@@ -87,28 +89,33 @@ namespace SDU
         {
             using(var aScope = new GUILayout.VerticalScope())//"box"
             {
-                UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic.GetSubDic("InstallSetting"), iFieldName, false);
+                var aDic = iDataDic.GetSubDic("InstallSetting");
+                UCL.Core.UI.UCL_GUILayout.DrawField(this, aDic, iFieldName, false);
 
 
                 GUILayout.BeginHorizontal();
-                
-                m_ShowOpenFolderToggle = UCL.Core.UI.UCL_GUILayout.Toggle(m_ShowOpenFolderToggle);
-                
-                using (var aScope2 = new GUILayout.VerticalScope("box"))
+                bool IsShow = aDic.GetData(UCL_GUILayout.IsShowFieldKey, false);
+                if (IsShow)
                 {
-                    GUILayout.Label("Open Folder", GUILayout.ExpandWidth(false));
-                    if (m_ShowOpenFolderToggle)
+                    m_ShowOpenFolderToggle = UCL.Core.UI.UCL_GUILayout.Toggle(m_ShowOpenFolderToggle);
+
+                    using (var aScope2 = new GUILayout.VerticalScope("box"))
                     {
-                        foreach(FolderEnum aEnum in Enum.GetValues(typeof(FolderEnum)))
+                        GUILayout.Label("Open Folder", GUILayout.ExpandWidth(false));
+                        if (m_ShowOpenFolderToggle)
                         {
-                            if (GUILayout.Button($"Open {aEnum} Folder", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
+                            foreach (FolderEnum aEnum in Enum.GetValues(typeof(FolderEnum)))
                             {
-                                OpenFolder(aEnum);
+                                if (GUILayout.Button($"Open {aEnum} Folder", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
+                                {
+                                    OpenFolder(aEnum);
+                                }
                             }
+                            //C:\Users\Public\Documents\StableDiffUnity_V1\WebUI\models\Stable-diffusion
                         }
-                        //C:\Users\Public\Documents\StableDiffUnity_V1\WebUI\models\Stable-diffusion
                     }
                 }
+
                 GUILayout.EndHorizontal();
             }
 
@@ -134,6 +141,8 @@ namespace SDU
                 case FolderEnum.CheckPoints: return StableDiffusionModelsPath;
                 case FolderEnum.Lora: return StableDiffusionLoraPath;
                 case FolderEnum.Tex2ImgPreset: return Path.Combine(EnvInstallRoot, "Preset", "Tex2Img");
+                case FolderEnum.Img2ImgPreset: return Path.Combine(EnvInstallRoot, "Preset", "Img2Img");
+                    
                 //case FolderEnum.ControlNetModel: return Path.Combine(WebUIInstallRoot, "extensions", "sd-webui-controlnet", "models");
                 case FolderEnum.ControlNetModel: return Path.Combine(WebUIInstallRoot, "models", "ControlNet");
             }

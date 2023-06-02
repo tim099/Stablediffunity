@@ -41,7 +41,7 @@ namespace SDU
             }
             return aCMDList;
         }
-        override public async Task TriggerCMD(Tex2ImgSetting iTex2ImgSetting, System.Threading.CancellationToken iCancellationToken)
+        override public async Task TriggerCMD(SDU_ImgSetting iTex2ImgSetting, System.Threading.CancellationToken iCancellationToken)
         {
             await Task.Delay(1);
             //if (m_CMDs.IsNullOrEmpty()) return;

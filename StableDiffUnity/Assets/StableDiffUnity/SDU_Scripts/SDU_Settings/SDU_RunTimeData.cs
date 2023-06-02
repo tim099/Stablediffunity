@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UCL.Core;
 using UCL.Core.JsonLib;
+using UCL.Core.UI;
 using UnityEngine;
 namespace SDU
 {
@@ -33,6 +34,24 @@ namespace SDU
                 return s_RunTimeData;
             }
         }
+        const string ConfigFilePathKey = "StableDiffusionPage.ConfigFilePath";
+        public static string ConfigFilePath
+        {
+            get
+            {
+                if (!PlayerPrefs.HasKey(ConfigFilePathKey))
+                {
+                    PlayerPrefs.SetString(ConfigFilePathKey, DefaultConfigFilePath);
+                }
+                return PlayerPrefs.GetString(ConfigFilePathKey);
+            }
+            set
+            {
+                PlayerPrefs.SetString(ConfigFilePathKey, value);
+            }
+        }
+        public static string DefaultConfigFilePath => Path.Combine(InstallSetting.DefaultInstallRoot, "Configs", "StableDiffusion.json");
+
         static RunTimeData s_RunTimeData = null;
         static public void ReloadRunTimeData()
         {
@@ -40,7 +59,7 @@ namespace SDU
         }
         static public RunTimeData LoadRunTimeData()
         {
-            var aPath = SDU_StableDiffusionPage.ConfigFilePath;
+            var aPath = ConfigFilePath;
             if (File.Exists(aPath))
             {
                 try
@@ -60,8 +79,33 @@ namespace SDU
         static public void SaveRunTimeData()
         {
             string aJsonStr = UCL.Core.JsonLib.JsonConvert.SaveDataToJsonUnityVer(Ins).ToJsonBeautify();
-            UCL.Core.FileLib.Lib.WriteAllText(SDU_StableDiffusionPage.ConfigFilePath, aJsonStr);
+            UCL.Core.FileLib.Lib.WriteAllText(ConfigFilePath, aJsonStr);
             //PlayerPrefs.SetString(RunTimeDataKey, aJsonStr);
+        }
+        static public void ConfigOnGUI(UCL_ObjectDictionary iDataDic)
+        {
+            using (var aScope = new GUILayout.HorizontalScope("box"))
+            {
+                if (GUILayout.Button("Save", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                {
+                    RunTimeData.SaveRunTimeData();
+                }
+                if (File.Exists(RunTimeData.ConfigFilePath))
+                {
+                    if (GUILayout.Button("Load", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                    {
+                        RunTimeData.ReloadRunTimeData();
+                    }
+                }
+
+                var aConfigFilePath = RunTimeData.ConfigFilePath;
+                var aNewConfigFilePath = UCL_GUILayout.TextField("ConfigFilePath", aConfigFilePath);
+                if (aNewConfigFilePath != aConfigFilePath)
+                {
+                    RunTimeData.ConfigFilePath = aNewConfigFilePath;
+                }
+            }
+
         }
         static public StableDiffusionAPI SD_API => Ins.m_APISetting.m_StableDiffusionAPI;
         static public ControlNetAPI ControlNet_API => Ins.m_APISetting.m_ControlNetAPI;
@@ -69,14 +113,25 @@ namespace SDU
         public static string ServerUrl => Ins.m_WebURL;
         #endregion
 
+        public enum GenerateMode
+        {
+            Tex2Img,
+            Img2Img,
+        }
+
         public InstallSetting m_InstallSetting = new InstallSetting();
         public ResolutionSetting m_ResolutionSetting = new ResolutionSetting();
         public APISetting m_APISetting = new APISetting();
         public WebUISetting m_WebUISetting = new WebUISetting();
 
+        [UCL.Core.ATTR.UCL_HideOnGUI]
+        public GenerateMode m_GenerateMode = GenerateMode.Tex2Img;
 
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public Tex2ImgSetting m_Tex2ImgSettings = new Tex2ImgSetting();
+
+        [UCL.Core.ATTR.UCL_HideOnGUI]
+        public SDU_Img2ImgSetting m_Img2ImgSetting = new SDU_Img2ImgSetting();
 
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public Tex2ImgResults m_Tex2ImgResults = new Tex2ImgResults();
@@ -92,7 +147,25 @@ namespace SDU
         public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {
             UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic.GetSubDic("RunTimeData"), iFieldName, false);
-            UCL.Core.UI.UCL_GUILayout.DrawObjectData(m_Tex2ImgSettings, iDataDic.GetSubDic("Tex2Img"), "Tex2Img", false);
+            using (var aScope = new GUILayout.HorizontalScope())
+            {
+                GUILayout.Label("Generate Mode", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
+                m_GenerateMode = UCL_GUILayout.PopupAuto(m_GenerateMode, iDataDic.GetSubDic("GenerateMode"), "GenerateMode");
+            }
+                
+            switch (m_GenerateMode)
+            {
+                case GenerateMode.Tex2Img:
+                    {
+                        UCL_GUILayout.DrawObjectData(m_Tex2ImgSettings, iDataDic.GetSubDic("Tex2Img"), "Tex2Img", false);
+                        break;
+                    }
+                case GenerateMode.Img2Img:
+                    {
+                        UCL_GUILayout.DrawObjectData(m_Img2ImgSetting, iDataDic.GetSubDic("Img2Img"), "Img2Img", false);
+                        break;
+                    }
+            }
             return this;
         }
     }

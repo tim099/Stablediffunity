@@ -18,7 +18,6 @@ namespace SDU
         public static string ProgressStr = string.Empty;
         public static float ProgressVal = 0;
 
-        static bool s_StartGenerating = false;
         public readonly static List<Texture2D> s_Textures = new List<Texture2D>();
 
         public static void OnGUI(UCL_ObjectDictionary iDataDic)
@@ -30,19 +29,6 @@ namespace SDU
                 if (ProgressVal > 0) GUILayout.HorizontalSlider(ProgressVal, 0f, 1f);
                 GUILayout.EndHorizontal();
             }
-        }
-        public static void GenerateImage(Tex2ImgSetting iSetting)
-        {
-            if (s_StartGenerating || !IsAvaliable)
-            {
-                return;
-            }
-            s_StartGenerating = true;
-            UCL.Core.ServiceLib.UCL_UpdateService.AddAction(() =>
-            {
-                s_StartGenerating = false;
-                GenerateImageAsync(iSetting).Forget();
-            });
         }
         public static string DefaultImageOutputFolder()
         {
@@ -73,7 +59,7 @@ namespace SDU
             }
             s_Textures.Clear();
         }
-        public static async System.Threading.Tasks.ValueTask GenerateImageAsync(Tex2ImgSetting iSetting)
+        public static async System.Threading.Tasks.ValueTask GenerateImageAsync(SDU_ImgSetting iSetting)
         {
             RunTimeData.SaveRunTimeData();
             if (!IsAvaliable)
@@ -85,7 +71,7 @@ namespace SDU
             GeneratingImage = true;
             ProgressStr = "Generating Image Start";
             ClearTextures();
-            //List<Texture2D> aTextures = new List<Texture2D>();
+
             int aBatchCount = iSetting.m_BatchCount;
             for (int aBatchID = 0; aBatchID < aBatchCount; aBatchID++)
             {
@@ -100,7 +86,7 @@ namespace SDU
                         var aResultJson = await client.SendWebRequestStringAsync(aJsonStr);
                         //Debug.LogWarning($"aResultJson:{aResultJson}");
                     }
-                    using (var aClient = RunTimeData.SD_API.Client_Txt2img)
+                    using (var aClient = iSetting.Client)
                     {
                         JsonData aJson = iSetting.GetConfigJson();
 
@@ -167,6 +153,31 @@ namespace SDU
                         {
                             throw new Exception($"SendWebRequestAsync, !responses.Contains(\"images\"),aResultJson:{aResultJson.ToJsonBeautify()}");
                         }
+                        if (aResultJson.Contains("info"))
+                        {
+                            JsonData aInfo = aResultJson["info"];
+                            iSetting.m_ResultInfo = aInfo;
+                            //if(aInfo.GetString())
+                            string aInfoJson = aInfo.GetString();
+                            try
+                            {
+                                JsonData aInfoData = JsonData.ParseJson(aInfoJson);
+
+                                iSetting.m_ResultInfo = aInfoData;
+                            }
+                            catch(System.Exception e)
+                            {
+                                Debug.LogException(e);
+                            }
+                            
+                            //string aInfoJson = aInfo.ToJsonBeautify();
+                            //Debug.LogWarning($"Result info:{aInfoJson}");
+                            //GUIUtility.systemCopyBuffer = aInfoJson;
+                        }
+                        else
+                        {
+                            Debug.LogError("!aResultJson.Contains(\"info\")");
+                        }
                         var aImageOutputSetting = iSetting.m_ImageOutputSetting;
                         var aSavePath = GetSaveImagePath(aImageOutputSetting);
                         string aPath = aImageOutputSetting.OutputFolderPath;//aSavePath.Item1;
@@ -178,11 +189,17 @@ namespace SDU
                         Debug.LogWarning($"aImages.Count:{aImages.Count}");
                         if (aImageOutputSetting.m_OutputGenerateImageSetting)
                         {
-                            var aSettingJson = iSetting.SerializeToJson();
+                            
                             string aFilePath = Path.Combine(aPath, $"{aFileName}.json"); // M HH:mm:ss
                             Debug.Log($"aPath:{aPath},aFilePath:{aFilePath}");
-
+                            long aSeed = iSetting.m_Seed;
+                            if (iSetting.m_ResultInfo.Contains("seed"))
+                            {
+                                iSetting.m_Seed = iSetting.m_ResultInfo["seed"].GetLong();
+                            }
+                            var aSettingJson = iSetting.SerializeToJson();
                             aFileTasks.Add(File.WriteAllTextAsync(aFilePath, aSettingJson.ToJsonBeautify()));
+                            iSetting.m_Seed = aSeed;//restore Seed
                         }
                         for (int i = 0; i < aImages.Count; i++)
                         {

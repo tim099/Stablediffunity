@@ -32,6 +32,7 @@ namespace SDU
         public string m_ApiCmdFlags = "/sdapi/v1/cmd-flags";
         
         public string m_ApiTxt2img = "/sdapi/v1/txt2img";
+        public string m_ApiImg2img = "/sdapi/v1/img2img";
         public string m_ApiPngInfo = "/sdapi/v1/png-info";
         #region Get
         public string m_ApiSdModels = "/sdapi/v1/sd-models";
@@ -55,6 +56,7 @@ namespace SDU
         public string URL_CmdFlags => ServerUrl + m_ApiCmdFlags;
         
         public string URL_Txt2img => ServerUrl + m_ApiTxt2img;
+        public string URL_Img2img => ServerUrl + m_ApiImg2img;
         public string URL_PngInfo => ServerUrl + m_ApiPngInfo;
 
         #region Client
@@ -67,7 +69,9 @@ namespace SDU
 
         public SDU_WebUIClient.SDU_WebRequest Client_Txt2img =>
             new SDU_WebUIClient.SDU_WebRequest(URL_Txt2img, SDU_WebRequest.Method.Post);
-
+        public SDU_WebUIClient.SDU_WebRequest Client_Img2img =>
+            new SDU_WebUIClient.SDU_WebRequest(URL_Img2img, SDU_WebRequest.Method.Post);
+        
         public SDU_WebUIClient.SDU_WebRequest Client_AppID =>
             new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/app_id", SDU_WebRequest.Method.Get);
         public SDU_WebUIClient.SDU_WebRequest Client_Progress =>

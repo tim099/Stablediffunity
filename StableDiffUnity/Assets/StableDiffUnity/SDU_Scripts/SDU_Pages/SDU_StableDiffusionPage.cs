@@ -21,29 +21,9 @@ namespace SDU
     //[UCL.Core.ATTR.RequiresConstantRepaint]
     public class SDU_StableDiffusionPage : UCL_EditorPage
     {
-        const string ConfigFilePathKey = "StableDiffusionPage.ConfigFilePath";
-
         #region static
         static public SDU_StableDiffusionPage Create() => UCL_EditorPage.Create<SDU_StableDiffusionPage>();
 
-        public static string ConfigFilePath
-        {
-            get
-            {
-                if (!PlayerPrefs.HasKey(ConfigFilePathKey))
-                {
-                    PlayerPrefs.SetString(ConfigFilePathKey, DefaultConfigFilePath);
-                }
-                return PlayerPrefs.GetString(ConfigFilePathKey);
-            }
-            set
-            {
-                PlayerPrefs.SetString(ConfigFilePathKey, value);
-            }
-        }
-        
-        public static string DefaultConfigFilePath => Path.Combine(InstallSetting.DefaultInstallRoot, "Configs", "StableDiffusion.json");
-        
         #endregion
         public override bool IsWindow => true;
         public override string WindowName => $"StableDiffUnity GUI {SDU_EditorMenuPage.SDU_Version}";
@@ -51,7 +31,6 @@ namespace SDU
 
         
         UCL.Core.UCL_ObjectDictionary m_Dic = new UCL.Core.UCL_ObjectDictionary();
-        int m_ProcessID = -1;
 
         ~SDU_StableDiffusionPage()
         {
@@ -62,6 +41,7 @@ namespace SDU
         {
             base.Init(iGUIPageController);
             RunTimeData.LoadRunTimeData();
+            SDU_FileInstall.CheckAndInstall(RunTimeData.InstallSetting);
             SDU_Server.CheckServerStarted();
         }
         public override void OnClose()
@@ -71,71 +51,22 @@ namespace SDU
             //SDU_Server.Close();
             base.OnClose();
         }
+        protected override void TopBarButtons()
+        {
+            using (var aScope = new GUILayout.HorizontalScope())
+            {
+                GUILayout.Space(30);
+                SDU_Server.OnGUI(m_Dic.GetSubDic("SDU_Server"));
+            }
+        }
         protected override void ContentOnGUI()
         {
-            using(var aScope = new GUILayout.HorizontalScope())
-            {
-                SDU_Server.OnGUI(m_Dic.GetSubDic("SDU_Server"));
-
-                string aServerStateStr = string.Empty;
-                if (SDU_Server.ServerReady)
-                {
-                    aServerStateStr = "Server Ready.".RichTextColor(Color.green);
-                }
-                else if (SDU_Server.s_CheckingServerStarted)
-                {
-                    aServerStateStr = "Checking Server Started.".RichTextColor(Color.cyan);
-                }
-                else
-                {
-                    aServerStateStr = "Server Not found!!Please Start Server.".RichTextColor(Color.yellow);
-                }
-                GUILayout.Label($"{aServerStateStr} Time:{System.DateTime.Now.ToString("HH:mm:ss")}", UCL_GUIStyle.LabelStyle);
-            }
-
-            if(!SDU_ProcessList.ProcessStarted)
-            {
-                if (GUILayout.Button("Start Server", UCL_GUIStyle.ButtonStyle))
-                {
-                    m_ProcessID = SDU_Server.StartServer();
-                }
-            }
-            else
-            {
-                if (GUILayout.Button("Stop Server", UCL_GUIStyle.ButtonStyle))
-                {
-                    UnityEngine.Debug.Log($"Stop server. m_ProcessID:{m_ProcessID}");
-                    SDU_Server.Close();
-                    SDU_ProcessList.KillAllProcess();
-                    m_ProcessID = -1;
-                }
-            }
 
             if (GUILayout.Button("Download File"))
             {
                 SDU_DownloadFilePage.Create();
             }
-            using (var aScope = new GUILayout.HorizontalScope("box"))
-            {
-                if (GUILayout.Button("Save", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
-                {
-                    RunTimeData.SaveRunTimeData();
-                }
-                if (File.Exists(ConfigFilePath))
-                {
-                    if (GUILayout.Button("Load", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
-                    {
-                        RunTimeData.ReloadRunTimeData();
-                    }
-                }
-
-                var aConfigFilePath = ConfigFilePath;
-                var aNewConfigFilePath = UCL_GUILayout.TextField("ConfigFilePath", aConfigFilePath);
-                if (aNewConfigFilePath != aConfigFilePath)
-                {
-                    ConfigFilePath = aNewConfigFilePath;
-                }
-            }
+            RunTimeData.ConfigOnGUI(m_Dic.GetSubDic("RunTimeData"));
 
             UCL.Core.UI.UCL_GUILayout.DrawObjectData(RunTimeData.Ins, m_Dic.GetSubDic("RunTimeData"), "Configs", false);
 

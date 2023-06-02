@@ -8,7 +8,7 @@ namespace SDU
     {
         public SDU_CheckPointSetting m_CheckPointSetting = new SDU_CheckPointSetting();
         override public string GetShortName() => $"{base.GetShortName()}({m_CheckPointSetting.m_CheckPoint})";
-        override public async Task TriggerCMD(Tex2ImgSetting iTex2ImgSetting, System.Threading.CancellationToken iCancellationToken)
+        override public async Task TriggerCMD(SDU_ImgSetting iTex2ImgSetting, System.Threading.CancellationToken iCancellationToken)
         {
             iTex2ImgSetting.RequireClearDic = true;
             iTex2ImgSetting.m_CheckPoint.Set(m_CheckPointSetting);

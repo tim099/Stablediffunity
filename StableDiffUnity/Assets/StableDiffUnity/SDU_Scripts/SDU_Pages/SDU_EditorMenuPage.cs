@@ -17,6 +17,8 @@ namespace SDU
         protected override bool ShowCloseButton => false;
         protected override bool ShowBackButton => false;
 
+
+        UCL.Core.UCL_ObjectDictionary m_Dic = new UCL.Core.UCL_ObjectDictionary();
         protected override void TopBar()
         {
             //base.TopBar();
@@ -30,10 +32,21 @@ namespace SDU
         {
             using (var aScope = new GUILayout.VerticalScope("box"))//, GUILayout.MaxWidth(320)
             {
-                if (GUILayout.Button("Install StableDiffusion", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
+                RunTimeData.ConfigOnGUI(m_Dic.GetSubDic("RunTimeData"));
+                GUILayout.Space(10);
+                UCL.Core.UI.UCL_GUILayout.DrawObjectData(RunTimeData.Ins.m_InstallSetting, m_Dic.GetSubDic("InstallSetting"), "InstallSetting", false);
+                GUILayout.Space(10);
+                if (GUILayout.Button("Stable Diffusion", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
                 {
                     SDU_StableDiffusionPage.Create();
                 }
+
+                GUILayout.Space(10);
+                if (GUILayout.Button("Download File"))
+                {
+                    SDU_DownloadFilePage.Create();
+                }
+
                 GUILayout.Space(10);
                 if (GUILayout.Button("Compress Image"))
                 {

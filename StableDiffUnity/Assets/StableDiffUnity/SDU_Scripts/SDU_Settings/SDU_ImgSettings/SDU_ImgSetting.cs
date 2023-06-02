@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UCL.Core.UI;
@@ -16,9 +16,7 @@ using System.Threading;
 
 namespace SDU
 {
-    [UCL.Core.ATTR.EnableUCLEditor]
-    [System.Serializable]
-    public class Tex2ImgSetting : UCL.Core.JsonLib.UnityJsonSerializable, UCL.Core.UI.UCLI_FieldOnGUI
+    public class SDU_ImgSetting : UCL.Core.JsonLib.UnityJsonSerializable, UCL.Core.UI.UCLI_FieldOnGUI
     {
         #region Save & Load Setting
         [UCL.Core.ATTR.UCL_HideOnGUI]
@@ -27,17 +25,10 @@ namespace SDU
         public string m_LoadID = string.Empty;
         #endregion
 
-        //public List<string> GetAllModelNames() => RunTimeData.Ins.m_WebUISetting.m_ModelNames;
-        //[UCL.Core.PA.UCL_List("GetAllModelNames")]
-        //[UCL.Core.ATTR.UCL_HideOnGUI]
-        //public string m_SelectedModel;
-
         public SDU_CheckPointSetting m_CheckPoint = new SDU_CheckPointSetting();
 
         public SDU_SamplerSetting m_Sampler = new SDU_SamplerSetting();
 
-        [UCL.Core.ATTR.UCL_HideOnGUI] public string m_SelectedLoraModel;
-        
         public string m_Prompt = "masterpiece, best quality, ultra-detailed,((black background)),1girl,";
         public string m_NegativePrompt = "(low quality, worst quality:1.4), ((bad fingers))";
         public int m_Width = 512;
@@ -57,16 +48,35 @@ namespace SDU
 
         [UCL.Core.PA.UCL_IntSlider(1, 8)]
         public int m_BatchSize = 1;
+
         //[UCL.Core.ATTR.UCL_HideOnGUI] 
         public ControlNetSettings m_ControlNetSettings = new ControlNetSettings();
 
         public SDU_ImageOutputSetting m_ImageOutputSetting = new SDU_ImageOutputSetting();
+
+        public JsonData m_ResultInfo = new JsonData();
+        #region Hide
+        [UCL.Core.ATTR.UCL_HideOnGUI]
+        public string m_SelectedLoraModel;
+
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public List<SDU_CMD> m_CMDs = new List<SDU_CMD>();
+        #endregion
 
-        private bool m_Show = true;
+        protected bool m_Show = true;
         public bool RequireClearDic { get; set; } = false;
-        public JsonData GetConfigJson()
+        virtual public SDU_WebUIClient.SDU_WebRequest Client => RunTimeData.SD_API.Client_Txt2img;
+        virtual public FolderEnum PresetFolder => FolderEnum.Tex2ImgPreset;
+        public override JsonData SerializeToJson()
+        {
+            return base.SerializeToJson();
+        }
+        public override void DeserializeFromJson(JsonData iJson)
+        {
+            base.DeserializeFromJson(iJson);
+            RequireClearDic = true;
+        }
+        virtual public JsonData GetConfigJson()
         {
             const int MaxRes = 2048;
             JsonData aJson = new JsonData();
@@ -78,7 +88,7 @@ namespace SDU
             {
                 m_Width += (8 - m_Width % 8);
             }
-            if(m_Height % 8 != 0)
+            if (m_Height % 8 != 0)
             {
                 m_Height += (8 - m_Height % 8);
             }
@@ -108,37 +118,32 @@ namespace SDU
             }
             return aJson;
         }
-
-        public override JsonData SerializeToJson()
-        {
-            return base.SerializeToJson();
-        }
-        public override void DeserializeFromJson(JsonData iJson)
-        {
-            base.DeserializeFromJson(iJson);
-            RequireClearDic = true;
-        }
-        public async Task GenerateImage()
+        virtual public async Task GenerateImage()
         {
             await SDU_ImageGenerator.GenerateImageAsync(this);
         }
-        public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
+        virtual public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {
             //iDataDic
-            UCL_ObjectDictionary aDataDic = iDataDic.GetSubDic("Tex2ImgSetting");
+            UCL_ObjectDictionary aSubDic = iDataDic.GetSubDic("ImgSetting");
             if (RequireClearDic)
             {
                 RequireClearDic = false;
-                aDataDic.Clear();
+                aSubDic.Clear();
             }
             GUILayout.BeginHorizontal();
             m_Show = UCL_GUILayout.Toggle(m_Show);
             GUILayout.Label(iFieldName, UCL_GUIStyle.LabelStyle);
             GUILayout.EndHorizontal();
             if (!m_Show) return this;
+            TexSettingOnGUI(iFieldName, aSubDic, iDataDic);
+            return this;
+        }
+        virtual public void PresetOnGUI(UCL_ObjectDictionary iSubDic)
+        {
             using (var aScope = new GUILayout.VerticalScope("box"))
             {
-                string aPresetPath = RunTimeData.InstallSetting.GetFolderPath(FolderEnum.Tex2ImgPreset);
+                string aPresetPath = RunTimeData.InstallSetting.GetFolderPath(PresetFolder);
                 if (!Directory.Exists(aPresetPath))
                 {
                     Directory.CreateDirectory(aPresetPath);
@@ -155,7 +160,7 @@ namespace SDU
                     m_ID = GUILayout.TextArea(m_ID);
                     if (GUILayout.Button("Open Folder", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
                     {
-                        RunTimeData.InstallSetting.OpenFolder(FolderEnum.Tex2ImgPreset);
+                        RunTimeData.InstallSetting.OpenFolder(PresetFolder);
                     }
                 }
                 using (var aScope2 = new GUILayout.HorizontalScope("box"))
@@ -168,16 +173,19 @@ namespace SDU
                             if (File.Exists(aFilePath))
                             {
                                 string aJsonStr = File.ReadAllText(aFilePath);
-                                aDataDic.Clear();
+                                iSubDic.Clear();
                                 DeserializeFromJson(JsonData.ParseJson(aJsonStr));
                             }
                         });
                     }
                     GUILayout.Label("ID", UCL.Core.UI.UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
                     var aFiles = UCL.Core.FileLib.Lib.GetFilesName(aPresetPath, "*.json", SearchOption.TopDirectoryOnly, true);
-                    m_LoadID = UCL_GUILayout.PopupAuto(m_LoadID, aFiles, aDataDic, "Setting ID", 8);
+                    m_LoadID = UCL_GUILayout.PopupAuto(m_LoadID, aFiles, iSubDic, "Setting ID", 8);
                 }
             }
+        }
+        virtual public void LoraOnGUI(UCL_ObjectDictionary iSubDic)
+        {
             using (var aScope = new GUILayout.HorizontalScope("box"))
             {
                 if (GUILayout.Button("Refresh", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
@@ -194,7 +202,7 @@ namespace SDU
                 var aLoraNames = RunTimeData.Ins.m_WebUISetting.m_LoraNames;
                 if (!aLoraNames.IsNullOrEmpty())
                 {
-                    m_SelectedLoraModel = UCL_GUILayout.PopupAuto(m_SelectedLoraModel, aLoraNames, aDataDic, "Lora", 8);
+                    m_SelectedLoraModel = UCL_GUILayout.PopupAuto(m_SelectedLoraModel, aLoraNames, iSubDic, "Lora", 8);
                 }
 
                 if (GUILayout.Button("Open Folder", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
@@ -202,43 +210,9 @@ namespace SDU
                     RunTimeData.InstallSetting.OpenFolder(FolderEnum.Lora);
                 }
             }
-
-            UCL.Core.UI.UCL_GUILayout.DrawField(this, aDataDic.GetSubDic("Tex2Img"), iFieldName, true);
-            UCL.Core.UI.UCL_GUILayout.DrawObjectData(m_CMDs, iDataDic.GetSubDic("CMDs"), "CMDs", false);
-            
-            if (SDU_Server.ServerReady)
-            {
-                if (!SDU_CMDService.TriggeringCMD)
-                {
-                    if (GUILayout.Button("Generate Image", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
-                    {
-                        var aCMD = new SDU_CMDGenerateImage();
-                        var aCMDs = new List<SDU_CMD>() { aCMD };
-                        SDU_CMDService.TriggerCMDs(this, aCMDs, new CancellationTokenSource()).Forget();
-                    }
-                    if (!m_CMDs.IsNullOrEmpty())
-                    {
-                        if (GUILayout.Button("Trigger CMDs", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
-                        {
-                            var aCMDs = new List<SDU_CMD>();
-                            foreach(var aCMD in m_CMDs)
-                            {
-                                aCMDs.Append(aCMD.GetCMDList());
-                            }
-                            UCL.Core.ServiceLib.UCL_UpdateService.AddAction(() =>
-                            {
-                                SDU_CMDService.TriggerCMDs(this, aCMDs, new CancellationTokenSource()).Forget();
-                            });
-                        }
-                    }
-                }
-                
-                SDU_CMDService.OnGUI(iDataDic.GetSubDic("SDU_CMDService"));
-            }
-
-            SDU_ImageGenerator.OnGUI(iDataDic.GetSubDic("SDU_ImageGenerator"));
-
-            //m_ControlNetSettings.OnGUI(iDataDic.GetSubDic("ControlNetSettings"));
+        }
+        virtual public object TexSettingOnGUI(string iFieldName, UCL_ObjectDictionary iSubDic, UCL_ObjectDictionary iDataDic)
+        {
             return this;
         }
     }
