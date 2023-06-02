@@ -244,7 +244,7 @@ namespace SDU
                     var aCam = URP_Camera.CurCamera;
                     if (aCam != null)
                     {
-                        var aSetting = RunTimeData.Ins.m_Tex2ImgSettings;
+                        var aSetting = RunTimeData.Ins.CurImgSetting;
                         aCam.CaptureImage(aSetting.m_Width, aSetting.m_Height, ref m_ImageSetting.Texture, iCaptureMod);
                         if (iSaveAfterCapture)
                         {

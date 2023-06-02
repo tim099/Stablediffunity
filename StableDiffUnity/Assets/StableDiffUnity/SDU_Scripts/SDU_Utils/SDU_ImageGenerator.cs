@@ -44,7 +44,7 @@ namespace SDU
             string aPath = DefaultImageOutputFolder();
             if(iSetting == null)
             {
-                iSetting = RunTimeData.Ins.m_Tex2ImgSettings.m_ImageOutputSetting;
+                iSetting = RunTimeData.Ins.CurImgSetting.m_ImageOutputSetting;
             }
             string aFileID = (++iSetting.m_OutPutFileID).ToString();
             string aFileName = $"{System.DateTime.Now.ToString("HHmmssff")}_{aFileID}";

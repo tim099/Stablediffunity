@@ -127,6 +127,18 @@ namespace SDU
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public GenerateMode m_GenerateMode = GenerateMode.Tex2Img;
 
+        public SDU_ImgSetting CurImgSetting
+        {
+            get
+            {
+                switch (m_GenerateMode)
+                {
+                    case GenerateMode.Img2Img: return m_Img2ImgSetting;
+                }
+                return m_Tex2ImgSettings;
+            }
+        }
+
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public Tex2ImgSetting m_Tex2ImgSettings = new Tex2ImgSetting();
 
