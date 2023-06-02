@@ -27,6 +27,7 @@ namespace SDU
             public string m_FileName = "InputImage.png";
 
             public string FilePath => string.IsNullOrEmpty(m_FileName) ? string.Empty : Path.Combine(m_FolderPath, m_FileName);
+            public bool FileExist => File.Exists(FilePath);
             public IList<string> GetAllFileNames()
             {
                 if (!Directory.Exists(m_FolderPath))
@@ -100,6 +101,7 @@ namespace SDU
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public URP_Camera.CaptureMode m_CaptureMode = URP_Camera.CaptureMode.Depth;
 
+        public bool ShowImageDetail => m_ShowImageDetail;
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public bool m_ShowImageDetail = false;
 

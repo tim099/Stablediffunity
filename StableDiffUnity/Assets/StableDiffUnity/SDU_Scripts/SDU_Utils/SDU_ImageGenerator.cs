@@ -20,7 +20,10 @@ namespace SDU
         public static float ProgressVal = 0;
 
         public readonly static List<Texture2D> s_Textures = new List<Texture2D>();
-
+        public static void ClearPrevGeneratedImage()
+        {
+            PrevGeneratedImage = null;
+        }
         public static void OnGUI(UCL_ObjectDictionary iDataDic)
         {
             if (!string.IsNullOrEmpty(ProgressStr))

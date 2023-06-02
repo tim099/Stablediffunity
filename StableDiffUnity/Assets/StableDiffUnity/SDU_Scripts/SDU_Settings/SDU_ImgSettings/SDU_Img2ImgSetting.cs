@@ -91,7 +91,11 @@ namespace SDU
 
         override public void SetInputImage(SDU_InputImage iInputImage)
         {
-            if (iInputImage == null) return;
+            if (iInputImage == null) return;//iInputImage
+            if (!iInputImage.m_LoadImageSetting.FileExist)
+            {
+                return;
+            }
             m_InputImage.DeserializeFromJson(iInputImage.SerializeToJson());
         }
     }
