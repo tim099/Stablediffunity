@@ -215,5 +215,12 @@ namespace SDU
         {
             return this;
         }
+
+        #region Set
+        virtual public void SetInputImage(SDU_InputImage iInputImage)
+        {
+
+        }
+        #endregion
     }
 }

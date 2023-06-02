@@ -88,5 +88,11 @@ namespace SDU
             SDU_ImageGenerator.OnGUI(iDataDic.GetSubDic("SDU_ImageGenerator"));
             return this;
         }
+
+        override public void SetInputImage(SDU_InputImage iInputImage)
+        {
+            if (iInputImage == null) return;
+            m_InputImage.DeserializeFromJson(iInputImage.SerializeToJson());
+        }
     }
 }

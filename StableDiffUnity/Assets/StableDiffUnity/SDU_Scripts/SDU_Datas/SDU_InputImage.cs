@@ -106,6 +106,19 @@ namespace SDU
         private bool m_StartCapture = false;//m_AutoCaptureMode
         public Texture2D Texture { get => m_ImageSetting.Texture; set => m_ImageSetting.Texture = value; }
 
+        public SDU_InputImage() { }
+        ~SDU_InputImage()
+        {
+            Clear();
+        }
+        public void Clear()
+        {
+            if (Texture != null)
+            {
+                GameObject.DestroyImmediate(Texture);
+                Texture = null;
+            }
+        }
         public string GetShortName()
         {
             return $"{m_LoadImageSetting.m_FileName}";//InputImage File:
@@ -303,10 +316,7 @@ namespace SDU
                 var aTexture = UCL.Core.TextureLib.Lib.CreateTexture(aBytes);
                 if (aTexture != null)
                 {
-                    if (Texture != null)
-                    {
-                        GameObject.DestroyImmediate(Texture);
-                    }
+                    Clear();
                     Texture = aTexture;
                 }
             }
@@ -317,6 +327,7 @@ namespace SDU
         }
         public override void DeserializeFromJson(JsonData iJson)
         {
+            Clear();
             base.DeserializeFromJson(iJson);
             if (File.Exists(m_LoadImageSetting.FilePath))
             {

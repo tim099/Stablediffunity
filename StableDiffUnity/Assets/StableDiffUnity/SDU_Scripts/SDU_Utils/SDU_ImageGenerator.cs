@@ -14,6 +14,7 @@ namespace SDU
     public static class SDU_ImageGenerator
     {
         public static bool IsAvaliable => SDU_Server.ServerReady && !GeneratingImage;
+        public static SDU_InputImage PrevGeneratedImage { get; private set; } = null;
         public static bool GeneratingImage { get; private set; } = false;
         public static string ProgressStr = string.Empty;
         public static float ProgressVal = 0;
@@ -180,7 +181,7 @@ namespace SDU
                         }
                         var aImageOutputSetting = iSetting.m_ImageOutputSetting;
                         var aSavePath = GetSaveImagePath(aImageOutputSetting);
-                        string aPath = aImageOutputSetting.OutputFolderPath;//aSavePath.Item1;
+                        string aFolderPath = aImageOutputSetting.OutputFolderPath;//aSavePath.Item1;
                         string aFileName = aSavePath.Item2;
 
                         var aFileTasks = new List<Task>();
@@ -190,8 +191,8 @@ namespace SDU
                         if (aImageOutputSetting.m_OutputGenerateImageSetting)
                         {
                             
-                            string aFilePath = Path.Combine(aPath, $"{aFileName}.json"); // M HH:mm:ss
-                            Debug.Log($"aPath:{aPath},aFilePath:{aFilePath}");
+                            string aFilePath = Path.Combine(aFolderPath, $"{aFileName}.json"); // M HH:mm:ss
+                            Debug.Log($"aPath:{aFolderPath},aFilePath:{aFilePath}");
                             long aSeed = iSetting.m_Seed;
                             if (iSetting.m_ResultInfo.Contains("seed"))
                             {
@@ -212,17 +213,33 @@ namespace SDU
 
                             var aImageBytes = Convert.FromBase64String(aSplitStr[0]);
                             var aTexture = UCL.Core.TextureLib.Lib.CreateTexture(aImageBytes);
-
+                            //PrevGeneratedImage
                             if (aRemoveLastImageOutput && i == aImages.Count - 1)
                             {
 
                             }
                             else
                             {
-                                string aFilePath = Path.Combine(aPath, $"{aFileName}_{i}.png"); // M HH:mm:ss
-                                Debug.Log($"aPath:{aPath},aFilePath:{aFilePath}");
+
+                                string aFileSaveName = $"{aFileName}_{i}.png";
+                                string aFilePath = Path.Combine(aFolderPath, aFileSaveName); // M HH:mm:ss
+                                Debug.Log($"aPath:{aFolderPath},aFilePath:{aFilePath}");
 
                                 aFileTasks.Add(File.WriteAllBytesAsync(aFilePath, aTexture.EncodeToPNG()));
+
+                                if (i == 0)
+                                {
+                                    if (PrevGeneratedImage == null)
+                                    {
+                                        PrevGeneratedImage = new SDU_InputImage();
+                                    }
+                                    else
+                                    {
+                                        PrevGeneratedImage.Clear();
+                                    }
+                                    PrevGeneratedImage.m_LoadImageSetting.m_FolderPath = aFolderPath;
+                                    PrevGeneratedImage.m_LoadImageSetting.m_FileName = aFileSaveName;
+                                }
                             }
 
                             s_Textures.Add(aTexture);

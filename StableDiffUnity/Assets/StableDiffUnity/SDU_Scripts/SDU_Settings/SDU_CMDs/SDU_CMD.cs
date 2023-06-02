@@ -25,6 +25,7 @@ namespace SDU
                 s_Types.Add(typeof(SDU_CMDSetSteps));
                 s_Types.Add(typeof(SDU_CMDSetCfgScale));
                 s_Types.Add(typeof(SDU_CMDSetSeed));
+                s_Types.Add(typeof(SDU_CMDSetInputImage));
 
                 s_Types.Add(typeof(SDU_CMDForeach));
                 s_Types.Add(typeof(SDU_CMDControlNet));
