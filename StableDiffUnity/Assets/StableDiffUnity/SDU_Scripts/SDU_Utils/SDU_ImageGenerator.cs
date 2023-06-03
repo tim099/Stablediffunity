@@ -45,11 +45,17 @@ namespace SDU
         }
         public static Tuple<string, string> GetSaveImagePath(SDU_ImageOutputSetting iSetting = null)
         {
-            string aPath = DefaultImageOutputFolder();
-            if(iSetting == null)
+            if (iSetting == null)
             {
                 iSetting = RunTimeData.Ins.CurImgSetting.m_ImageOutputSetting;
             }
+
+            string aPath = iSetting.OutputFolderPath;
+            if (!Directory.Exists(aPath))
+            {
+                Directory.CreateDirectory(aPath);
+            }
+
             string aFileID = (++iSetting.m_OutPutFileID).ToString();
             string aFileName = $"{System.DateTime.Now.ToString("HHmmssff")}_{aFileID}";
             return Tuple.Create(aPath, aFileName);

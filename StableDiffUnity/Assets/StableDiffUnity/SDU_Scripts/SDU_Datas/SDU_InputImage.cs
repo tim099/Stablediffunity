@@ -18,6 +18,8 @@ namespace SDU
     {
         public class LoadImageSetting : UCL.Core.UI.UCLI_FieldOnGUI
         {
+            public bool ClearDic { get; set; } = false;
+
             [UCL.Core.PA.UCL_FolderExplorer(UCL.Core.PA.ExplorerType.None)]
             public string m_FolderPath = string.Empty;//SDU_StableDiffusionPage.Data.m_InstallSetting.EnvInstallRoot;
             /// <summary>
@@ -83,6 +85,17 @@ namespace SDU
                 return this;
             }
         }
+        public class AutoCaptureSetting : UCL.Core.JsonLib.UnityJsonSerializable
+        {
+            public bool m_EnableAutoCapture = false;
+            public bool m_SaveAutoCaptureImage = true;
+            /// <summary>
+            /// Interval in seconds
+            /// </summary>
+            public float m_AutoCaptureInterval = 0.1f;
+
+            public System.DateTime PrevCaptureTime { get; set; } = System.DateTime.MinValue;
+        }
         public enum AutoCaptureMode
         {
             Off,
@@ -96,7 +109,9 @@ namespace SDU
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public ImageSetting m_ImageSetting = new ImageSetting();
 
-        public AutoCaptureMode m_AutoCaptureMode = AutoCaptureMode.Off;
+        //public AutoCaptureMode m_AutoCaptureMode = AutoCaptureMode.Off;
+
+        public AutoCaptureSetting m_AutoCaptureSetting = new AutoCaptureSetting();
 
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public URP_Camera.CaptureMode m_CaptureMode = URP_Camera.CaptureMode.Depth;
@@ -186,10 +201,7 @@ namespace SDU
                                         {
                                             var aSavePath = SDU_ImageGenerator.GetSaveImagePath();
                                             string aFolderPath = aSavePath.Item1;
-                                            if (!Directory.Exists(aFolderPath))
-                                            {
-                                                Directory.CreateDirectory(aFolderPath);
-                                            }
+
                                             System.Diagnostics.Process.Start(aFolderPath);
                                             //RunTimeData.Ins.m_Tex2ImgSettings.m_ImageOutputSetting.OpenFolder();
                                         }
@@ -206,7 +218,12 @@ namespace SDU
                                     }
                                 }
                                 //iFieldName
-                                UCL.Core.UI.UCL_GUILayout.DrawObjectData(m_LoadImageSetting, iDataDic.GetSubDic("LoadImageSetting"), "LoadImageSetting", false);
+                                var aLoadImageSettingDic = iDataDic.GetSubDic("LoadImageSetting");
+                                if (m_LoadImageSetting.ClearDic)
+                                {
+                                    aLoadImageSettingDic.Clear();
+                                }
+                                UCL.Core.UI.UCL_GUILayout.DrawObjectData(m_LoadImageSetting, aLoadImageSettingDic, "LoadImageSetting", false);
                                 GUILayout.EndHorizontal();
 
                                 UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic.GetSubDic("InputImage"), "InputImage", true);
@@ -224,21 +241,29 @@ namespace SDU
                 }
 
             }
-            if(m_AutoCaptureMode != AutoCaptureMode.Off && !m_StartCapture)
+            if(!m_StartCapture)//m_AutoCaptureMode != AutoCaptureMode.Off && 
             {
-                switch (m_AutoCaptureMode)
+                if (m_AutoCaptureSetting.m_EnableAutoCapture)
                 {
-                    case AutoCaptureMode.AutoCaptureImage:
-                        {
-                            CaptureImage(m_CaptureMode, false);
-                            break;
-                        }
-                    case AutoCaptureMode.AutoCaptureAndSaveImage:
-                        {
-                            CaptureImage(m_CaptureMode, true);
-                            break;
-                        }
+                    if ((System.DateTime.Now - m_AutoCaptureSetting.PrevCaptureTime).TotalSeconds >= m_AutoCaptureSetting.m_AutoCaptureInterval)
+                    {
+                        m_AutoCaptureSetting.PrevCaptureTime = System.DateTime.Now;
+                        CaptureImage(m_CaptureMode, m_AutoCaptureSetting.m_SaveAutoCaptureImage);
+                    }
                 }
+                //switch (m_AutoCaptureMode)
+                //{
+                //    case AutoCaptureMode.AutoCaptureImage:
+                //        {
+                //            CaptureImage(m_CaptureMode, false);
+                //            break;
+                //        }
+                //    case AutoCaptureMode.AutoCaptureAndSaveImage:
+                //        {
+                //            CaptureImage(m_CaptureMode, true);
+                //            break;
+                //        }
+                //}
             }
 
 
@@ -296,6 +321,8 @@ namespace SDU
                 }
 
                 File.WriteAllBytes(aFilePath, Texture.EncodeToPNG());
+
+                m_LoadImageSetting.ClearDic = true;
                 m_LoadImageSetting.m_FolderPath = aFolderPath;
                 m_LoadImageSetting.m_FileName = aFileName;
             }
