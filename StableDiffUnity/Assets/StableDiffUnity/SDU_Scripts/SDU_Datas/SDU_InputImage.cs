@@ -18,7 +18,7 @@ namespace SDU
     {
         public class LoadImageSetting : UCL.Core.UI.UCLI_FieldOnGUI
         {
-            public bool ClearDic { get; set; } = false;
+            public bool RequireClearDic { get; set; } = false;
 
             [UCL.Core.PA.UCL_FolderExplorer(UCL.Core.PA.ExplorerType.None)]
             public string m_FolderPath = string.Empty;//SDU_StableDiffusionPage.Data.m_InstallSetting.EnvInstallRoot;
@@ -219,8 +219,9 @@ namespace SDU
                                 }
                                 //iFieldName
                                 var aLoadImageSettingDic = iDataDic.GetSubDic("LoadImageSetting");
-                                if (m_LoadImageSetting.ClearDic)
+                                if (m_LoadImageSetting.RequireClearDic)
                                 {
+                                    m_LoadImageSetting.RequireClearDic = false;
                                     aLoadImageSettingDic.Clear();
                                 }
                                 UCL.Core.UI.UCL_GUILayout.DrawObjectData(m_LoadImageSetting, aLoadImageSettingDic, "LoadImageSetting", false);
@@ -322,7 +323,7 @@ namespace SDU
 
                 File.WriteAllBytes(aFilePath, Texture.EncodeToPNG());
 
-                m_LoadImageSetting.ClearDic = true;
+                m_LoadImageSetting.RequireClearDic = true;
                 m_LoadImageSetting.m_FolderPath = aFolderPath;
                 m_LoadImageSetting.m_FileName = aFileName;
             }
