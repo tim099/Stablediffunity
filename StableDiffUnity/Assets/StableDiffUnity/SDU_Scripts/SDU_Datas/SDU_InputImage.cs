@@ -94,13 +94,9 @@ namespace SDU
             /// </summary>
             public float m_AutoCaptureInterval = 0.1f;
 
+            public List<URP_Camera.CaptureMode> m_AutoCaptureModes = new List<URP_Camera.CaptureMode>();
+
             public System.DateTime PrevCaptureTime { get; set; } = System.DateTime.MinValue;
-        }
-        public enum AutoCaptureMode
-        {
-            Off,
-            AutoCaptureImage,
-            AutoCaptureAndSaveImage,
         }
 
         [UCL.Core.ATTR.UCL_HideOnGUI]
@@ -173,7 +169,7 @@ namespace SDU
                                 if (GUILayout.Button("Capture Image", UCL.Core.UI.UCL_GUIStyle.ButtonStyle,
                                     GUILayout.ExpandWidth(false)))
                                 {
-                                    CaptureImage(m_CaptureMode, m_ImageSetting.m_SaveImageAfterCapture);
+                                    CaptureImage(new List<URP_Camera.CaptureMode>() { m_CaptureMode }, m_ImageSetting.m_SaveImageAfterCapture);
                                 }
                                 m_CaptureMode = UCL_GUILayout.PopupAuto(m_CaptureMode, iDataDic.GetSubDic("CaptureMode"),
                                     "CaptureMode");
@@ -184,7 +180,6 @@ namespace SDU
 
                         if (m_ShowImageDetail)
                         {
-
                             try
                             {
                                 
@@ -249,7 +244,9 @@ namespace SDU
                     if ((System.DateTime.Now - m_AutoCaptureSetting.PrevCaptureTime).TotalSeconds >= m_AutoCaptureSetting.m_AutoCaptureInterval)
                     {
                         m_AutoCaptureSetting.PrevCaptureTime = System.DateTime.Now;
-                        CaptureImage(m_CaptureMode, m_AutoCaptureSetting.m_SaveAutoCaptureImage);
+                        var aCaptureModes = m_AutoCaptureSetting.m_AutoCaptureModes.Clone();
+                        if (aCaptureModes.Count == 0) aCaptureModes.Add(m_CaptureMode);
+                        CaptureImage(aCaptureModes, m_AutoCaptureSetting.m_SaveAutoCaptureImage);
                     }
                 }
                 //switch (m_AutoCaptureMode)
@@ -270,7 +267,7 @@ namespace SDU
 
             return this;
         }
-        public void CaptureImage(URP_Camera.CaptureMode iCaptureMod, bool iSaveAfterCapture)
+        public void CaptureImage(List<URP_Camera.CaptureMode> iCaptureModes, bool iSaveAfterCapture)
         {
             //Debug.LogWarning($"CaptureImage iCaptureMod:{iCaptureMod}");
             if (m_StartCapture)
@@ -286,11 +283,15 @@ namespace SDU
                     if (aCam != null)
                     {
                         var aSetting = RunTimeData.Ins.CurImgSetting;
-                        aCam.CaptureImage(aSetting.m_Width, aSetting.m_Height, ref m_ImageSetting.Texture, iCaptureMod);
-                        if (iSaveAfterCapture)
+                        foreach(var aCaptureMode in iCaptureModes)
                         {
-                            SaveImage();
+                            aCam.CaptureImage(aSetting.m_Width, aSetting.m_Height, ref m_ImageSetting.Texture, aCaptureMode);
+                            if (iSaveAfterCapture)
+                            {
+                                SaveImage();
+                            }
                         }
+
                     }
                     else
                     {
