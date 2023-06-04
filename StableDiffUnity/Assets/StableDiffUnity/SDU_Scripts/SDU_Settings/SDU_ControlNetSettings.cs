@@ -18,8 +18,9 @@ namespace SDU
     [System.Serializable]
     public class ControlNetSettings : UCL.Core.JsonLib.UnityJsonSerializable, UCL.Core.UI.UCLI_FieldOnGUI
     {
+        [UCL.Core.ATTR.UCL_HideOnGUI]
         public bool m_EnableControlNet = false;
-        public List<string> GetAllModels() => RunTimeData.Ins.m_WebUISetting.m_ControlNetData.m_ModelList;
+        //public List<string> GetAllModels() => RunTimeData.Ins.m_WebUISetting.m_ControlNetData.m_ModelList;
         //[UCL.Core.PA.UCL_List("GetAllModels")] 
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public string m_SelectedModel;
@@ -52,7 +53,32 @@ namespace SDU
                 m_Show = UCL_GUILayout.Toggle(m_Show);
                 using (var aScope2 = new GUILayout.VerticalScope())
                 {
-                    GUILayout.Label(iFieldName, UCL_GUIStyle.LabelStyle);
+                    using (var aScope3 = new GUILayout.HorizontalScope())
+                    {
+                        m_EnableControlNet = UCL_GUILayout.CheckBox(m_EnableControlNet);
+                        GUILayout.Label($"{iFieldName} [{m_SelectedModel}]", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
+                        GUILayout.FlexibleSpace();
+                        if (GUILayout.Button("Copy", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                        {
+                            GUIUtility.systemCopyBuffer = SerializeToJson().ToJson();
+                        }
+                        if(GUILayout.Button("Paste", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                        {
+                            if (!string.IsNullOrEmpty(GUIUtility.systemCopyBuffer))
+                            {
+                                try
+                                {
+                                    var aJson = JsonData.ParseJson(GUIUtility.systemCopyBuffer);
+                                    DeserializeFromJson(aJson);
+                                }
+                                catch (Exception e)
+                                {
+                                    Debug.LogException(e);
+                                }
+                            }
+                        }
+                    }
+
                     if (m_Show)
                     {
                         using (var aScope3 = new GUILayout.HorizontalScope("box"))
