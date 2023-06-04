@@ -4,6 +4,7 @@ namespace SDU
 {
     public class SDU_CMDGroup : SDU_CMD
     {
+        public bool UnpackToCMDList { get; set; } = true;
         public List<SDU_CMD> m_CMDs = new List<SDU_CMD>();
 
         override public string GetShortName()
@@ -14,15 +15,27 @@ namespace SDU
         public override List<SDU_CMD> GetCMDList()
         {
             var aList = new List<SDU_CMD>();
-            foreach(var aCmd in m_CMDs)
+            if (UnpackToCMDList)
             {
-                aList.Append(aCmd.GetCMDList());
+                foreach (var aCmd in m_CMDs)
+                {
+                    aList.Append(aCmd.GetCMDList());
+                }
             }
+            else
+            {
+                aList.Add(this);
+            }
+
             return aList;
         }
-        override public async Task TriggerCMD(SDU_ImgSetting iTex2ImgSetting, System.Threading.CancellationToken iCancellationToken)
+        override public async Task TriggerCMD(SDU_ImgSetting iImgSetting, System.Threading.CancellationToken iCancellationToken)
         {
-            await Task.Delay(1);
+            var aCMDs = m_CMDs.Clone();
+            foreach(var aCmd in aCMDs)
+            {
+                await aCmd.TriggerCMD(iImgSetting, iCancellationToken);
+            }
         }
     }
 }

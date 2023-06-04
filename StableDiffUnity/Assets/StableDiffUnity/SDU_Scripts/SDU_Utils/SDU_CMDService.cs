@@ -41,7 +41,8 @@ namespace SDU
         {
             if (s_TriggeringCMD)
             {
-                using(var aScope = new GUILayout.HorizontalScope("box"))
+                UCL_GUILayout.DrawObjectData(s_CMDs, iDataDic.GetSubDic("s_CMDs"), "Triggering CMDs");
+                using (var aScope = new GUILayout.HorizontalScope("box"))
                 {
                     GUILayout.Label($"Triggering CMD[{s_TriggerCMDAt+1}/{s_CMDs.Count}]",
                         UCL_GUIStyle.LabelStyle, GUILayout.Width(200));
