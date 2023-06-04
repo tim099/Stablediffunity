@@ -22,44 +22,7 @@ namespace SDU
     {
         override public JsonData GetConfigJson()
         {
-            const int MaxRes = 2048;
-            JsonData aJson = new JsonData();
-            if (m_Width <= 0) m_Width = 8;
-            if (m_Height <= 0) m_Height = 8;
-            if (m_Width > MaxRes) m_Width = MaxRes;
-            if (m_Height > MaxRes) m_Height = MaxRes;
-            if (m_Width % 8 != 0)
-            {
-                m_Width += (8 - m_Width % 8);
-            }
-            if(m_Height % 8 != 0)
-            {
-                m_Height += (8 - m_Height % 8);
-            }
-
-            aJson["sampler_index"] = m_Sampler.m_SelectedSampler;//m_SelectedSampler;
-            aJson["prompt"] = m_Prompt;
-            aJson["steps"] = m_Steps;
-            aJson["negative_prompt"] = m_NegativePrompt;
-            aJson["seed"] = m_Seed;
-            //aJson["clip_skip"] = m_ClipSkip;
-            aJson["cfg_scale"] = m_CfgScale;
-            aJson["width"] = m_Width;
-            aJson["height"] = m_Height;
-            aJson["batch_size"] = m_BatchSize;
-            Debug.LogWarning($"m_Width:{m_Width},m_Height:{m_Height}");
-            if (m_ControlNetSettings.m_EnableControlNet)
-            {
-                JsonData aAlwayson = new JsonData();
-                aJson["alwayson_scripts"] = aAlwayson;
-                {
-                    JsonData aControlnet = m_ControlNetSettings.GetConfigJson();//new JsonData();
-                    if (aControlnet != null)
-                    {
-                        aAlwayson["controlnet"] = aControlnet;
-                    }
-                }
-            }
+            JsonData aJson = base.GetConfigJson();
             return aJson;
         }
 

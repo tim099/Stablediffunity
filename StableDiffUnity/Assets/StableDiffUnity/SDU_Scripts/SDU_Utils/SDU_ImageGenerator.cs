@@ -99,7 +99,7 @@ namespace SDU
                     using (var aClient = iSetting.Client)
                     {
                         JsonData aJson = iSetting.GetConfigJson();
-
+                        iSetting.m_ResultInfo = aJson;
                         string aJsonStr = aJson.ToJson();
                         //GUIUtility.systemCopyBuffer = aJsonStr;
                         var aValueTask = aClient.SendWebRequestAsync(aJsonStr);

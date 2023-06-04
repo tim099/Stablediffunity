@@ -51,7 +51,7 @@ namespace SDU
 
         //[UCL.Core.ATTR.UCL_HideOnGUI] 
         public ControlNetSettings m_ControlNetSettings = new ControlNetSettings();
-
+        public List<ControlNetSettings> m_MultiControlNetSettings = new();
         public SDU_ImageOutputSetting m_ImageOutputSetting = new SDU_ImageOutputSetting();
 
         public JsonData m_ResultInfo = new JsonData();
@@ -104,18 +104,45 @@ namespace SDU
             aJson["height"] = m_Height;
             aJson["batch_size"] = m_BatchSize;
             Debug.LogWarning($"m_Width:{m_Width},m_Height:{m_Height}");
+
+            List<ControlNetSettings> aControlNetSettings = new List<ControlNetSettings>();
             if (m_ControlNetSettings.m_EnableControlNet)
             {
-                JsonData aAlwayson = new JsonData();
-                aJson["alwayson_scripts"] = aAlwayson;
+                aControlNetSettings.Add(m_ControlNetSettings);
+            }
+            if (!m_MultiControlNetSettings.IsNullOrEmpty())
+            {
+                foreach(var aControlNetSetting in m_MultiControlNetSettings)
                 {
-                    JsonData aControlnet = m_ControlNetSettings.GetConfigJson();//new JsonData();
-                    if (aControlnet != null)
+                    if (aControlNetSetting.m_EnableControlNet)
                     {
-                        aAlwayson["controlnet"] = aControlnet;
+                        aControlNetSettings.Add(aControlNetSetting);
                     }
                 }
             }
+            if (!aControlNetSettings.IsNullOrEmpty())
+            {
+                Debug.LogWarning($"aControlNetSettings:{aControlNetSettings.Count}");
+                JsonData aAlwayson = new JsonData();
+                aJson["alwayson_scripts"] = aAlwayson;
+                {
+                    JsonData aControlnet = new JsonData();
+                    aAlwayson["controlnet"] = aControlnet;
+                    JsonData aArgs = new JsonData();
+                    aControlnet["args"] = aArgs;
+
+                    for (int i = 0; i < aControlNetSettings.Count; i++)
+                    {
+                        var aControlNetSetting = aControlNetSettings[i];
+                        JsonData aControlnetArg = aControlNetSetting.GetConfigJson();
+                        if (aControlnetArg != null)
+                        {
+                            aArgs.Add(aControlnetArg);
+                        }
+                    }
+                }
+            }
+
             return aJson;
         }
         virtual public async Task GenerateImage()
