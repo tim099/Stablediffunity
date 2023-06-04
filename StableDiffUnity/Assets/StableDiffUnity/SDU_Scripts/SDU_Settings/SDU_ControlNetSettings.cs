@@ -41,6 +41,16 @@ namespace SDU
             base.DeserializeFromJson(iJson);
             RequireClearDic = true;
         }
+        public void SetInputImage(SDU_InputImage iInputImage)
+        {
+            RequireClearDic = true;
+            m_InputImage.DeserializeFromJson(iInputImage.SerializeToJson());
+        }
+        public void SetEnable(bool iEnable)
+        {
+            RequireClearDic = true;
+            m_EnableControlNet = iEnable;
+        }
         public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {
             if (RequireClearDic)

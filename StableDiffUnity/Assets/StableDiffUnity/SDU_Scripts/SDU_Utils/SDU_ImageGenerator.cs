@@ -98,6 +98,10 @@ namespace SDU
                     }
                     using (var aClient = iSetting.Client)
                     {
+                        var aImageOutputSetting = iSetting.m_ImageOutputSetting;
+                        int aEnabledControlNetCount = iSetting.GetEnabledControlNetSettings().Count;
+                        bool aRemoveControlNetInputImage = !aImageOutputSetting.m_OutputControlNetInputImage && aEnabledControlNetCount > 0;
+
                         JsonData aJson = iSetting.GetConfigJson();
                         iSetting.m_ResultInfo = aJson;
                         string aJsonStr = aJson.ToJson();
@@ -188,14 +192,14 @@ namespace SDU
                         {
                             Debug.LogError("!aResultJson.Contains(\"info\")");
                         }
-                        var aImageOutputSetting = iSetting.m_ImageOutputSetting;
+                        
                         var aSavePath = GetSaveImagePath(aImageOutputSetting);
                         string aFolderPath = aImageOutputSetting.OutputFolderPath;//aSavePath.Item1;
                         string aFileName = aSavePath.Item2;
 
                         var aFileTasks = new List<Task>();
                         var aImages = aResultJson["images"];
-                        bool aRemoveLastImageOutput = iSetting.m_ControlNetSettings.m_EnableControlNet && !aImageOutputSetting.m_OutputControlNetInputImage;
+
                         Debug.LogWarning($"aImages.Count:{aImages.Count}");
                         if (aImageOutputSetting.m_OutputGenerateImageSetting)
                         {
@@ -223,7 +227,7 @@ namespace SDU
                             var aImageBytes = Convert.FromBase64String(aSplitStr[0]);
                             var aTexture = UCL.Core.TextureLib.Lib.CreateTexture(aImageBytes);
                             //PrevGeneratedImage
-                            if (aRemoveLastImageOutput && i == aImages.Count - 1)
+                            if (aRemoveControlNetInputImage && i >= aImages.Count - aEnabledControlNetCount)
                             {
 
                             }

@@ -29,7 +29,7 @@ namespace SDU
             UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic, iFieldName, false);
             return this;
         }
-        virtual public async Task TriggerCMD(SDU_ImgSetting iTex2ImgSetting, System.Threading.CancellationToken iCancellationToken)
+        virtual public async Task TriggerCMD(SDU_ImgSetting iTex2ImgSetting, int iTargetControlNetID, System.Threading.CancellationToken iCancellationToken)
         {
             //iTex2ImgSetting.m_ControlNetSettings.RequireClearDic = true;
 

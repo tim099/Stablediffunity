@@ -50,7 +50,8 @@ namespace SDU
         public int m_BatchSize = 1;
 
         //[UCL.Core.ATTR.UCL_HideOnGUI] 
-        public ControlNetSettings m_ControlNetSettings = new ControlNetSettings();
+        //public ControlNetSettings m_ControlNetSettings = new ControlNetSettings();
+
         public List<ControlNetSettings> m_MultiControlNetSettings = new();
         public SDU_ImageOutputSetting m_ImageOutputSetting = new SDU_ImageOutputSetting();
 
@@ -67,6 +68,21 @@ namespace SDU
         public bool RequireClearDic { get; set; } = false;
         virtual public SDU_WebUIClient.SDU_WebRequest Client => RunTimeData.SD_API.Client_Txt2img;
         virtual public FolderEnum PresetFolder => FolderEnum.Tex2ImgPreset;
+        public ControlNetSettings GetControlNetSetting(int iTargetControlNetID)
+        {
+            if (iTargetControlNetID < 0)
+            {
+                Debug.LogError($"GetControlNetSetting iTargetControlNetID({iTargetControlNetID}) < 0");
+                return null;
+            }
+            if (iTargetControlNetID >= m_MultiControlNetSettings.Count)
+            {
+                Debug.LogError($"GetControlNetSetting iTargetControlNetID({iTargetControlNetID}) >= m_MultiControlNetSettings.Count" +
+                    $"({m_MultiControlNetSettings.Count})");
+                return null;
+            }
+            return m_MultiControlNetSettings[iTargetControlNetID];
+        }
         public override JsonData SerializeToJson()
         {
             return base.SerializeToJson();
@@ -75,6 +91,25 @@ namespace SDU
         {
             base.DeserializeFromJson(iJson);
             RequireClearDic = true;
+        }
+        public List<ControlNetSettings> GetEnabledControlNetSettings()
+        {
+            List<ControlNetSettings> aControlNetSettings = new List<ControlNetSettings>();
+            //if (m_ControlNetSettings.m_EnableControlNet)
+            //{
+            //    aControlNetSettings.Add(m_ControlNetSettings);
+            //}
+            if (!m_MultiControlNetSettings.IsNullOrEmpty())
+            {
+                foreach (var aControlNetSetting in m_MultiControlNetSettings)
+                {
+                    if (aControlNetSetting.m_EnableControlNet)
+                    {
+                        aControlNetSettings.Add(aControlNetSetting);
+                    }
+                }
+            }
+            return aControlNetSettings;
         }
         virtual public JsonData GetConfigJson()
         {
@@ -105,21 +140,8 @@ namespace SDU
             aJson["batch_size"] = m_BatchSize;
             Debug.LogWarning($"m_Width:{m_Width},m_Height:{m_Height}");
 
-            List<ControlNetSettings> aControlNetSettings = new List<ControlNetSettings>();
-            if (m_ControlNetSettings.m_EnableControlNet)
-            {
-                aControlNetSettings.Add(m_ControlNetSettings);
-            }
-            if (!m_MultiControlNetSettings.IsNullOrEmpty())
-            {
-                foreach(var aControlNetSetting in m_MultiControlNetSettings)
-                {
-                    if (aControlNetSetting.m_EnableControlNet)
-                    {
-                        aControlNetSettings.Add(aControlNetSetting);
-                    }
-                }
-            }
+            List<ControlNetSettings> aControlNetSettings = GetEnabledControlNetSettings();
+
             if (!aControlNetSettings.IsNullOrEmpty())
             {
                 Debug.LogWarning($"aControlNetSettings:{aControlNetSettings.Count}");
