@@ -55,7 +55,8 @@ namespace SDU
         {
             using (var aScope = new GUILayout.HorizontalScope())
             {
-                GUILayout.Space(30);
+                //GUILayout.Space(30);
+                GUILayout.Label($"[{System.DateTime.Now.ToString("HH:mm:ss")}]", UCL_GUIStyle.LabelStyle,GUILayout.Width(80));
                 SDU_Server.OnGUI(m_Dic.GetSubDic("SDU_Server"));
             }
         }

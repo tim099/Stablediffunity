@@ -14,14 +14,56 @@ using UCL.Core;
 
 namespace SDU
 {
+    public class AutoCaptureSetting : UCL.Core.JsonLib.UnityJsonSerializable, UCL.Core.UI.UCLI_FieldOnGUI
+    {
+        public bool m_SaveAutoCaptureImage = true;
+        /// <summary>
+        /// Interval in seconds
+        /// </summary>
+        public float m_AutoCaptureInterval = 0.1f;
+
+        public List<URP_Camera.CaptureMode> m_AutoCaptureModes = new List<URP_Camera.CaptureMode>();
+
+        public System.DateTime PrevCaptureTime { get; set; } = System.DateTime.MinValue;
+        public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
+        {
+            UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic, iFieldName, false);
+            if(iDataDic.GetData(UCL_GUILayout.IsShowFieldKey, false))
+            {
+                if (!URP_Camera.IsAutoCaptureEnabled)
+                {
+                    if (GUILayout.Button("Enable Auto Capture", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                    {
+                        URP_Camera.EnableAutoCapture(this, SDU_InputImage.CurOnGUIInputImage);
+                    }
+                }
+                else
+                {
+                    if (GUILayout.Button("Disable Auto Capture", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                    {
+                        URP_Camera.DisableAutoCapture();
+                    }
+                }
+            }
+            return this;
+        }
+    }
     public class SDU_InputImage : UCL.Core.JsonLib.UnityJsonSerializable, UCL.Core.UCLI_ShortName, UCL.Core.UI.UCLI_FieldOnGUI
     {
+        public static SDU_InputImage CurOnGUIInputImage { get; private set; } = null;
         public class LoadImageSetting : UCL.Core.UI.UCLI_FieldOnGUI
         {
             public bool RequireClearDic { get; set; } = false;
 
             [UCL.Core.PA.UCL_FolderExplorer(UCL.Core.PA.ExplorerType.None)]
             public string m_FolderPath = string.Empty;//SDU_StableDiffusionPage.Data.m_InstallSetting.EnvInstallRoot;
+
+            public IList<string> GetAllFileNames() {
+
+                var aFileNames = UCL.Core.FileLib.Lib.GetFilesName(m_FolderPath, "*.png");
+                if(aFileNames.IsNullOrEmpty()) return new List<string> { string.Empty };
+                return aFileNames;
+            }
             /// <summary>
             /// ÀÉ®×¦WºÙ
             /// </summary>
@@ -30,13 +72,12 @@ namespace SDU
 
             public string FilePath => string.IsNullOrEmpty(m_FileName) ? string.Empty : Path.Combine(m_FolderPath, m_FileName);
             public bool FileExist => File.Exists(FilePath);
-            public IList<string> GetAllFileNames()
+
+            public void SetPath(string iFolderPath, string iFileName)
             {
-                if (!Directory.Exists(m_FolderPath))
-                {
-                    return null;
-                }
-                return UCL.Core.FileLib.Lib.GetFilesName(m_FolderPath, "*.png"); //RCG_FileData.GetFileData(m_FolderPath, "*");
+                RequireClearDic = true;
+                m_FolderPath = iFolderPath;
+                m_FileName = iFileName;
             }
             public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
             {
@@ -85,19 +126,7 @@ namespace SDU
                 return this;
             }
         }
-        public class AutoCaptureSetting : UCL.Core.JsonLib.UnityJsonSerializable
-        {
-            public bool m_EnableAutoCapture = false;
-            public bool m_SaveAutoCaptureImage = true;
-            /// <summary>
-            /// Interval in seconds
-            /// </summary>
-            public float m_AutoCaptureInterval = 0.1f;
-
-            public List<URP_Camera.CaptureMode> m_AutoCaptureModes = new List<URP_Camera.CaptureMode>();
-
-            public System.DateTime PrevCaptureTime { get; set; } = System.DateTime.MinValue;
-        }
+        
 
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public LoadImageSetting m_LoadImageSetting = new LoadImageSetting();
@@ -144,13 +173,14 @@ namespace SDU
         /// <returns></returns>
         public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {
+            CurOnGUIInputImage = this;
             using (var aScope = new GUILayout.VerticalScope("box"))
             {
                 {
                     GUILayout.BeginHorizontal();
                     if (Texture != null)
                     {
-                        var aSize = SDU_Util.GetTextureSize(48, Texture);
+                        var aSize = SDU_Util.GetTextureSize(64, Texture);
                         GUILayout.Box(Texture, GUILayout.Width(aSize.x), GUILayout.Height(aSize.y));
                     }
                     m_ShowImageDetail = UCL.Core.UI.UCL_GUILayout.Toggle(m_ShowImageDetail);
@@ -175,6 +205,7 @@ namespace SDU
                                     "CaptureMode");
                             }
                         }
+                        UCL_GUILayout.DrawCopyPaste(this);
                         GUILayout.EndHorizontal();
 
 
@@ -182,8 +213,6 @@ namespace SDU
                         {
                             try
                             {
-                                
-
                                 if (Texture != null)
                                 {
                                     using (var aScope3 = new GUILayout.HorizontalScope())
@@ -201,7 +230,6 @@ namespace SDU
                                             //RunTimeData.Ins.m_Tex2ImgSettings.m_ImageOutputSetting.OpenFolder();
                                         }
                                     }
-
                                 }
 
                                 GUILayout.BeginHorizontal();
@@ -237,9 +265,10 @@ namespace SDU
                 }
 
             }
-            if(!m_StartCapture)//m_AutoCaptureMode != AutoCaptureMode.Off && 
+
+            if (!m_StartCapture)//m_AutoCaptureMode != AutoCaptureMode.Off && 
             {
-                if (m_AutoCaptureSetting.m_EnableAutoCapture)
+                if (URP_Camera.IsAutoCaptureEnabled)
                 {
                     if ((System.DateTime.Now - m_AutoCaptureSetting.PrevCaptureTime).TotalSeconds >= m_AutoCaptureSetting.m_AutoCaptureInterval)
                     {
@@ -249,21 +278,8 @@ namespace SDU
                         CaptureImage(aCaptureModes, m_AutoCaptureSetting.m_SaveAutoCaptureImage);
                     }
                 }
-                //switch (m_AutoCaptureMode)
-                //{
-                //    case AutoCaptureMode.AutoCaptureImage:
-                //        {
-                //            CaptureImage(m_CaptureMode, false);
-                //            break;
-                //        }
-                //    case AutoCaptureMode.AutoCaptureAndSaveImage:
-                //        {
-                //            CaptureImage(m_CaptureMode, true);
-                //            break;
-                //        }
-                //}
             }
-
+            CurOnGUIInputImage = null;
 
             return this;
         }
@@ -283,15 +299,13 @@ namespace SDU
                     if (aCam != null)
                     {
                         var aSetting = RunTimeData.Ins.CurImgSetting;
-                        foreach(var aCaptureMode in iCaptureModes)
-                        {
-                            aCam.CaptureImage(aSetting.m_Width, aSetting.m_Height, ref m_ImageSetting.Texture, aCaptureMode);
-                            if (iSaveAfterCapture)
-                            {
-                                SaveImage();
-                            }
-                        }
 
+                        var aFilePaths = aCam.CaptureImage(aSetting.m_Width, aSetting.m_Height, ref m_ImageSetting.Texture, iCaptureModes, iSaveAfterCapture);
+                        if (!aFilePaths.IsNullOrEmpty())
+                        {
+                            var aPath = aFilePaths.LastElement();
+                            m_LoadImageSetting.SetPath(aPath.Item1, aPath.Item2);
+                        }
                     }
                     else
                     {
@@ -312,21 +326,8 @@ namespace SDU
         {
             try
             {
-                var aSavePath = SDU_ImageGenerator.GetSaveImagePath();
-                string aFolderPath = aSavePath.Item1;
-                string aFileName = $"Input_{aSavePath.Item2}.png";
-                string aFilePath = Path.Combine(aFolderPath, aFileName); // M HH:mm:ss
-                Debug.Log($"Save Image Path:{aFilePath}");
-                if (!Directory.Exists(aFolderPath))
-                {
-                    UCL.Core.FileLib.Lib.CreateDirectory(aFolderPath);
-                }
-
-                File.WriteAllBytes(aFilePath, Texture.EncodeToPNG());
-
-                m_LoadImageSetting.RequireClearDic = true;
-                m_LoadImageSetting.m_FolderPath = aFolderPath;
-                m_LoadImageSetting.m_FileName = aFileName;
+                var aPath = SDU_ImageGenerator.SaveImage(Texture);
+                m_LoadImageSetting.SetPath(aPath.Item1, aPath.Item2);
             }
             catch (Exception ex)
             {

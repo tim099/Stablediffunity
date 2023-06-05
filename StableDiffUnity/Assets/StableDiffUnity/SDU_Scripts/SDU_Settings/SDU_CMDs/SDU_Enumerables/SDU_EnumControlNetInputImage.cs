@@ -91,37 +91,6 @@ namespace SDU
                     aCMDControlNet.m_ControlNetCMDs.Add(aCMD);
                 }
             }
-            //for (int i = 0; i < m_InputImagesSettings.Count; i++)
-            //var aSetting = m_InputImagesSettings[i];
-
-            //foreach (var aSetting in m_InputImagesSettings)
-            //{
-            //    string aInputImagesFolder = aSetting.m_InputImagesFolder;
-            //    if (Directory.Exists(aInputImagesFolder))
-            //    {
-            //        var aFiles = UCL.Core.FileLib.Lib.GetFilesName(aInputImagesFolder, "*.png");
-            //        if (!aFiles.IsNullOrEmpty())
-            //        {
-            //            SDU_CMDControlNet aCMDControlNet = new SDU_CMDControlNet();
-            //            aCMDControlNet.m_TargetControlNetID = aSetting.m_TargetControlNetID;
-            //            aCMDs.Add(aCMDControlNet);
-            //            foreach (var aFile in aFiles)
-            //            {
-            //                //string aFilePath = Path.Combine(m_InputImagesFolder, aFile);
-            //                SDU_ControlNetCMDSetInputImage aCMD = new SDU_ControlNetCMDSetInputImage();
-            //                aCMD.m_InputImage.m_LoadImageSetting.m_FileName = aFile;
-            //                aCMD.m_InputImage.m_LoadImageSetting.m_FolderPath = aInputImagesFolder;
-            //                //aCMD.m_InputImage.LoadImage();
-            //                aCMDControlNet.m_ControlNetCMDs.Add(aCMD);
-            //            }
-            //        }
-            //    }
-            //    else
-            //    {
-            //        Debug.LogError($"SDU_EnumControlNetInputImages InputImagesFolder Not Exist," +
-            //            $"InputImagesFolder:{aInputImagesFolder}");
-            //    }
-            //}
 
             return new SDU_Enumerator(aCMDs);
         }

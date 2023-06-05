@@ -43,6 +43,33 @@ namespace SDU
             }
             return aPath;
         }
+        public static Tuple<string,string> SaveImage(Texture2D iTexture,string iSubFolderPath = null)
+        {
+            var aSavePath = GetSaveImagePath();
+            string aFolderPath = aSavePath.Item1;
+            if (!string.IsNullOrEmpty(iSubFolderPath))
+            {
+                aFolderPath = Path.Combine(aFolderPath, iSubFolderPath);
+            }
+            string aFileName = $"Input_{aSavePath.Item2}.png";
+            string aFilePath = Path.Combine(aFolderPath, aFileName); // M HH:mm:ss
+            try
+            {
+
+                Debug.Log($"Save Image Path:{aFilePath}");
+                if (!Directory.Exists(aFolderPath))
+                {
+                    UCL.Core.FileLib.Lib.CreateDirectory(aFolderPath);
+                }
+
+                File.WriteAllBytes(aFilePath, iTexture.EncodeToPNG());
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+            }
+            return new Tuple<string, string>(aFolderPath, aFileName);
+        }
         public static Tuple<string, string> GetSaveImagePath(SDU_ImageOutputSetting iSetting = null)
         {
             if (iSetting == null)

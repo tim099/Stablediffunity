@@ -53,14 +53,14 @@ namespace SDU
             }
             if (!SDU_ProcessList.ProcessStarted)
             {
-                if (GUILayout.Button("Start Server", UCL_GUIStyle.GetButtonStyle(Color.white), GUILayout.ExpandWidth(false)))
+                if (GUILayout.Button("Start Server", UCL_GUIStyle.GetButtonStyle(Color.white), GUILayout.Width(160)))//GUILayout.ExpandWidth(false)
                 {
                     StartServer().Forget();
                 }
             }
             else
             {
-                if (GUILayout.Button("Stop Server", UCL_GUIStyle.GetButtonStyle(Color.yellow), GUILayout.ExpandWidth(false)))
+                if (GUILayout.Button("Stop Server", UCL_GUIStyle.GetButtonStyle(Color.yellow), GUILayout.Width(160)))
                 {
                     UnityEngine.Debug.Log($"Stop server. ProcessID:{SDU_ProcessList.s_ProcessID}");
                     SDU_Server.Close();
@@ -85,9 +85,9 @@ namespace SDU
             {
                 aServerStateStr = "Server Not Started!!".RichTextColor(Color.yellow);
             }
-            GUILayout.Label($"{aServerStateStr} [{System.DateTime.Now.ToString("HH:mm:ss")}]", UCL_GUIStyle.LabelStyle);
+            GUILayout.Label($"{aServerStateStr}", UCL_GUIStyle.LabelStyle);
 
-            if (GUILayout.Button("Check Server", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+            if (GUILayout.Button("Refresh Server State", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
             {
                 if (!s_CheckingServerStarted) CheckServerStarted();
             }

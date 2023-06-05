@@ -183,12 +183,17 @@ namespace SDU
                                     DownloadFileAsync(iURL, iFilePath, iAutoRetryDownload).Forget();
                                 });
                             }
-                            Debug.LogError($"DownloadFileAsync Fail, aUnityWebRequest.result:{aUnityWebRequest.result}");
+                            Debug.LogError($"DownloadFileAsync Fail, aUnityWebRequest.result:{aUnityWebRequest.result},error:{aUnityWebRequest.error}");
+                            break;
+                        }
+                    case UnityWebRequest.Result.ProtocolError:
+                        {
+                            Debug.LogError($"DownloadFileAsync Fail, aUnityWebRequest.result:{aUnityWebRequest.result},error:{aUnityWebRequest.error}");
                             break;
                         }
                     default:
                         {
-                            Debug.LogError($"DownloadFileAsync Fail, aUnityWebRequest.result:{aUnityWebRequest.result}");
+                            Debug.LogError($"DownloadFileAsync Fail, aUnityWebRequest.result:{aUnityWebRequest.result},error:{aUnityWebRequest.error}");
                             break;
                         }
                 }

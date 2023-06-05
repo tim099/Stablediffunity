@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -20,8 +21,11 @@ namespace SDU
         public static URP_Camera CurCamera => s_Cameras.IsNullOrEmpty() ? null : s_Cameras[0];
         public static List<URP_Camera> s_Cameras = new List<URP_Camera>();
         //public static List<RenderTexture> s_RenderTextures = new List<RenderTexture>();
-        public RenderTexture m_RT;
-
+        public static bool IsAutoCaptureEnabled => s_AutoCaptureInputImage != null;
+        //private static bool s_EnableAutoCapture = false;
+        public static AutoCaptureSetting s_AutoCaptureSetting = new AutoCaptureSetting();
+        public static SDU_InputImage s_AutoCaptureInputImage = null;
+        public List<RenderTexture> m_RenderTextures = new List<RenderTexture>();
         public Camera m_Camera;
         public Volume m_Volume;
         public Material m_DepthMaterial;
@@ -34,71 +38,84 @@ namespace SDU
         }
         private void OnDestroy()
         {
+            ClearRenderTextures();
             s_Cameras.Remove(this);
         }
-        [UCL.Core.ATTR.UCL_FunctionButton]
-        public void Test()
+        public static void DisableAutoCapture()
         {
-            if(s_Cameras == null) return;
-            if(s_Cameras.Contains(this)) return;
-            s_Cameras.Add(this);
+            //s_EnableAutoCapture = false;
+            s_AutoCaptureInputImage = null;
         }
-        public Texture2D CaptureImage(int iWidth, int iHeight, ref Texture2D iTexture, CaptureMode iCaptureMode)
+        public static void EnableAutoCapture(AutoCaptureSetting iAutoCaptureSetting, SDU_InputImage iInputImage)
         {
-            switch(iCaptureMode)
-            {
-                case CaptureMode.Depth:
-                    {
-                        return CaptureImage(iWidth, iHeight, m_DepthMaterial, ref iTexture);
-                    }
-                    case CaptureMode.Normal:
-                    {
-                        return CaptureImage(iWidth, iHeight, m_NormalMaterial, ref iTexture);
-                    }
-            }
-            return CaptureImage(iWidth, iHeight, m_DepthMaterial, ref iTexture);
+            //s_EnableAutoCapture = true;
+            s_AutoCaptureInputImage = iInputImage;
+            s_AutoCaptureSetting.DeserializeFromJson(iAutoCaptureSetting.SerializeToJson());
         }
-        public Texture2D CaptureImage(int iWidth, int iHeight, Material iMat, ref Texture2D iTexture)
+
+        public void ClearRenderTextures()
         {
-            //Debug.LogWarning($"CaptureImage iWidth:{iWidth},iHeight:{iHeight}.iMat:{iMat.name}");
-            //var texture = new Texture2D(iWidth, iHeight, TextureFormat.RGB24, false);
-            if (m_RT != null)
+            foreach(var aRenderTexture in m_RenderTextures)
             {
-                RenderTexture.ReleaseTemporary(m_RT);
+                RenderTexture.ReleaseTemporary(aRenderTexture);
             }
-            RenderTexture aRenderTarget = null;
-            try
+            m_RenderTextures.Clear();
+        }
+        public RenderTexture CreateRenderTexture(int iWidth, int iHeight)
+        {
+            var aRenderTexture = RenderTexture.GetTemporary(iWidth, iHeight, 24, GraphicsFormat.R32G32B32A32_SFloat);
+            m_RenderTextures.Add(aRenderTexture);
+            return aRenderTexture;
+        }
+        public List<Tuple<string, string>> CaptureImage(int iWidth, int iHeight, ref Texture2D iTexture, 
+            List<CaptureMode> iCaptureModes, bool iSaveAfterCapture)
+        {
+            ClearRenderTextures();
+
+            List<Tuple<string,string>> aSaveFilePaths = new List<Tuple<string,string>>();
+            List<Tuple<CaptureMode, RenderTexture>> aRenderTextures = new();
+            for (int i = 0; i < iCaptureModes.Count; i++)
             {
-                m_RT = RenderTexture.GetTemporary(iWidth, iHeight, 24, GraphicsFormat.R32G32B32A32_SFloat);
-                aRenderTarget = RenderTexture.GetTemporary(iWidth, iHeight, 24, GraphicsFormat.R32G32B32A32_SFloat);
-                //m_RT.antiAliasing = 8;
-                var aBlitRequest = new BlitToCamera()
+                CaptureMode aCaptureMode = iCaptureModes[i];
+                
+                RenderTexture aRT = null;
+                switch (aCaptureMode)
                 {
-                    RemoveAfterBlit = true,
-                    Camera = m_Camera,
-                    RenderAction = (BlitData iBlitData) =>
-                    {
-                        var aCmd = iBlitData.Cmd;
-                        var aCameraData = iBlitData.RenderingData.cameraData;
-                        int width = aCameraData.cameraTargetDescriptor.width;
-                        int height = aCameraData.cameraTargetDescriptor.height;
+                    case CaptureMode.Depth:
+                        {
+                            aRT = CaptureImage(iWidth, iHeight, m_DepthMaterial);
+                            break;
+                        }
+                    case CaptureMode.Normal:
+                        {
+                            aRT = CaptureImage(iWidth, iHeight, m_NormalMaterial);
+                            break;
+                        }
+                    default:
+                        {
+                            aRT = CaptureImage(iWidth, iHeight, m_DepthMaterial);
+                            break;
+                        }
+                }
+                if (aRT != null)
+                {
+                    aRenderTextures.Add(new Tuple<CaptureMode, RenderTexture>(aCaptureMode, aRT));
+                }
+            }
 
-                        //int aDesID = iBlitData.GetTemporaryRT(width, height, 0, FilterMode.Point, RenderTextureFormat.Default).id;//s_KeepFrameBuffer;
+            
+            RenderTexture aCameraRT = CreateRenderTexture(iWidth, iHeight);
+            m_Camera.targetTexture = aCameraRT;
 
-                        //iMat.SetFloat("_Weight", 1f);//depth.weight.value
-                        iMat.SetMatrix("_ViewToWorld", aCameraData.camera.cameraToWorldMatrix);
+            m_Camera.Render();
+            m_Camera.targetTexture = null;
 
-                        //aCmd.SetGlobalTexture("_MainTex", aDesID);
-                        aCmd.Blit(iBlitData.Renderer.cameraColorTarget, m_RT, iMat, 0);
-                    },
-                    RenderPassEvent = UnityEngine.Rendering.Universal.RenderPassEvent.BeforeRenderingPostProcessing,
-                };
-                URP_BlitRendererFeature.AddBlitRequest(aBlitRequest);
-
+            if (!aRenderTextures.IsNullOrEmpty())
+            {
                 var aFormat = TextureFormat.RGB24;
                 if (iTexture != null)
                 {
-                    if(iTexture.width != iWidth || iTexture.height != iHeight
+                    if (iTexture.width != iWidth || iTexture.height != iHeight
                         || iTexture.format != aFormat)
                     {
                         Debug.LogWarning($"Refresh m_Texture m_Texture size:" +
@@ -108,26 +125,72 @@ namespace SDU
                         iTexture = null;
                     }
                 }
-                if(iTexture == null)
+                if (iTexture == null)
                 {
                     iTexture = new Texture2D(iWidth, iHeight, aFormat, false);
                 }
+
+                if (!iSaveAfterCapture)
+                {
+                    iTexture.ReadPixels(aRenderTextures.LastElement().Item2);
+                }
+                else
+                {
+                    foreach (var aRT in aRenderTextures)
+                    {
+                        iTexture.ReadPixels(aRT.Item2);
+                        aSaveFilePaths.Add(SDU_ImageGenerator.SaveImage(iTexture, aRT.Item1.ToString()));
+                    }
+                }
+            }
+            return aSaveFilePaths;
+        }
+        public BlitToCamera CreateBlitRequest(Material iMat, RenderTexture iRenderTexture)
+        {
+            BlitToCamera aBlitRequest = new BlitToCamera()
+            {
+                RemoveAfterBlit = true,
+                Camera = m_Camera,
+                RenderAction = (BlitData iBlitData) =>
+                {
+                    var aCmd = iBlitData.Cmd;
+                    var aCameraData = iBlitData.RenderingData.cameraData;
+
+                    iMat.SetMatrix("_ViewToWorld", aCameraData.camera.cameraToWorldMatrix);
+
+                    aCmd.Blit(iBlitData.Renderer.cameraColorTarget, iRenderTexture, iMat, 0);
+                },
+                RenderPassEvent = UnityEngine.Rendering.Universal.RenderPassEvent.BeforeRenderingPostProcessing,
+            };
+            URP_BlitRendererFeature.AddBlitRequest(aBlitRequest);
+            return aBlitRequest;
+        }
+        public RenderTexture CaptureImage(int iWidth, int iHeight, Material iMat)
+        {
+            //RenderTexture aCameraRT = CreateRenderTexture(iWidth, iHeight);
+            RenderTexture aRT = CreateRenderTexture(iWidth, iHeight);
+            try
+            {
+                CreateBlitRequest(iMat, aRT);
                 
-                m_Camera.targetTexture = aRenderTarget;
-                m_Camera.Render();
-                RenderTexture.active = m_RT;
-                iTexture.ReadPixels(new Rect(0, 0, iWidth, iHeight), 0, 0);
-                iTexture.Apply();
+                //m_Camera.targetTexture = aCameraRT;
+                //m_Camera.Render();
+            }
+            catch(System.Exception e)
+            {
+                Debug.LogException(e);
             }
             finally
             {
-                m_Camera.targetTexture = null;
-                //RenderTexture.ReleaseTemporary(m_RT);
-                if(aRenderTarget != null) RenderTexture.ReleaseTemporary(aRenderTarget);
-                RenderTexture.active = null;
+                //m_Camera.targetTexture = null;
             }
 
-            return iTexture;
+            return aRT;
+        }
+
+        private void Update()
+        {
+            
         }
     }
 }

@@ -22,7 +22,7 @@ namespace SDU
         public override object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {
             UCL_GUILayout.DrawField(this, iDataDic, iFieldName, false);
-            if(m_SetInputImageMode == SetInputImageMode.PrevGeneratedImage)
+            if(m_SetInputImageMode == SetInputImageMode.PrevGeneratedImage && iDataDic.GetData(UCL_GUILayout.IsShowFieldKey, false))
             {
                 if (SDU_ImageGenerator.PrevGeneratedImage != null)
                 {

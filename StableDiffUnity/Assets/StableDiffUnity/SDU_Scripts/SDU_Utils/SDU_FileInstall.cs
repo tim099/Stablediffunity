@@ -90,6 +90,19 @@ namespace SDU
                 UCL.Core.FileLib.Lib.CopyDirectory(aInstallFrom, iInstallRoot);
             }
         }
+        public static void LoadInstallEnvFromStreammingAssets(string iInstallRoot)
+        {
+            var aInstallFrom = GetEnvInstallSourcePath(iInstallRoot);
+            if (!Directory.Exists(aInstallFrom))
+            {
+                return;
+            }
+            //if (Directory.Exists(iInstallRoot))
+            //{
+            //    Directory.Delete(iInstallRoot, true);
+            //}
+            UCL.Core.FileLib.Lib.CopyDirectory(aInstallFrom, iInstallRoot);
+        }
         public static void SaveInstallEnvToStreammingAssets(string iInstallRoot)
         {
             if (!Directory.Exists(iInstallRoot))

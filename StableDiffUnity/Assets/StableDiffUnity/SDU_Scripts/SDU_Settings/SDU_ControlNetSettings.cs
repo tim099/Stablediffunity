@@ -19,7 +19,7 @@ namespace SDU
     public class ControlNetSettings : UCL.Core.JsonLib.UnityJsonSerializable, UCL.Core.UI.UCLI_FieldOnGUI
     {
         [UCL.Core.ATTR.UCL_HideOnGUI]
-        public bool m_EnableControlNet = false;
+        public bool m_EnableControlNet = true;
         //public List<string> GetAllModels() => RunTimeData.Ins.m_WebUISetting.m_ControlNetData.m_ModelList;
         //[UCL.Core.PA.UCL_List("GetAllModels")] 
         [UCL.Core.ATTR.UCL_HideOnGUI]
@@ -68,25 +68,7 @@ namespace SDU
                         m_EnableControlNet = UCL_GUILayout.CheckBox(m_EnableControlNet);
                         GUILayout.Label($"{iFieldName} [{m_SelectedModel}]", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
                         GUILayout.FlexibleSpace();
-                        if (GUILayout.Button("Copy", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
-                        {
-                            GUIUtility.systemCopyBuffer = SerializeToJson().ToJson();
-                        }
-                        if(GUILayout.Button("Paste", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
-                        {
-                            if (!string.IsNullOrEmpty(GUIUtility.systemCopyBuffer))
-                            {
-                                try
-                                {
-                                    var aJson = JsonData.ParseJson(GUIUtility.systemCopyBuffer);
-                                    DeserializeFromJson(aJson);
-                                }
-                                catch (Exception e)
-                                {
-                                    Debug.LogException(e);
-                                }
-                            }
-                        }
+                        UCL_GUILayout.DrawCopyPaste(this);
                     }
 
                     if (m_Show)

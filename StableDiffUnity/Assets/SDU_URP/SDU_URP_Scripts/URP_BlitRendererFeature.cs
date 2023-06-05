@@ -83,26 +83,26 @@ namespace SDU
         [System.Serializable]
         public class BlitSettings
         {
-            public Material blitMaterial = null;
-            public int blitMaterialPassIndex = 0;
+            public Material m_BlitMaterial = null;
+            public int m_BlitMaterialPassIndex = 0;
         }
 
         public BlitSettings m_Settings = new BlitSettings();
-        readonly Dictionary<RenderPassEvent, URP_BlitPass> _blitPassDic = new Dictionary<RenderPassEvent, URP_BlitPass>();
+        readonly Dictionary<RenderPassEvent, URP_BlitPass> m_BlitPassDic = new Dictionary<RenderPassEvent, URP_BlitPass>();
         public override void Create()
         {
-            var passIndex = m_Settings.blitMaterial != null ? m_Settings.blitMaterial.passCount - 1 : 1;
-            m_Settings.blitMaterialPassIndex = Mathf.Clamp(m_Settings.blitMaterialPassIndex, -1, passIndex);
+            var passIndex = m_Settings.m_BlitMaterial != null ? m_Settings.m_BlitMaterial.passCount - 1 : 1;
+            m_Settings.m_BlitMaterialPassIndex = Mathf.Clamp(m_Settings.m_BlitMaterialPassIndex, -1, passIndex);
         }
         private URP_BlitPass GetBlitPass(RenderPassEvent renderPassEvent)
         {
 
-            if (!_blitPassDic.ContainsKey(renderPassEvent))
+            if (!m_BlitPassDic.ContainsKey(renderPassEvent))
             {
-                _blitPassDic.Add(renderPassEvent, new URP_BlitPass(renderPassEvent, m_Settings.blitMaterial,
-                    m_Settings.blitMaterialPassIndex, $"{name}_{renderPassEvent.ToString()}"));
+                m_BlitPassDic.Add(renderPassEvent, new URP_BlitPass(renderPassEvent, m_Settings.m_BlitMaterial,
+                    m_Settings.m_BlitMaterialPassIndex, $"{name}_{renderPassEvent.ToString()}"));
             }
-            return _blitPassDic[renderPassEvent];
+            return m_BlitPassDic[renderPassEvent];
         }
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
         {
@@ -124,7 +124,7 @@ namespace SDU
             }
 
             //var src = renderer.cameraColorTarget;
-            foreach (var blitPass in _blitPassDic.Values)
+            foreach (var blitPass in m_BlitPassDic.Values)
             {
                 if (blitPass.HasRequests)
                 {
