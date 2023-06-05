@@ -21,7 +21,7 @@ namespace SDU
         public static URP_Camera CurCamera => s_Cameras.IsNullOrEmpty() ? null : s_Cameras[0];
         public static List<URP_Camera> s_Cameras = new List<URP_Camera>();
         //public static List<RenderTexture> s_RenderTextures = new List<RenderTexture>();
-        public static bool IsAutoCaptureEnabled => s_AutoCaptureInputImage != null;
+        public static bool IsAutoCapturing => s_AutoCaptureInputImage != null;
         //private static bool s_EnableAutoCapture = false;
         public static AutoCaptureSetting s_AutoCaptureSetting = new AutoCaptureSetting();
         public static SDU_InputImage s_AutoCaptureInputImage = null;
@@ -190,7 +190,28 @@ namespace SDU
 
         private void Update()
         {
-            
+            if(CurCamera != this)
+            {
+                return;
+            }
+
+            if (IsAutoCapturing)
+            {
+                if (s_AutoCaptureSetting.CheckAutoCaptureTime())
+                {
+                    var aCaptureModes = s_AutoCaptureSetting.m_AutoCaptureModes.Clone();
+                    if (aCaptureModes.Count == 0) aCaptureModes.Add(s_AutoCaptureInputImage.m_CaptureMode);
+                    var aSetting = RunTimeData.Ins.CurImgSetting;
+                    var aImageSetting = s_AutoCaptureInputImage.m_ImageSetting;
+                    var aFilePaths = CaptureImage(aSetting.m_Width, aSetting.m_Height, ref aImageSetting.Texture, aCaptureModes,
+                        s_AutoCaptureSetting.m_SaveAutoCaptureImage);
+                    if (!aFilePaths.IsNullOrEmpty())
+                    {
+                        var aPath = aFilePaths.LastElement();
+                        s_AutoCaptureInputImage.m_LoadImageSetting.SetPath(aPath.Item1, aPath.Item2);
+                    }
+                }
+            }
         }
     }
 }

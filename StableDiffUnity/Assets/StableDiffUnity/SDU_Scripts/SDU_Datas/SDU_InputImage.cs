@@ -25,12 +25,21 @@ namespace SDU
         public List<URP_Camera.CaptureMode> m_AutoCaptureModes = new List<URP_Camera.CaptureMode>();
 
         public System.DateTime PrevCaptureTime { get; set; } = System.DateTime.MinValue;
+        public bool CheckAutoCaptureTime()
+        {
+            if ((System.DateTime.Now - PrevCaptureTime).TotalSeconds >= m_AutoCaptureInterval)
+            {
+                PrevCaptureTime = System.DateTime.Now;
+                return true;
+            }
+            return false;
+        }
         public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {
             UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic, iFieldName, false);
             if(iDataDic.GetData(UCL_GUILayout.IsShowFieldKey, false))
             {
-                if (!URP_Camera.IsAutoCaptureEnabled)
+                if (!URP_Camera.IsAutoCapturing)
                 {
                     if (GUILayout.Button("Enable Auto Capture", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
                     {
@@ -266,19 +275,19 @@ namespace SDU
 
             }
 
-            if (!m_StartCapture)//m_AutoCaptureMode != AutoCaptureMode.Off && 
-            {
-                if (URP_Camera.IsAutoCaptureEnabled)
-                {
-                    if ((System.DateTime.Now - m_AutoCaptureSetting.PrevCaptureTime).TotalSeconds >= m_AutoCaptureSetting.m_AutoCaptureInterval)
-                    {
-                        m_AutoCaptureSetting.PrevCaptureTime = System.DateTime.Now;
-                        var aCaptureModes = m_AutoCaptureSetting.m_AutoCaptureModes.Clone();
-                        if (aCaptureModes.Count == 0) aCaptureModes.Add(m_CaptureMode);
-                        CaptureImage(aCaptureModes, m_AutoCaptureSetting.m_SaveAutoCaptureImage);
-                    }
-                }
-            }
+            //if (!m_StartCapture)
+            //{
+            //    if (URP_Camera.IsAutoCapturing)
+            //    {
+            //        if ((System.DateTime.Now - m_AutoCaptureSetting.PrevCaptureTime).TotalSeconds >= m_AutoCaptureSetting.m_AutoCaptureInterval)
+            //        {
+            //            m_AutoCaptureSetting.PrevCaptureTime = System.DateTime.Now;
+            //            var aCaptureModes = m_AutoCaptureSetting.m_AutoCaptureModes.Clone();
+            //            if (aCaptureModes.Count == 0) aCaptureModes.Add(m_CaptureMode);
+            //            CaptureImage(aCaptureModes, m_AutoCaptureSetting.m_SaveAutoCaptureImage);
+            //        }
+            //    }
+            //}
             CurOnGUIInputImage = null;
 
             return this;
