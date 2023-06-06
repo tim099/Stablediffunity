@@ -36,24 +36,45 @@ namespace SDU
         }
         public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {
-            UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic, iFieldName, false);
-            if(iDataDic.GetData(UCL_GUILayout.IsShowFieldKey, false))
+            using(var aScope = new GUILayout.HorizontalScope())
             {
-                if (!URP_Camera.IsAutoCapturing)
+                var aIsShowField = UCL_GUILayout.Toggle(iDataDic, UCL_GUILayout.IsShowFieldKey);
+                using (var aScope2 = new GUILayout.VerticalScope())
                 {
-                    if (GUILayout.Button("Enable Auto Capture", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                    using (var aScope3 = new GUILayout.HorizontalScope())
                     {
-                        URP_Camera.EnableAutoCapture(this, SDU_InputImage.CurOnGUIInputImage);
+                        GUILayout.Label(iFieldName, UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
+                        if (URP_Camera.CurCamera != null)
+                        {
+                            if (!URP_Camera.IsAutoCapturing)
+                            {
+                                if (GUILayout.Button("Enable Auto Capture", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                                {
+                                    URP_Camera.EnableAutoCapture(this, SDU_InputImage.CurOnGUIInputImage);
+                                }
+                            }
+                            else
+                            {
+                                if (GUILayout.Button("Disable Auto Capture", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                                {
+                                    URP_Camera.DisableAutoCapture();
+                                }
+                            }
+                        }
+                    }
+
+                    if (aIsShowField)
+                    {
+                        UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic, iFieldName, true);
                     }
                 }
-                else
-                {
-                    if (GUILayout.Button("Disable Auto Capture", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
-                    {
-                        URP_Camera.DisableAutoCapture();
-                    }
-                }
+
+
             }
+            
+
+            
+
             return this;
         }
     }
