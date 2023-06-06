@@ -117,7 +117,7 @@ namespace SDU
             File.WriteAllText(aInstallSetting.PythonInstallPathFilePath, aInstallSetting.PythonInstallRoot);
             File.WriteAllText(aInstallSetting.WebUIInstallPathFilePath, aInstallSetting.WebUIInstallRoot);
             File.WriteAllText(aInstallSetting.CommandlindArgsFilePath, aInstallSetting.CommandlindArgs);
-
+            File.WriteAllText(aInstallSetting.RunBatFilePath, aBatPath);
             SDU_ProcessList.PreCheckProcessEvent();//check current exist process
             var aProcess = new System.Diagnostics.Process();
 
@@ -126,7 +126,17 @@ namespace SDU
             UnityEngine.Debug.LogWarning($"RunPythonPath:{aRunPythonPath},BatPath:{aBatPath}");
 
             aProcess.StartInfo.FileName = aPythonExePath;
-            aProcess.StartInfo.Arguments = $"{aRunPythonPath} {aBatPath}";
+            string aArguments = string.Empty;
+            if (!string.IsNullOrEmpty(aInstallSetting.PythonArgs))
+            {
+                aArguments = $"{aInstallSetting.PythonArgs} {aRunPythonPath}";
+            }
+            else
+            {
+                aArguments = aRunPythonPath;
+            }
+            Debug.LogWarning($"Process Arguments:{aArguments}");
+            aProcess.StartInfo.Arguments = aArguments;// {aBatPath}
             aProcess.StartInfo.Verb = string.Empty;
 
             aProcess.StartInfo.CreateNoWindow = false;

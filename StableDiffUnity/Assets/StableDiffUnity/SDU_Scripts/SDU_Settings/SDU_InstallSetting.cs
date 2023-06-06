@@ -48,7 +48,7 @@ namespace SDU
         public string WebUIInstallRoot = Path.Combine(DefaultInstallRoot, "WebUI");
         public string PythonInstallRoot = Path.Combine(DefaultInstallRoot, "Python");
         public string CommandlindArgs = "--api --xformers";
-
+        public string PythonArgs;//-Xfrozen_modules=off
 
 
         [UCL.Core.ATTR.UCL_HideOnGUI]
@@ -68,8 +68,8 @@ namespace SDU
         public string PythonInstallPathFilePath => Path.Combine(EnvInstallRoot, "PythonRoot.txt");
         public string WebUIInstallPathFilePath => Path.Combine(EnvInstallRoot, "WebUIInstallPath.txt");
         public string CommandlindArgsFilePath => Path.Combine(EnvInstallRoot, "CommandlindArgs.txt");
-
-        
+        public string RunBatFilePath => Path.Combine(EnvInstallRoot, "RunBatFilePath.txt");
+        public string EnvVersionFilePath => Path.Combine(EnvInstallRoot, "EnvVersion.txt");
 
         public string ModelsRootPath => Path.Combine(WebUIInstallRoot, "models");
         public string StableDiffusionModelsPath => Path.Combine(ModelsRootPath, "Stable-diffusion");

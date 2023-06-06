@@ -110,10 +110,7 @@ namespace SDU
             JsonData aArg1 = new JsonData();
             aArg1["input_image"] = m_InputImage.GetTextureBase64String();
             aArg1["model"] = m_SelectedModel;//"control_sd15_depth"
-                                             //int aWeight = Mathf.RoundToInt(m_ControlWeight * 20f);
-                                             //string aWeightStr = (aWeight/20f).ToString("0.00");
-                                             //Debug.LogError($"aWeightStr:{aWeightStr}");
-            aArg1["weight"] = m_ControlWeight;//aWeightStr;
+            aArg1["weight"] = m_ControlWeight;
             aArg1["guidance_start"] = m_StartingControlStep;
             aArg1["guidance_end"] = m_EndingControlStep;
             return aArg1;
