@@ -51,6 +51,35 @@ namespace SDU
             //SDU_Server.Close();
             base.OnClose();
         }
+        protected override void TopBar()
+        {
+            int aAction = 0;//0 none 1 back 2 close
+            using (var aScope = new GUILayout.HorizontalScope("box"))
+            {
+                if (ShowBackButton)
+                {
+                    if (GUILayout.Button(UCL.Core.LocalizeLib.UCL_LocalizeManager.Get("Back"), GUILayout.ExpandWidth(false)))
+                    {
+                        aAction = 1;
+                    }
+                }
+
+                TopBarButtons();
+            }
+            switch (aAction)
+            {
+                case 1:
+                    {
+                        BackButtonClicked();
+                        break;
+                    }
+                case 2:
+                    {
+                        CloseButtonClicked();
+                        break;
+                    }
+            }
+        }
         protected override void TopBarButtons()
         {
             using (var aScope = new GUILayout.HorizontalScope())
@@ -58,6 +87,11 @@ namespace SDU
                 //GUILayout.Space(30);
                 GUILayout.Label($"[{System.DateTime.Now.ToString("HH:mm:ss")}]", UCL_GUIStyle.LabelStyle,GUILayout.Width(80));
                 SDU_Server.OnGUI(m_Dic.GetSubDic("SDU_Server"));
+            }
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("Debug Log", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+            {
+                UCL_DebugLogPage.Create();
             }
         }
         protected override void ContentOnGUI()

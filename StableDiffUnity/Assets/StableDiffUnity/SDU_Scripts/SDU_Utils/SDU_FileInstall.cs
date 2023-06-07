@@ -86,7 +86,7 @@ namespace SDU
             bool aRequireInstall = true;
             if (Directory.Exists(iInstallData.m_InstallRoot))//Install done
             {
-                Debug.LogWarning($"CheckInstall Directory.Exists iInstallRoot:{iInstallData.m_InstallRoot}" +
+                Debug.Log($"CheckInstall Directory.Exists iInstallRoot:{iInstallData.m_InstallRoot}" +
                     $"\n,iInstallTarget:{iInstallData.m_InstallTarget}");
                 aRequireInstall = false;
                 if (!iInstallData.m_RequiredFiles.IsNullOrEmpty())

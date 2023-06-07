@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UCL.Core.EditorLib.Page;
 using UCL.Core.Game;
 using UCL.Core.LocalizeLib;
+using UCL.Core.UI;
 using UnityEngine;
 
 
@@ -19,6 +20,11 @@ namespace SDU
 
 
         UCL.Core.UCL_ObjectDictionary m_Dic = new UCL.Core.UCL_ObjectDictionary();
+        public override void Init(UCL_GUIPageController iGUIPageController)
+        {
+            base.Init(iGUIPageController);
+            UCL.Core.ServiceLib.UCL_DebugLogService.Init();
+        }
         protected override void TopBar()
         {
             //base.TopBar();
@@ -42,16 +48,22 @@ namespace SDU
                 }
 
                 GUILayout.Space(10);
-                if (GUILayout.Button("Download File"))
+                if (GUILayout.Button("Download File", UCL_GUIStyle.ButtonStyle))
                 {
                     SDU_DownloadFilePage.Create();
                 }
 
                 GUILayout.Space(10);
-                if (GUILayout.Button("Compress Image"))
+                if (GUILayout.Button("Compress Image", UCL_GUIStyle.ButtonStyle))
                 {
                     SDU_CompressImagePage.Create();
                 }
+                GUILayout.Space(10);
+                if (GUILayout.Button("Debug Log", UCL_GUIStyle.ButtonStyle))
+                {
+                    UCL_DebugLogPage.Create();
+                }
+                
 #if !UNITY_EDITOR
                 GUILayout.Space(30);
                 if (GUILayout.Button("Exit SDU"))
