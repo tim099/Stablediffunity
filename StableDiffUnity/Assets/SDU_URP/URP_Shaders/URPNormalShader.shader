@@ -25,7 +25,7 @@ Shader "Unlit/URPNormalShader"
             half4 Frag(Varyings IN) : SV_Target
             {
                 //float4 mainColor = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uv);
-
+                
                 float3 normals = SampleSceneNormals(IN.uv);
                 float4 camNormals = float4(normals.xyz, 1);
                 if (normals.x == 0 && normals.y == 0 && normals.z == 0) {
@@ -37,11 +37,9 @@ Shader "Unlit/URPNormalShader"
                     camNormals /= aLen;
                 }
 
-                half4 color = 0;
+                half3 color = half3(camNormals.x, camNormals.y, camNormals.z) * 0.5 + 0.5; // *0.5 + 0.5;_ViewToWorld *
 
-                color.rgb = half4(camNormals.z, camNormals.y, camNormals.x, 1) * 0.5 + 0.5;// *0.5 + 0.5;_ViewToWorld *
-
-                return color;
+                return half4(color.b, color.g, color.r, 1);
             }
 
             ENDHLSL

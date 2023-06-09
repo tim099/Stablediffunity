@@ -87,7 +87,7 @@ namespace SDU
             }
             GUILayout.Label($"{aServerStateStr}", UCL_GUIStyle.LabelStyle);
 
-            if (GUILayout.Button("Refresh Server State", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+            if (GUILayout.Button("Check Server", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
             {
                 if (!s_CheckingServerStarted) CheckServerStarted();
             }

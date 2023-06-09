@@ -15,7 +15,6 @@ namespace SDU
     {
         public static System.Action<string> s_OnOutputDataReceivedAct = null;
         public static System.Text.StringBuilder s_ServerOutput = new();
-        public static string s_ProcessName = "python";
         public static int s_ProcessID = -1;
         public static bool ProcessStarted => s_PidList.Count > 0;
         public static List<int> s_PidList = new List<int>();
@@ -75,8 +74,9 @@ namespace SDU
 
             return false;//Process Not End
         }
-        static bool s_IsPreCheckProcess = false;
-        static List<int> s_PreCheckProcess = new List<int>();
+        private static bool s_IsPreCheckProcess = false;
+        private static List<int> s_PreCheckProcess = new List<int>();
+        private static List<string> s_TargetProcessName = new List<string>() { "python", "cmd" };
         public static void PreCheckProcessEvent()
         {
             if (s_IsPreCheckProcess)
@@ -93,7 +93,7 @@ namespace SDU
                 s_PreCheckProcess.Add(aPid);
             }
         }
-        static List<string> s_TargetProcessName = new List<string>() { "python", "cmd" };
+        
         public static void CheckProcessEvent()
         {
             if (!s_IsPreCheckProcess)

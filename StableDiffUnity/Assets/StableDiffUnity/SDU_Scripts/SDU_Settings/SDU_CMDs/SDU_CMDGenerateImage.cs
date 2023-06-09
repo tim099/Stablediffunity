@@ -10,7 +10,7 @@ namespace SDU
     {
         override public async Task TriggerCMD(SDU_ImgSetting iTex2ImgSetting, System.Threading.CancellationToken iCancellationToken)
         {
-            await iTex2ImgSetting.GenerateImage();
+            await iTex2ImgSetting.GenerateImage(iCancellationToken);
             return;
         }
     }

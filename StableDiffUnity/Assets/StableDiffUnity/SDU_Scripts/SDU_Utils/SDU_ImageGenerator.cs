@@ -1,7 +1,9 @@
+using Cysharp.Threading.Tasks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using UCL.Core;
 using UCL.Core.JsonLib;
@@ -26,7 +28,7 @@ namespace SDU
         }
         public static void OnGUI(UCL_ObjectDictionary iDataDic)
         {
-            if (!string.IsNullOrEmpty(ProgressStr))
+            if (GeneratingImage)
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.Label(ProgressStr, UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
@@ -43,9 +45,10 @@ namespace SDU
             }
             return aPath;
         }
-        public static Tuple<string,string> SaveImage(Texture2D iTexture,string iSubFolderPath = null)
+        public static Tuple<string,string> SaveImage(Texture2D iTexture, string iSubFolderPath = null, SDU_ImageOutputSetting iSetting = null
+            , bool iIncreaseID = true)
         {
-            var aSavePath = GetSaveImagePath();
+            var aSavePath = GetSaveImagePath(iSetting, iIncreaseID);
             string aFolderPath = aSavePath.Item1;
             if (!string.IsNullOrEmpty(iSubFolderPath))
             {
@@ -70,7 +73,7 @@ namespace SDU
             }
             return new Tuple<string, string>(aFolderPath, aFileName);
         }
-        public static Tuple<string, string> GetSaveImagePath(SDU_ImageOutputSetting iSetting = null)
+        public static Tuple<string, string> GetSaveImagePath(SDU_ImageOutputSetting iSetting = null, bool iIncreaseID = true)
         {
             if (iSetting == null)
             {
@@ -82,8 +85,8 @@ namespace SDU
             {
                 Directory.CreateDirectory(aPath);
             }
-
-            string aFileID = (++iSetting.m_OutPutFileID).ToString();
+            if (iIncreaseID) ++iSetting.m_OutPutFileID;
+            string aFileID = (iSetting.m_OutPutFileID).ToString();
             string aFileName = $"{System.DateTime.Now.ToString("HHmmssff")}_{aFileID}";
             return Tuple.Create(aPath, aFileName);
         }
@@ -96,7 +99,7 @@ namespace SDU
             }
             s_Textures.Clear();
         }
-        public static async System.Threading.Tasks.ValueTask GenerateImageAsync(SDU_ImgSetting iSetting)
+        public static async UniTask GenerateImageAsync(SDU_ImgSetting iSetting, CancellationToken iCancellationToken)
         {
             RunTimeData.SaveRunTimeData();
             if (!IsAvaliable)
@@ -128,7 +131,6 @@ namespace SDU
                         var aImageOutputSetting = iSetting.m_ImageOutputSetting;
                         int aEnabledControlNetCount = iSetting.GetEnabledControlNetSettings().Count;
                         bool aRemoveControlNetInputImage = !aImageOutputSetting.m_OutputControlNetInputImage && aEnabledControlNetCount > 0;
-
                         JsonData aJson = iSetting.GetConfigJson();
                         iSetting.m_ResultInfo = aJson;
                         string aJsonStr = aJson.ToJson();
@@ -152,21 +154,33 @@ namespace SDU
                             {
                                 break;
                             }
-                            using (var aClientProgress = RunTimeData.SD_API.Client_Progress)
+                            if(iCancellationToken.IsCancellationRequested)
                             {
-                                JsonData aProgressJson = new JsonData();
-
-                                var aProgress = await aClientProgress.SendWebRequestAsync();
-                                if (aProgress.Contains("progress"))
+                                using (var aClientInterrupt = RunTimeData.SD_API.Client_Interrupt)
                                 {
-                                    double aProgressVal = aProgress["progress"].GetDouble(0);
-                                    ProgressStr = $"Generating Image[{aBatchID + 1}/{aBatchCount}] " +
-                                        $"{(100f * aProgressVal).ToString("0.0")}%";
-                                    ProgressVal = (float)aProgressVal;
+                                    await aClientInterrupt.SendWebRequestAsync();
                                 }
-                                //Debug.LogWarning($"m_ProgressStr:{m_ProgressStr}");
+                                break;
                             }
-                            await Task.Delay(500);
+                            else
+                            {
+                                using (var aClientProgress = RunTimeData.SD_API.Client_Progress)
+                                {
+                                    JsonData aProgressJson = new JsonData();
+
+                                    var aProgress = await aClientProgress.SendWebRequestAsync();
+                                    if (aProgress.Contains("progress"))
+                                    {
+                                        double aProgressVal = aProgress["progress"].GetDouble(0);
+                                        ProgressStr = $"Generating Image[{aBatchID + 1}/{aBatchCount}] " +
+                                            $"{(100f * aProgressVal).ToString("0.0")}%";
+                                        ProgressVal = (float)aProgressVal;
+                                    }
+                                    //Debug.LogWarning($"m_ProgressStr:{m_ProgressStr}");
+                                }
+                                await Task.Delay(500);
+                            }
+
                         }
                         switch (aTask.Status)
                         {

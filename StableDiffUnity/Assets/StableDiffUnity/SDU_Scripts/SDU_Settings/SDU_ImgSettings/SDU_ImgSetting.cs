@@ -167,9 +167,9 @@ namespace SDU
 
             return aJson;
         }
-        virtual public async Task GenerateImage()
+        virtual public async Task GenerateImage(CancellationToken iCancellationToken)
         {
-            await SDU_ImageGenerator.GenerateImageAsync(this);
+            await SDU_ImageGenerator.GenerateImageAsync(this, iCancellationToken);
         }
         virtual public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {
@@ -262,6 +262,12 @@ namespace SDU
         }
         virtual public object TexSettingOnGUI(string iFieldName, UCL_ObjectDictionary iSubDic, UCL_ObjectDictionary iDataDic)
         {
+            PresetOnGUI(iSubDic);
+            LoraOnGUI(iSubDic);
+
+            UCL.Core.UI.UCL_GUILayout.DrawField(this, iSubDic.GetSubDic("Tex2Img"), iFieldName, true);
+            UCL.Core.UI.UCL_GUILayout.DrawObjectData(m_CMDs, iDataDic.GetSubDic("CMDs"), "CMDs", false);
+
             return this;
         }
 

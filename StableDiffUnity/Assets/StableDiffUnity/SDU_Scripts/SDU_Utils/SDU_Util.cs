@@ -10,8 +10,10 @@ namespace SDU
             if (iWidth <= 0)
             {
                 Debug.LogError("GetSize iWidth <= 0");
-                return new Vector2Int(iMaxSize, iMaxSize);
+                return Vector2Int.one;
             }
+            int aMaxSize = Mathf.Max(iWidth, iHeight);
+            if (aMaxSize < iMaxSize) iMaxSize = aMaxSize;
             int aWidth = iMaxSize;
             int aHeight = iMaxSize;
             float aRatio = iHeight / (float)iWidth;

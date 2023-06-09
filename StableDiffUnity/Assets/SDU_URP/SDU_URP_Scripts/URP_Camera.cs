@@ -12,43 +12,71 @@ namespace SDU
     [UCL.Core.ATTR.EnableUCLEditor]
     public class URP_Camera : MonoBehaviour
     {
+        [System.Serializable]
+        public class MatSetting
+        {
+            public CaptureMode m_CaptureMode;
+            public Material m_Material;
+        }
         public enum CaptureMode
         {
             Depth,
             Normal,
+            Canny,
         }
 
         public static URP_Camera CurCamera => s_Cameras.IsNullOrEmpty() ? null : s_Cameras[0];
         public static List<URP_Camera> s_Cameras = new List<URP_Camera>();
         //public static List<RenderTexture> s_RenderTextures = new List<RenderTexture>();
         public static bool IsAutoCapturing => s_AutoCaptureInputImage != null;
+        public static bool s_CaptureSingleFrame = true;
         //private static bool s_EnableAutoCapture = false;
         public static AutoCaptureSetting s_AutoCaptureSetting = new AutoCaptureSetting();
         public static SDU_InputImage s_AutoCaptureInputImage = null;
+
+        public List<MatSetting> m_MatSettings = new List<MatSetting>();
         public List<RenderTexture> m_RenderTextures = new List<RenderTexture>();
         public Camera m_Camera;
-        public Volume m_Volume;
-        public Material m_DepthMaterial;
-        public Material m_NormalMaterial;
+
+        private Dictionary<CaptureMode, MatSetting> m_MatDic = null;
+
+        private bool m_Inited = false;
         private void Start()
         {
-            if(m_Camera == null) m_Camera = GetComponent<Camera>();
+            Init();
+        }
+        public void Init()
+        {
+            if (m_Inited) return;
+            m_Inited = true;
+            if (m_Camera == null) m_Camera = GetComponent<Camera>();
             m_Camera.enabled = true;
             s_Cameras.Add(this);
+            m_MatDic = new Dictionary<CaptureMode, MatSetting>();
+            foreach(var aMat in m_MatSettings)
+            {
+                if (!m_MatDic.ContainsKey(aMat.m_CaptureMode))
+                {
+                    m_MatDic[aMat.m_CaptureMode] = aMat;
+                }
+            }
         }
         private void OnDestroy()
         {
             ClearRenderTextures();
-            s_Cameras.Remove(this);
+            if (m_Inited)
+            {
+                s_Cameras.Remove(this);
+            }
         }
         public static void DisableAutoCapture()
         {
             //s_EnableAutoCapture = false;
             s_AutoCaptureInputImage = null;
         }
-        public static void EnableAutoCapture(AutoCaptureSetting iAutoCaptureSetting, SDU_InputImage iInputImage)
+        public static void EnableAutoCapture(AutoCaptureSetting iAutoCaptureSetting, SDU_InputImage iInputImage, bool iCaptureSingleFrame = false)
         {
-            //s_EnableAutoCapture = true;
+            s_CaptureSingleFrame = iCaptureSingleFrame;
             s_AutoCaptureInputImage = iInputImage;
             s_AutoCaptureSetting.DeserializeFromJson(iAutoCaptureSetting.SerializeToJson());
         }
@@ -67,6 +95,15 @@ namespace SDU
             m_RenderTextures.Add(aRenderTexture);
             return aRenderTexture;
         }
+        private Material GetMaterial(CaptureMode iCaptureMode)
+        {
+            if (!m_MatDic.ContainsKey(iCaptureMode))
+            {
+                Debug.LogError($"GetMaterial !m_MatDic.ContainsKey CaptureMode:{iCaptureMode}");
+                return null;
+            }
+            return m_MatDic[iCaptureMode].m_Material;
+        }
         public List<Tuple<string, string>> CaptureImage(int iWidth, int iHeight, ref Texture2D iTexture, 
             List<CaptureMode> iCaptureModes, bool iSaveAfterCapture)
         {
@@ -79,24 +116,30 @@ namespace SDU
                 CaptureMode aCaptureMode = iCaptureModes[i];
                 
                 RenderTexture aRT = null;
-                switch (aCaptureMode)
+                var aMat = GetMaterial(aCaptureMode);
+                if (aMat != null)
                 {
-                    case CaptureMode.Depth:
-                        {
-                            aRT = CaptureImage(iWidth, iHeight, m_DepthMaterial);
-                            break;
-                        }
-                    case CaptureMode.Normal:
-                        {
-                            aRT = CaptureImage(iWidth, iHeight, m_NormalMaterial);
-                            break;
-                        }
-                    default:
-                        {
-                            aRT = CaptureImage(iWidth, iHeight, m_DepthMaterial);
-                            break;
-                        }
+                    aRT = CaptureImage(iWidth, iHeight, aMat);
                 }
+                
+                //switch (aCaptureMode)
+                //{
+                //    case CaptureMode.Depth:
+                //        {
+                //            aRT = CaptureImage(iWidth, iHeight, m_DepthMaterial);
+                //            break;
+                //        }
+                //    case CaptureMode.Normal:
+                //        {
+                //            aRT = CaptureImage(iWidth, iHeight, m_NormalMaterial);
+                //            break;
+                //        }
+                //    default:
+                //        {
+                //            aRT = CaptureImage(iWidth, iHeight, m_DepthMaterial);
+                //            break;
+                //        }
+                //}
                 if (aRT != null)
                 {
                     aRenderTextures.Add(new Tuple<CaptureMode, RenderTexture>(aCaptureMode, aRT));
@@ -136,10 +179,13 @@ namespace SDU
                 }
                 else
                 {
+                    var aSetting = RunTimeData.Ins.CurImgSetting.m_ImageOutputSetting;
+                    ++aSetting.m_OutPutFileID;
                     foreach (var aRT in aRenderTextures)
                     {
+                        string aFolderPath = aRT.Item1.ToString();
                         iTexture.ReadPixels(aRT.Item2);
-                        aSaveFilePaths.Add(SDU_ImageGenerator.SaveImage(iTexture, aRT.Item1.ToString()));
+                        aSaveFilePaths.Add(SDU_ImageGenerator.SaveImage(iTexture, aFolderPath, aSetting, false));
                     }
                 }
             }
@@ -194,22 +240,32 @@ namespace SDU
             {
                 return;
             }
-
+            bool aCapture = false;
             if (IsAutoCapturing)
             {
                 if (s_AutoCaptureSetting.CheckAutoCaptureTime())
                 {
-                    var aCaptureModes = s_AutoCaptureSetting.m_AutoCaptureModes.Clone();
-                    if (aCaptureModes.Count == 0) aCaptureModes.Add(s_AutoCaptureInputImage.m_CaptureMode);
-                    var aSetting = RunTimeData.Ins.CurImgSetting;
-                    var aImageSetting = s_AutoCaptureInputImage.m_ImageSetting;
-                    var aFilePaths = CaptureImage(aSetting.m_Width, aSetting.m_Height, ref aImageSetting.Texture, aCaptureModes,
-                        s_AutoCaptureSetting.m_SaveAutoCaptureImage);
-                    if (!aFilePaths.IsNullOrEmpty())
-                    {
-                        var aPath = aFilePaths.LastElement();
-                        s_AutoCaptureInputImage.m_LoadImageSetting.SetPath(aPath.Item1, aPath.Item2);
-                    }
+                    aCapture = true;
+                }
+            }
+
+            if (aCapture)
+            {
+                var aCaptureModes = s_AutoCaptureSetting.m_AutoCaptureModes.Clone();
+                if (aCaptureModes.Count == 0) aCaptureModes.Add(s_AutoCaptureInputImage.m_CaptureMode);
+                var aSetting = RunTimeData.Ins.CurImgSetting;
+                var aImageSetting = s_AutoCaptureInputImage.m_ImageSetting;
+                var aFilePaths = CaptureImage(aSetting.m_Width, aSetting.m_Height, ref aImageSetting.Texture, aCaptureModes,
+                    s_AutoCaptureSetting.m_SaveAutoCaptureImage);
+                if (!aFilePaths.IsNullOrEmpty())
+                {
+                    var aPath = aFilePaths.LastElement();
+                    s_AutoCaptureInputImage.m_LoadImageSetting.SetPath(aPath.Item1, aPath.Item2);
+                }
+                if (s_CaptureSingleFrame)
+                {
+                    s_CaptureSingleFrame = false;
+                    DisableAutoCapture();
                 }
             }
         }

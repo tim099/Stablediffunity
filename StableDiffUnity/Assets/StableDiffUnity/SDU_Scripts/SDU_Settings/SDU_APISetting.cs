@@ -71,7 +71,9 @@ namespace SDU
             new SDU_WebUIClient.SDU_WebRequest(URL_Txt2img, SDU_WebRequest.Method.Post);
         public SDU_WebUIClient.SDU_WebRequest Client_Img2img =>
             new SDU_WebUIClient.SDU_WebRequest(URL_Img2img, SDU_WebRequest.Method.Post);
-        
+        public SDU_WebUIClient.SDU_WebRequest Client_Interrupt =>
+            new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/sdapi/v1/interrupt", SDU_WebRequest.Method.Post);
+
         public SDU_WebUIClient.SDU_WebRequest Client_AppID =>
             new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/app_id", SDU_WebRequest.Method.Get);
         public SDU_WebUIClient.SDU_WebRequest Client_Progress =>

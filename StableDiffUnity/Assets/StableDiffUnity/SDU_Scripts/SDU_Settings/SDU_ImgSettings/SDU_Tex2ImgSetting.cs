@@ -37,43 +37,7 @@ namespace SDU
         
         override public object TexSettingOnGUI(string iFieldName, UCL_ObjectDictionary iSubDic, UCL_ObjectDictionary iDataDic)
         {
-            PresetOnGUI(iSubDic);
-            LoraOnGUI(iSubDic);
-
-            UCL.Core.UI.UCL_GUILayout.DrawField(this, iSubDic.GetSubDic("Tex2Img"), iFieldName, true);
-            UCL.Core.UI.UCL_GUILayout.DrawObjectData(m_CMDs, iDataDic.GetSubDic("CMDs"), "CMDs", false);
-
-            if (SDU_Server.ServerReady)
-            {
-                if (!SDU_CMDService.TriggeringCMD)
-                {
-                    if (GUILayout.Button("Generate Image", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
-                    {
-                        var aCMD = new SDU_CMDGenerateImage();
-                        var aCMDs = new List<SDU_CMD>() { aCMD };
-                        SDU_CMDService.TriggerCMDs(this, aCMDs, new CancellationTokenSource()).Forget();
-                    }
-                    if (!m_CMDs.IsNullOrEmpty())
-                    {
-                        if (GUILayout.Button("Trigger CMDs", UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
-                        {
-                            var aCMDs = new List<SDU_CMD>();
-                            foreach (var aCMD in m_CMDs)
-                            {
-                                aCMDs.Append(aCMD.GetCMDList());
-                            }
-                            UCL.Core.ServiceLib.UCL_UpdateService.AddAction(() =>
-                            {
-                                SDU_CMDService.TriggerCMDs(this, aCMDs, new CancellationTokenSource()).Forget();
-                            });
-                        }
-                    }
-                }
-
-                SDU_CMDService.OnGUI(iDataDic.GetSubDic("SDU_CMDService"));
-            }
-
-            SDU_ImageGenerator.OnGUI(iDataDic.GetSubDic("SDU_ImageGenerator"));
+            base.TexSettingOnGUI(iFieldName, iSubDic, iDataDic);
 
             return this;
         }

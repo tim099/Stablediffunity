@@ -50,7 +50,12 @@ namespace SDU
                             {
                                 if (GUILayout.Button("Enable Auto Capture", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
                                 {
-                                    URP_Camera.EnableAutoCapture(this, SDU_InputImage.CurOnGUIInputImage);
+                                    URP_Camera.EnableAutoCapture(this, SDU_InputImage.CurOnGUIInputImage, false);
+                                }
+                                GUILayout.Space(10);
+                                if (GUILayout.Button("Capture Image", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                                {
+                                    URP_Camera.EnableAutoCapture(this, SDU_InputImage.CurOnGUIInputImage, true);
                                 }
                             }
                             else
