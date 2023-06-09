@@ -133,13 +133,10 @@ namespace SDU
         }
         public abstract class WebRequestWrapper : IDisposable
         {
-            // field
             protected UnityWebRequest m_Request;
 
-            // property
-            protected UnityWebRequest WebRequest => m_Request;
-            public bool isDone => m_Request.isDone;
-            public UnityWebRequest.Result Result => m_Request.result;
+            public UnityWebRequest WebRequest => m_Request;
+            public bool IsDone => m_Request.isDone;
 
             public WebRequestWrapper()
             {
@@ -197,7 +194,7 @@ namespace SDU
 
             protected void CheckDone()
             {
-                if (isDone)
+                if (IsDone)
                 {
                     throw new WebRequestException("WebRequest already done.");
                 }

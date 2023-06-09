@@ -73,8 +73,6 @@ namespace SDU
                         UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic, iFieldName, true);
                     }
                 }
-
-
             }
             
 

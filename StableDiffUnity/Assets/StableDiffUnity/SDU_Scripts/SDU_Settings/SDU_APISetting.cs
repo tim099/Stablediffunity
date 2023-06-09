@@ -24,17 +24,21 @@ namespace SDU
             }
             if (GUILayout.Button("Test StablediffunityAPI", UCL_GUIStyle.ButtonStyle))
             {
-                StablediffunityGetVersion().Forget();
+                TestAPI(RunTimeData.Stablediffunity_API.Client_GetVersion).Forget();
+            }
+            if (GUILayout.Button("Test ControlNetAPI", UCL_GUIStyle.ButtonStyle))
+            {
+                TestAPI(RunTimeData.ControlNet_API.Client_GetVersion).Forget();
             }
             //m_StablediffunityAPI
             return this;
         }
-        public async UniTask StablediffunityGetVersion()
+        public async UniTask TestAPI(SDU_WebUIClient.SDU_WebRequest iClient)
         {
-            using (var aClient = RunTimeData.Stablediffunity_API.Client_GetVersion)
+            using (iClient)
             {
-                string aResult = await aClient.SendWebRequestStringAsync();
-                Debug.LogError($"StablediffunityGetVersion Result:{aResult}");
+                string aResult = await iClient.SendWebRequestStringAsync();
+                Debug.LogError($"TestAPI URL:{iClient.WebRequest.url} ,Result:{aResult}");
             }
         }
     }
@@ -147,6 +151,7 @@ namespace SDU
 
         #region Client
         public SDU_WebUIClient.SDU_WebRequest Client_ModelLists => new SDU_WebUIClient.SDU_WebRequest(URL_ModelLists, SDU_WebRequest.Method.Get);
+        public SDU_WebUIClient.SDU_WebRequest Client_GetVersion => new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/controlnet/version", SDU_WebRequest.Method.Get);
         #endregion
     }
 }
