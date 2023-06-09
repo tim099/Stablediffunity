@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using UCL.Core.JsonLib;
 using UCL.Core.UI;
@@ -27,7 +28,7 @@ namespace SDU
         public static bool s_CheckingServerStarted = false;
         public static ServerState s_ServerState = ServerState.Off;
         public static System.DateTime m_PrevCheckServerTime = DateTime.MinValue;
-        
+
         public static string ServerAppId => s_ServerAppId;
         public static bool ServerReady
         {
@@ -39,6 +40,8 @@ namespace SDU
             }
         }
         public static bool s_ServerReady = false;
+        public static bool IsCancelStartServer => s_CancellationTokenSource == null || s_CancellationTokenSource.IsCancellationRequested;
+        private static CancellationTokenSource s_CancellationTokenSource = null;
 
         private static string s_ServerAppId;
 
@@ -93,8 +96,21 @@ namespace SDU
             }
 
         }
+        public static void CancelStartServer()
+        {
+            if (s_CancellationTokenSource == null) return;
+            if (!s_CancellationTokenSource.IsCancellationRequested)
+            {
+                s_CancellationTokenSource.Cancel();
+            }
+            
+            s_CancellationTokenSource.Dispose();
+            s_CancellationTokenSource = null;
+        }
         public static async UniTaskVoid StartServer()
         {
+            CancelStartServer();
+            s_CancellationTokenSource = new CancellationTokenSource();
             int aProcessID = -1;
             SDU_ProcessList.s_ProcessID = aProcessID;
             var aInstallSetting = RunTimeData.InstallSetting;
@@ -169,7 +185,7 @@ namespace SDU
             s_ServerState = ServerState.Starting;
             try
             {
-                while (!ServerReady)
+                while (!ServerReady && !IsCancelStartServer)
                 {
                     ServerReady = await ValidateConnection();
                     if (ServerReady)
@@ -264,6 +280,7 @@ namespace SDU
         }
         public static void Close()
         {
+            CancelStartServer();
             //Debug.LogError("SDU_WebUIStatus Close()");
             s_ServerState = ServerState.Off;
             s_ServerReady = false;

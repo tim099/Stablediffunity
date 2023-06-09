@@ -58,6 +58,9 @@ namespace SDU
         public string WebUIZipPath => Path.Combine(InstallStableDiffusionRoot, WebUIZipFileName);
         public string PythonZipPath => Path.Combine(InstallStableDiffusionRoot, PythonZipFileName);
         public string RunPythonPath => Path.Combine(EnvInstallRoot, RunPythonName);
+        public string WebUISourcePath => Path.Combine(InstallStableDiffusionRoot, ".WebUI");
+        public string WebUIExtensionSourcePath => Path.Combine(WebUISourcePath, "extensions");
+
 
         public string OutputPath => Path.Combine(EnvInstallRoot, "Output");
         #region DownloadSettings
@@ -72,6 +75,7 @@ namespace SDU
         public string EnvVersionFilePath => Path.Combine(EnvInstallRoot, "EnvVersion.txt");
 
         public string ModelsRootPath => Path.Combine(WebUIInstallRoot, "models");
+        public string WebUIExtensionInstallPath => Path.Combine(WebUIInstallRoot, "extensions");
         public string StableDiffusionModelsPath => Path.Combine(ModelsRootPath, "Stable-diffusion");
         public string StableDiffusionLoraPath => Path.Combine(ModelsRootPath, "Lora");
 

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using UCL.Core.JsonLib;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -8,11 +9,17 @@ namespace SDU
 {
     public static class SDU_FileInstall
     {
+        public class SDUWebUIExtensionVersion : UCL.Core.JsonLib.UnityJsonSerializable
+        {
+            public Dictionary<string,string> m_ExtensionVersions = new Dictionary<string,string>();
+            public string m_EnvVersion;
+        }
         const string EnvVersion = "1.0.1";
         public class InstallData
         {
             public InstallData() { }
-            public InstallData(string iInstallTarget, string iInstallRoot, string iZipAbsolutePath, List<string> iRequiredFiles)
+            public InstallData(string iInstallTarget, string iInstallRoot, string iZipAbsolutePath,
+                List<string> iRequiredFiles = null)
             {
                 m_InstallTarget = iInstallTarget;
                 m_InstallRoot = iInstallRoot;
@@ -27,48 +34,122 @@ namespace SDU
             public string m_ZipAbsolutePath;
             public List<string> m_RequiredFiles;
         }
-        
+
         public static void CheckAndInstall(InstallSetting iInstallSetting)
         {
             InstallData aPythonData = new InstallData("Python", iInstallSetting.PythonInstallRoot, iInstallSetting.PythonZipPath,
                  InstallSetting.PythonRequiredFiles);
-            CheckInstall(aPythonData);
-
-            InstallData aEnvData = new InstallData("Env", iInstallSetting.EnvInstallRoot, iInstallSetting.EnvZipPath, 
-                InstallSetting.EnvRequiredFiles);
-
-            if (CheckInstall(aEnvData))//Env Installed
+            if (CheckRequireInstall(aPythonData))
             {
-                SaveEnvVersion(iInstallSetting);//Save Env version after Install
+                Install(aPythonData);
+            }
+
+            InstallData aEnvData = new InstallData("Env", iInstallSetting.EnvInstallRoot, iInstallSetting.EnvZipPath,
+                InstallSetting.EnvRequiredFiles);
+            bool aIsRequireInstallEnv = false;
+            if (CheckRequireInstall(aEnvData))//Env require Install
+            {
+                aIsRequireInstallEnv = true;
             }
             else
             {
-                string aEnvVersion = GetEnvVersion(iInstallSetting);
+                string aEnvVersion = GetVersion(iInstallSetting.EnvVersionFilePath);
                 if (aEnvVersion != EnvVersion)//Env need update
                 {
-                    Install(aEnvData);//force update
-                    SaveEnvVersion(iInstallSetting);
+                    aIsRequireInstallEnv = true;
                     Debug.LogWarning($"Env need update,Cur Ver:{EnvVersion},Install Ver:{aEnvVersion}");
                 }
                 else
                 {
-                    Debug.LogWarning($"Env up to date,Cur Ver:{EnvVersion},Install Ver:{aEnvVersion}");
+                    Debug.Log($"Env up to date,Cur Ver:{EnvVersion}");
                 }
+            }
+            if (aIsRequireInstallEnv)
+            {
+                Install(aEnvData);
+                SaveEnvVersion(iInstallSetting);//Save Env version after Install
             }
 
             InstallData aWebUIData = new InstallData("WebUI", iInstallSetting.WebUIInstallRoot, iInstallSetting.WebUIZipPath,
                 InstallSetting.WebUIRequiredFiles);
-            CheckInstall(aWebUIData);
+            if (CheckRequireInstall(aWebUIData))
+            {
+                Install(aWebUIData);
+            }
+            CheckAndInstallWebUIExtension(iInstallSetting);
 
+        }
+        public static void CheckAndInstallWebUIExtension(InstallSetting iInstallSetting)
+        {
+            //Debug.LogError($"CheckAndInstallWebUIExtension WebUIExtensionSourcePath:{iInstallSetting.WebUIExtensionSourcePath}");
+            if (!Directory.Exists(iInstallSetting.WebUIExtensionSourcePath))
+            {
+                Debug.LogError($"CheckAndInstallWebUIExtension WebUIExtensionSourcePath:{iInstallSetting.WebUIExtensionSourcePath}" +
+                    $", !Directory.Exists");
+                return;
+            }
+            SDUWebUIExtensionVersion aSDUWebUIExtensionVersion = new SDUWebUIExtensionVersion();
+            string aExtensionVersionFilePath = Path.Combine(iInstallSetting.WebUIExtensionInstallPath, "SDU_ExtensionVersion.json");
+            if(File.Exists(aExtensionVersionFilePath))
+            {
+                string aJsonStr = File.ReadAllText(aExtensionVersionFilePath);
+                JsonData aJson = JsonData.ParseJson(aJsonStr);
+                aSDUWebUIExtensionVersion.DeserializeFromJson(aJson);
+            }
 
+            var aSourceExtensions = UCL.Core.FileLib.Lib.GetFilesName(iInstallSetting.WebUIExtensionSourcePath,
+                "*.zip", SearchOption.TopDirectoryOnly, true);
+            foreach(var aExtensionZipName in aSourceExtensions)
+            {
+                var aExtensionName = aExtensionZipName.Replace(".zip", string.Empty);
+                //Debug.LogWarning($"SourceExtension:{aExtensionName}");
+                string aInstallPath = Path.Combine(iInstallSetting.WebUIExtensionInstallPath, aExtensionName);
+                string aInstallZipPath = Path.Combine(iInstallSetting.WebUIExtensionSourcePath, $"{aExtensionName}.zip");
+                bool aRequireInstall = false;
+                string aSourceVer = GetVersion(Path.Combine(iInstallSetting.WebUIExtensionSourcePath, $"{aExtensionName}_Version.txt"));
+                if (Directory.Exists(aInstallPath))//Installed
+                {
+                    Debug.Log($"Extension:{aExtensionName}, Installed");
+                    if (aSDUWebUIExtensionVersion.m_ExtensionVersions.ContainsKey(aExtensionName))//CheckVersion
+                    {
+                        string aInstallVer = aSDUWebUIExtensionVersion.m_ExtensionVersions[aExtensionName];
+                        if (aInstallVer != aSourceVer)
+                        {
+                            aRequireInstall = true;
+                            Debug.LogWarning($"Extension:{aExtensionName}, InstallVer:{aInstallVer},SourceVer:{aSourceVer}");
+                        }
+                    }
+                }
+                else//Not Installed
+                {
+                    Debug.LogWarning($"Extension:{aExtensionName},Not Installed");
+                    aRequireInstall = true;
+                }
+                if(aRequireInstall)
+                {
+                    aSDUWebUIExtensionVersion.m_ExtensionVersions[aExtensionName] = aSourceVer;
+                    Debug.LogWarning($"Start Install Extension:{aExtensionName}," +
+                        $"\nInstallSourcePath:{aInstallZipPath}" +
+                            $"\nInstallPath:{aInstallPath}");
+                    InstallData aInstallData = new InstallData($"Extension[{aExtensionName}]",
+                        aInstallPath, aInstallZipPath);
+                    Install(aInstallData);
+                    //UCL.Core.FileLib.Lib.CopyDirectory(aInstallSourcePath, aInstallPath);
+                }
+            }
+
+            {
+                aSDUWebUIExtensionVersion.m_EnvVersion = EnvVersion;
+                string aJsonStr = aSDUWebUIExtensionVersion.SerializeToJson().ToJsonBeautify();
+                File.WriteAllText(aExtensionVersionFilePath, aJsonStr);
+            }
         }
         public static void SaveEnvVersion(InstallSetting iInstallSetting)
         {
             File.WriteAllText(iInstallSetting.EnvVersionFilePath, EnvVersion);
         }
-        public static string GetEnvVersion(InstallSetting iInstallSetting)
+        public static string GetVersion(string aPath)
         {
-            var aPath = iInstallSetting.EnvVersionFilePath;
             //Debug.LogWarning($"GetEnvVersion aPath:{aPath}");
             if (File.Exists(aPath))
             {
@@ -81,7 +162,7 @@ namespace SDU
         /// </summary>
         /// <param name="iInstallData"></param>
         /// <returns>true if need to Install</returns>
-        public static bool CheckInstall(InstallData iInstallData)
+        public static bool CheckRequireInstall(InstallData iInstallData)
         {
             bool aRequireInstall = true;
             if (Directory.Exists(iInstallData.m_InstallRoot))//Install done
@@ -105,10 +186,10 @@ namespace SDU
                 }
                 //return iInstallRoot;
             }
-            if (aRequireInstall)
-            {
-                Install(iInstallData);
-            }
+            //if (aRequireInstall)
+            //{
+            //    Install(iInstallData);
+            //}
             
             return aRequireInstall;
         }

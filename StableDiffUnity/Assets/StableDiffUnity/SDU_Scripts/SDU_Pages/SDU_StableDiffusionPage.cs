@@ -135,6 +135,10 @@ namespace SDU
                 SDU_Server.OnGUI(m_DataDic.GetSubDic("SDU_Server"));
             }
             GUILayout.FlexibleSpace();
+            if (GUILayout.Button("Download File"))
+            {
+                SDU_DownloadFilePage.Create();
+            }
             if (GUILayout.Button("Debug Log", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
             {
                 UCL_DebugLogPage.Create();
@@ -142,11 +146,6 @@ namespace SDU
         }
         protected override void ContentOnGUI()
         {
-
-            if (GUILayout.Button("Download File"))
-            {
-                SDU_DownloadFilePage.Create();
-            }
             RunTimeData.ConfigOnGUI(m_DataDic.GetSubDic("RunTimeData"));
 
             UCL.Core.UI.UCL_GUILayout.DrawObjectData(RunTimeData.Ins, m_DataDic.GetSubDic("RunTimeData"), "Configs", false);
