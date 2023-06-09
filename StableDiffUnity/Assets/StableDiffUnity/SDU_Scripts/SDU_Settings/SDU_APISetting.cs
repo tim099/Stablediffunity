@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
 using UCL.Core;
@@ -8,6 +9,7 @@ namespace SDU
     public class APISetting
     {
         public ControlNetAPI m_ControlNetAPI = new ControlNetAPI();
+        public StablediffunityAPI m_StablediffunityAPI = new StablediffunityAPI();
         public StableDiffusionAPI m_StableDiffusionAPI = new StableDiffusionAPI();
         public OpenWebURL m_OpenWebURL = new OpenWebURL();
     }
@@ -20,7 +22,20 @@ namespace SDU
             {
                 System.Diagnostics.Process.Start(RunTimeData.SD_API.URL_Docs);
             }
+            if (GUILayout.Button("Test StablediffunityAPI", UCL_GUIStyle.ButtonStyle))
+            {
+                StablediffunityGetVersion().Forget();
+            }
+            //m_StablediffunityAPI
             return this;
+        }
+        public async UniTask StablediffunityGetVersion()
+        {
+            using (var aClient = RunTimeData.Stablediffunity_API.Client_GetVersion)
+            {
+                string aResult = await aClient.SendWebRequestStringAsync();
+                Debug.LogError($"StablediffunityGetVersion Result:{aResult}");
+            }
         }
     }
     [System.Serializable]
@@ -87,7 +102,19 @@ namespace SDU
         //    new SDU_WebUIClient.SDU_WebRequest(URL_Docs, SDU_WebRequest.Method.Get);
         #endregion
     }
+    ///
+    /// <summary>
+    /// https://github.com/Mikubill/sd-webui-controlnet/wiki/API
+    /// </summary>
+    [System.Serializable]
+    public class StablediffunityAPI
+    {
+        public static string ServerUrl => RunTimeData.ServerUrl;
 
+        #region Client Get
+        public SDU_WebUIClient.SDU_WebRequest Client_GetVersion => new SDU_WebUIClient.SDU_WebRequest(ServerUrl+"/stablediffunity/version", SDU_WebRequest.Method.Get);
+        #endregion
+    }
     /// <summary>
     /// https://github.com/Mikubill/sd-webui-controlnet/wiki/API
     /// </summary>

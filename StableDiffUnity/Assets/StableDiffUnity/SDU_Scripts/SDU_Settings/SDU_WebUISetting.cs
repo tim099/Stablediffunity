@@ -12,6 +12,19 @@ namespace SDU
     public class WebUISetting : UCL.Core.UI.UCLI_FieldOnGUI
     {
         [System.Serializable]
+        public class SdModels : UCL.Core.UCLI_ShortName
+        {
+            public string title;
+            public string model_name;
+            public string hash;
+            public string sha256;
+            public string filename;
+            public string config;
+
+            public string GetShortName() => model_name;
+        }
+
+        [System.Serializable]
         public class ControlNetData
         {
             public List<string> m_ModelList = new List<string>();
@@ -43,7 +56,7 @@ namespace SDU
                 "DDIM",
                 "PLMS"
             };
-        public List<SDU_WebUIClient.Get.SdApi.V1.SdModels.Responses> m_Models = new();
+        public List<SdModels> m_Models = new();
         public SDU_WebUIClient.Get.SdApi.V1.CmdFlags.Responses m_CmdFlags = new();
 
         public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
@@ -110,7 +123,7 @@ namespace SDU
                     m_ModelNames.Clear();
                     foreach (JsonData aModelJson in responses)
                     {
-                        var aModel = JsonConvert.LoadDataFromJson<SDU_WebUIClient.Get.SdApi.V1.SdModels.Responses>(aModelJson);
+                        var aModel = JsonConvert.LoadDataFromJson<SdModels>(aModelJson);
                         m_Models.Add(aModel);
                         m_ModelNames.Add(aModel.model_name);
                     }

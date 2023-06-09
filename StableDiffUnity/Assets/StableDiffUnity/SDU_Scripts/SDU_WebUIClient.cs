@@ -127,7 +127,7 @@ namespace SDU
                 else
                 {
                     //Debug.LogError($"WebRequest.error:{WebRequest.error},URL:{WebRequest.url}");
-                    throw new WebRequestException($"WebRequest.error:{WebRequest.error},URL:{WebRequest.url}");
+                    throw new WebRequestException($"WebRequest.method:{WebRequest.method},error:{WebRequest.error},URL:{WebRequest.url}");
                 }
             }
         }
@@ -439,93 +439,6 @@ namespace SDU
                         public CmdFlags() : base(Url, Method, RequestHeaderList) { }
                         public CmdFlags(IUrl url) : base(url.Url, Method, RequestHeaderList) { }
                         public CmdFlags(string url) : base(url, Method, RequestHeaderList) { }
-                        public ValueTask<Responses> SendRequestAsync()
-                        {
-                            return base.SendRequestAsync<Responses>();
-                        }
-                    }
-
-                    public class SdModels : WebRequestWrapper
-                    {
-                        // static
-                        public static string Paths => "/sdapi/v1/sd-models";
-                        public static string Url => $"{ServerUrl}{Paths}";
-                        public static IReadOnlyList<RequestHeader> RequestHeaderList { get; }
-
-                        static SdModels()
-                        {
-                            RequestHeaderList = new List<RequestHeader>() { new RequestHeader(ContentType, ApplicationJson), };
-                        }
-
-                        // interface
-                        public interface IUrl
-                        {
-                            public string Url { get; }
-                        }
-
-                        // internal class
-                        [Serializable]
-                        public class Responses : IResponses, UCL.Core.UCLI_ShortName
-                        {
-                            public string title;
-                            public string model_name;
-                            public string hash;
-                            public string sha256;
-                            public string filename;
-                            public string config;
-
-                            public string GetShortName() => model_name;
-                        }
-
-                        // method
-                        public SdModels() : base(Url, Method, RequestHeaderList) { }
-                        public SdModels(string url) : base(url, Method, RequestHeaderList) { }
-
-                        public ValueTask<IList<Responses>> SendRequestAsync()
-                        {
-                            return base.SendRequestAsListResponsesAsync<Responses>();
-                        }
-                    }
-
-                    public class Progress : WebRequestWrapper
-                    {
-                        // static
-                        public static string Paths => "/sdapi/v1/progress";
-                        public static string Url => $"{ServerUrl}{Paths}";
-                        public static IReadOnlyList<RequestHeader> RequestHeaderList { get; }
-
-                        static Progress()
-                        {
-                            RequestHeaderList = new List<RequestHeader>() { new RequestHeader(ContentType, ApplicationJson), };
-                        }
-
-                        // interface
-                        public interface IUrl
-                        {
-                            public string Url { get; }
-                        }
-
-                        // internal class
-                        [Serializable]
-                        public class Parameters : IParameters
-                        {
-                            public bool skip_current_image;
-                        }
-
-                        [Serializable]
-                        public class Responses : IResponses
-                        {
-                            public float progress = 0;
-                            public float eta_relative = 0;
-                            //public XXX state = { };
-                            public string current_image = "string";
-                            public string textinfo = "string";
-                        }
-
-                        // method
-                        public Progress() : base(Url, Method, RequestHeaderList) { }
-                        public Progress(IUrl url) : base(url.Url, Method, RequestHeaderList) { }
-
                         public ValueTask<Responses> SendRequestAsync()
                         {
                             return base.SendRequestAsync<Responses>();

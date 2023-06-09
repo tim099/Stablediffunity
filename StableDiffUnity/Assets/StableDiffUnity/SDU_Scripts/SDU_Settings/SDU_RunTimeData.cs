@@ -107,7 +107,9 @@ namespace SDU
             }
 
         }
+        
         static public StableDiffusionAPI SD_API => Ins.m_APISetting.m_StableDiffusionAPI;
+        static public StablediffunityAPI Stablediffunity_API => Ins.m_APISetting.m_StablediffunityAPI;
         static public ControlNetAPI ControlNet_API => Ins.m_APISetting.m_ControlNetAPI;
         static public InstallSetting InstallSetting => Ins.m_InstallSetting;
         public static string ServerUrl => Ins.m_WebURL;
