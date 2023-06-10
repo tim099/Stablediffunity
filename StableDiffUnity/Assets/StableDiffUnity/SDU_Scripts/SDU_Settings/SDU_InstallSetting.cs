@@ -53,14 +53,14 @@ namespace SDU
 
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public bool m_ShowOpenFolderToggle = false;
-        public string InstallStableDiffusionRoot => Path.Combine(Application.streamingAssetsPath, "InstallStableDiffUnity");
-        public string EnvZipPath => Path.Combine(InstallStableDiffusionRoot, EnvZipFileName);
-        public string WebUIZipPath => Path.Combine(InstallStableDiffusionRoot, WebUIZipFileName);
-        public string PythonZipPath => Path.Combine(InstallStableDiffusionRoot, PythonZipFileName);
-        public string RunPythonPath => Path.Combine(EnvInstallRoot, RunPythonName);
-        public string WebUISourcePath => Path.Combine(InstallStableDiffusionRoot, ".WebUI");
-        public string WebUIExtensionSourcePath => Path.Combine(WebUISourcePath, "extensions");
+        public static string InstallStableDiffusionRoot => Path.Combine(Application.streamingAssetsPath, "InstallStableDiffUnity");
+        public static string EnvZipPath => Path.Combine(InstallStableDiffusionRoot, EnvZipFileName);
+        public static string WebUIZipPath => Path.Combine(InstallStableDiffusionRoot, WebUIZipFileName);
+        public static string PythonZipPath => Path.Combine(InstallStableDiffusionRoot, PythonZipFileName);
+        public static string WebUISourcePath => Path.Combine(InstallStableDiffusionRoot, ".WebUI");
+        public static string WebUIExtensionSourcePath => Path.Combine(WebUISourcePath, "extensions");
 
+        public string RunPythonPath => Path.Combine(EnvInstallRoot, RunPythonName);
 
         public string OutputPath => Path.Combine(EnvInstallRoot, "Output");
         #region DownloadSettings
@@ -74,11 +74,13 @@ namespace SDU
         public string RunBatFilePath => Path.Combine(EnvInstallRoot, "RunBatFilePath.txt");
         public string EnvVersionFilePath => Path.Combine(EnvInstallRoot, "EnvVersion.txt");
 
-        public string ModelsRootPath => Path.Combine(WebUIInstallRoot, "models");
-        public string WebUIExtensionInstallPath => Path.Combine(WebUIInstallRoot, "extensions");
-        public string StableDiffusionModelsPath => Path.Combine(ModelsRootPath, "Stable-diffusion");
-        public string StableDiffusionLoraPath => Path.Combine(ModelsRootPath, "Lora");
 
+        #region WebUI
+        public string WebUIModelsRootPath => Path.Combine(WebUIInstallRoot, "models");
+        public string WebUIExtensionInstallPath => Path.Combine(WebUIInstallRoot, "extensions");
+        public string WebUIModelsPath => Path.Combine(WebUIModelsRootPath, "Stable-diffusion");
+        public string WebUILoraPath => Path.Combine(WebUIModelsRootPath, "Lora");
+        #endregion
 
         /// <summary>
         /// inside Env folder
@@ -142,8 +144,8 @@ namespace SDU
                 case FolderEnum.Env: return EnvInstallRoot;
                 case FolderEnum.WebUI: return WebUIInstallRoot;
                 case FolderEnum.Python: return PythonInstallRoot;
-                case FolderEnum.CheckPoints: return StableDiffusionModelsPath;
-                case FolderEnum.Lora: return StableDiffusionLoraPath;
+                case FolderEnum.CheckPoints: return WebUIModelsPath;
+                case FolderEnum.Lora: return WebUILoraPath;
                 case FolderEnum.Tex2ImgPreset: return Path.Combine(EnvInstallRoot, "Preset", "Tex2Img");
                 case FolderEnum.Img2ImgPreset: return Path.Combine(EnvInstallRoot, "Preset", "Img2Img");
                     

@@ -16,8 +16,11 @@ namespace SDU
     [System.Serializable]
     public class OpenWebURL : UCL.Core.UI.UCLI_FieldOnGUI
     {
+        public StablediffunityAPI.GitCloneData m_GitCloneData = new StablediffunityAPI.GitCloneData();
+
         public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {
+            UCL_GUILayout.DrawField(this, iDataDic.GetSubDic("Data"), iFieldName);
             if(GUILayout.Button("Open API Docs", UCL_GUIStyle.ButtonStyle))
             {
                 System.Diagnostics.Process.Start(RunTimeData.SD_API.URL_Docs);
@@ -26,6 +29,12 @@ namespace SDU
             {
                 TestAPI(RunTimeData.Stablediffunity_API.Client_GetVersion).Forget();
             }
+            if (GUILayout.Button("Test StablediffunityAPI Git Clone", UCL_GUIStyle.ButtonStyle))
+            {
+                string aJson = m_GitCloneData.SerializeToJson().ToJson();
+                Debug.LogError($"aJson:{aJson}");
+                TestAPI(RunTimeData.Stablediffunity_API.Client_PostGitClone, aJson).Forget();
+            }
             if (GUILayout.Button("Test ControlNetAPI", UCL_GUIStyle.ButtonStyle))
             {
                 TestAPI(RunTimeData.ControlNet_API.Client_GetVersion).Forget();
@@ -33,11 +42,11 @@ namespace SDU
             //m_StablediffunityAPI
             return this;
         }
-        public async UniTask TestAPI(SDU_WebUIClient.SDU_WebRequest iClient)
+        public async UniTask TestAPI(SDU_WebUIClient.SDU_WebRequest iClient, string iJson = "")
         {
             using (iClient)
             {
-                string aResult = await iClient.SendWebRequestStringAsync();
+                string aResult = await iClient.SendWebRequestStringAsync(iJson);
                 Debug.LogError($"TestAPI URL:{iClient.WebRequest.url} ,Result:{aResult}");
             }
         }
@@ -116,8 +125,22 @@ namespace SDU
         public static string ServerUrl => RunTimeData.ServerUrl;
 
         #region Client Get
-        public SDU_WebUIClient.SDU_WebRequest Client_GetVersion => new SDU_WebUIClient.SDU_WebRequest(ServerUrl+"/stablediffunity/version", SDU_WebRequest.Method.Get);
+        public SDU_WebUIClient.SDU_WebRequest Client_GetVersion => 
+            new SDU_WebUIClient.SDU_WebRequest(ServerUrl+"/stablediffunity/version", SDU_WebRequest.Method.Get);
         #endregion
+
+        #region Client Post
+        public SDU_WebUIClient.SDU_WebRequest Client_PostGitClone => 
+            new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/stablediffunity/git_clone", SDU_WebRequest.Method.Post);
+        #endregion
+
+        [System.Serializable]
+        public class GitCloneData : UCL.Core.JsonLib.UnityJsonSerializable
+        {
+            public string m_url;
+            public string m_target_dir;
+            public string m_branch;
+        }
     }
     /// <summary>
     /// https://github.com/Mikubill/sd-webui-controlnet/wiki/API

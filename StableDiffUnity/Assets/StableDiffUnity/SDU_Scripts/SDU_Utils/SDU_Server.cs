@@ -66,8 +66,7 @@ namespace SDU
                 if (GUILayout.Button("Stop Server", UCL_GUIStyle.GetButtonStyle(Color.yellow), GUILayout.Width(160)))
                 {
                     UnityEngine.Debug.Log($"Stop server. ProcessID:{SDU_ProcessList.s_ProcessID}");
-                    SDU_Server.Close();
-                    SDU_ProcessList.KillAllProcess();
+                    SDU_Server.StopServer();
                 }
             }
 
@@ -107,7 +106,7 @@ namespace SDU
             s_CancellationTokenSource.Dispose();
             s_CancellationTokenSource = null;
         }
-        public static async UniTaskVoid StartServer()
+        public static async UniTask StartServer()
         {
             CancelStartServer();
             s_CancellationTokenSource = new CancellationTokenSource();
@@ -212,6 +211,20 @@ namespace SDU
                     UnityEngine.Debug.LogError($"StartServer() fail, !ServerReady");
                     return;
                 }
+                
+                bool aIsInstall = await SDU_FileInstall.SDU_WebUIRequiredExtensions.Ins.
+                    CheckAndInstallRequiredExtensions(RunTimeData.InstallSetting);
+                if (aIsInstall)//Need to restart Server
+                {
+                    StopServer();
+                    await Task.Delay(1);
+                    UCL.Core.ServiceLib.UCL_UpdateService.AddAction(() =>
+                    {
+                        StartServer().Forget();
+                    });
+                    return;
+                }
+
                 s_ServerState = ServerState.Ready;
                 //aProcess.StandardOutput.ReadToEnd();
                 if (RunTimeData.Ins.m_AutoOpenWeb)
@@ -277,6 +290,11 @@ namespace SDU
                 //UnityEngine.Debug.LogException(e);
                 return false;
             }
+        }
+        public static void StopServer()
+        {
+            Close();
+            SDU_ProcessList.KillAllProcess();
         }
         public static void Close()
         {

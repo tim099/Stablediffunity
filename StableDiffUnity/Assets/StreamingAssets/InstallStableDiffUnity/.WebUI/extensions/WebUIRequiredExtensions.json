@@ -1,0 +1,11 @@
+{
+	"Extensions":
+	[
+		{
+			"AutoInstall":"True",
+			"ExtensionName":"sd-webui-controlnet",
+			"Url":"https://github.com/Mikubill/sd-webui-controlnet",
+			"Branch":"main"
+		}
+	]
+}

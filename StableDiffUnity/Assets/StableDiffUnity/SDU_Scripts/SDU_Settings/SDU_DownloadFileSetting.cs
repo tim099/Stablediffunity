@@ -9,22 +9,20 @@ using UCL.Core.UI;
 
 namespace SDU
 {
-    public class SDU_DownloadFileSetting : UCL.Core.JsonLib.UnityJsonSerializable, UCL.Core.UI.UCLI_FieldOnGUI, UCLI_ShortName
+    public class SDU_DownloadFileSetting : UnityJsonSerializable, UCLI_FieldOnGUI, UCLI_ShortName
     {
-        public enum FileType
-        {
-            CheckPoint,
-            Lora,
-        }
-
         public string m_URL;
         public SDU_FolderSetting m_FolderSetting = new SDU_FolderSetting();
+
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public string m_FileName = "NewFile";
+
         public string m_FileExtension = "safetensors";
         //public bool m_AutoRetryDownload = true;
 
-        [UCL.Core.ATTR.UCL_HideOnGUI] public string m_WebPageURL;
+        [UCL.Core.ATTR.UCL_HideOnGUI] 
+        public string m_WebPageURL;
+
         public string FolderPath => m_FolderSetting.Path;
         public string FilePath => Path.Combine(FolderPath, $"{m_FileName}.{m_FileExtension}");
         public SDU_FileDownloader.DownloadHandle DownloadHandle => SDU_FileDownloader.GetDownloadFileHandle(m_URL, FilePath);

@@ -49,6 +49,9 @@ namespace SDU
                 var aFileHandle = SDU_FileDownloader.DownloadingFiles[aKey];
                 aFileHandle.OnGUI(m_Dic.GetSubDic($"DownloadingFiles_{aKey}"));
             }
+
+            var aSDUWebUIRequiredExtensions = SDU_FileInstall.SDU_WebUIRequiredExtensions.Ins;
+            aSDUWebUIRequiredExtensions.OnGUI(m_Dic.GetSubDic("SDU_WebUIRequiredExtensions"));
         }
 
     }

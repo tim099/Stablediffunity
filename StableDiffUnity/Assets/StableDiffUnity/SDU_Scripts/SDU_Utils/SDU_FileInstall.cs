@@ -1,7 +1,11 @@
+using Cysharp.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using UCL.Core.JsonLib;
+using UCL.Core.UI;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -9,12 +13,147 @@ namespace SDU
 {
     public static class SDU_FileInstall
     {
+        const string EnvVersion = "1.0.1";
+
         public class SDUWebUIExtensionVersion : UCL.Core.JsonLib.UnityJsonSerializable
         {
             public Dictionary<string,string> m_ExtensionVersions = new Dictionary<string,string>();
             public string m_EnvVersion;
         }
-        const string EnvVersion = "1.0.1";
+
+        public class SDUWebUIExtensionData : UnityJsonSerializable, UCL.Core.UCLI_ShortName
+        {
+            public bool m_AutoInstall = true;
+            public string m_ExtensionName;
+            public string m_Url;
+            //public string m_TargetDir;
+            public string m_Branch;
+            //public StablediffunityAPI.GitCloneData m_GitCloneData = new StablediffunityAPI.GitCloneData();
+
+            public string GetShortName() => $"ExtensionData[{m_ExtensionName}]";
+            public async UniTask<bool> CheckAndInstallRequiredExtensions(InstallSetting iInstallSetting, CancellationToken iCancellationToken)
+            {
+                //Check if installed!!
+                string aInstallPath = Path.Combine(iInstallSetting.WebUIExtensionInstallPath, m_ExtensionName);
+                if (Directory.Exists(aInstallPath))
+                {
+                    Debug.Log($"CheckAndInstallRequiredExtensions ExtensionName:{m_ExtensionName}, already installed!!");
+                    return false;
+                }
+                StablediffunityAPI.GitCloneData m_GitCloneData = new StablediffunityAPI.GitCloneData();
+                m_GitCloneData.m_url = m_Url;
+                m_GitCloneData.m_branch = m_Branch;
+                m_GitCloneData.m_target_dir = aInstallPath;
+
+                string aJson = m_GitCloneData.SerializeToJson().ToJson();
+                Debug.LogWarning($"GitCloneData:{aJson}");
+                using(var aClient = RunTimeData.Stablediffunity_API.Client_PostGitClone)
+                {
+                    string aResult = await aClient.SendWebRequestStringAsync(aJson);
+                    Debug.LogWarning($"InstallRequiredExtensions Result:{aResult}");
+                }
+                return true;
+            }
+        }
+        public class SDU_WebUIRequiredExtensions : UnityJsonSerializable
+        {
+            #region static
+            public static string SavePath => Path.Combine(InstallSetting.WebUIExtensionSourcePath, "WebUIRequiredExtensions.json");
+            public static SDU_WebUIRequiredExtensions Ins
+            {
+                get
+                {
+                    if (s_Ins == null)
+                    {
+                        s_Ins = new SDU_WebUIRequiredExtensions();
+                        s_Ins.Load();
+                    }
+                    return s_Ins;
+                }
+            }
+
+            private static SDU_WebUIRequiredExtensions s_Ins = null;
+            private static CancellationTokenSource s_CancellationTokenSource = null;
+
+
+
+            public static void Cancel()
+            {
+                if (s_CancellationTokenSource == null) return;
+                if (!s_CancellationTokenSource.IsCancellationRequested)
+                {
+                    s_CancellationTokenSource.Cancel();
+                }
+                s_CancellationTokenSource.Dispose();
+                s_CancellationTokenSource = null;
+            }
+            #endregion
+
+            public List<SDUWebUIExtensionData> m_Extensions = new List<SDUWebUIExtensionData>();
+
+            public void OnGUI(UCL.Core.UCL_ObjectDictionary iDataDic)
+            {
+                using(var aScope = new GUILayout.VerticalScope("box"))
+                {
+                    using (var aScope2 = new GUILayout.HorizontalScope())
+                    {
+                        if (GUILayout.Button("Save", UCL_GUIStyle.ButtonStyle))
+                        {
+                            Save();
+                        }
+                        if (GUILayout.Button("Load", UCL_GUIStyle.ButtonStyle))
+                        {
+                            Load();
+                            iDataDic.Clear();
+                        }
+                    }
+                    if (SDU_Server.ServerReady)
+                    {
+                        if (GUILayout.Button("Check and install required Extensions", UCL_GUIStyle.ButtonStyle))
+                        {
+                            CheckAndInstallRequiredExtensions(RunTimeData.InstallSetting).Forget();
+                        }
+                    }
+
+                    UCL_GUILayout.DrawField(this, iDataDic.GetSubDic("Data"), "WebUI required Extensions", true);
+                }
+
+                
+            }
+            public void Save()
+            {
+                File.WriteAllText(SavePath, SerializeToJson().ToJsonBeautify());
+            }
+            public void Load()
+            {
+                string aPath = SavePath;
+                if (File.Exists(aPath))
+                {
+                    string aJsonStr = File.ReadAllText(aPath);
+                    DeserializeFromJson(JsonData.ParseJson(aJsonStr));
+                }
+            }
+            public async UniTask<bool> CheckAndInstallRequiredExtensions(InstallSetting iInstallSetting)
+            {
+                Cancel();
+                s_CancellationTokenSource = new CancellationTokenSource();
+                var aExtensions = m_Extensions.Clone();
+                bool aIsInstall = false;
+                foreach (var aExtension in aExtensions)
+                {
+                    if (aExtension.m_AutoInstall)
+                    {
+                        if(await aExtension.CheckAndInstallRequiredExtensions(iInstallSetting, s_CancellationTokenSource.Token))
+                        {
+                            aIsInstall = true;//Install new Extensions, require restart server!!
+                        }
+                    }
+                    if (s_CancellationTokenSource.IsCancellationRequested) break;
+                }
+                return aIsInstall;
+            }
+        }
+        
         public class InstallData
         {
             public InstallData() { }
@@ -35,16 +174,17 @@ namespace SDU
             public List<string> m_RequiredFiles;
         }
 
+        
         public static void CheckAndInstall(InstallSetting iInstallSetting)
         {
-            InstallData aPythonData = new InstallData("Python", iInstallSetting.PythonInstallRoot, iInstallSetting.PythonZipPath,
+            InstallData aPythonData = new InstallData("Python", iInstallSetting.PythonInstallRoot, InstallSetting.PythonZipPath,
                  InstallSetting.PythonRequiredFiles);
             if (CheckRequireInstall(aPythonData))
             {
                 Install(aPythonData);
             }
 
-            InstallData aEnvData = new InstallData("Env", iInstallSetting.EnvInstallRoot, iInstallSetting.EnvZipPath,
+            InstallData aEnvData = new InstallData("Env", iInstallSetting.EnvInstallRoot, InstallSetting.EnvZipPath,
                 InstallSetting.EnvRequiredFiles);
             bool aIsRequireInstallEnv = false;
             if (CheckRequireInstall(aEnvData))//Env require Install
@@ -70,7 +210,7 @@ namespace SDU
                 SaveEnvVersion(iInstallSetting);//Save Env version after Install
             }
 
-            InstallData aWebUIData = new InstallData("WebUI", iInstallSetting.WebUIInstallRoot, iInstallSetting.WebUIZipPath,
+            InstallData aWebUIData = new InstallData("WebUI", iInstallSetting.WebUIInstallRoot, InstallSetting.WebUIZipPath,
                 InstallSetting.WebUIRequiredFiles);
             if (CheckRequireInstall(aWebUIData))
             {
@@ -79,15 +219,17 @@ namespace SDU
             CheckAndInstallWebUIExtension(iInstallSetting);
 
         }
+
         public static void CheckAndInstallWebUIExtension(InstallSetting iInstallSetting)
         {
             //Debug.LogError($"CheckAndInstallWebUIExtension WebUIExtensionSourcePath:{iInstallSetting.WebUIExtensionSourcePath}");
-            if (!Directory.Exists(iInstallSetting.WebUIExtensionSourcePath))
+            if (!Directory.Exists(InstallSetting.WebUIExtensionSourcePath))
             {
-                Debug.LogError($"CheckAndInstallWebUIExtension WebUIExtensionSourcePath:{iInstallSetting.WebUIExtensionSourcePath}" +
+                Debug.LogError($"CheckAndInstallWebUIExtension WebUIExtensionSourcePath:{InstallSetting.WebUIExtensionSourcePath}" +
                     $", !Directory.Exists");
                 return;
             }
+
             SDUWebUIExtensionVersion aSDUWebUIExtensionVersion = new SDUWebUIExtensionVersion();
             string aExtensionVersionFilePath = Path.Combine(iInstallSetting.WebUIExtensionInstallPath, "SDU_ExtensionVersion.json");
             if(File.Exists(aExtensionVersionFilePath))
@@ -97,16 +239,16 @@ namespace SDU
                 aSDUWebUIExtensionVersion.DeserializeFromJson(aJson);
             }
 
-            var aSourceExtensions = UCL.Core.FileLib.Lib.GetFilesName(iInstallSetting.WebUIExtensionSourcePath,
+            var aSourceExtensions = UCL.Core.FileLib.Lib.GetFilesName(InstallSetting.WebUIExtensionSourcePath,
                 "*.zip", SearchOption.TopDirectoryOnly, true);
             foreach(var aExtensionZipName in aSourceExtensions)
             {
                 var aExtensionName = aExtensionZipName.Replace(".zip", string.Empty);
                 //Debug.LogWarning($"SourceExtension:{aExtensionName}");
                 string aInstallPath = Path.Combine(iInstallSetting.WebUIExtensionInstallPath, aExtensionName);
-                string aInstallZipPath = Path.Combine(iInstallSetting.WebUIExtensionSourcePath, $"{aExtensionName}.zip");
+                string aInstallZipPath = Path.Combine(InstallSetting.WebUIExtensionSourcePath, $"{aExtensionName}.zip");
                 bool aRequireInstall = false;
-                string aSourceVer = GetVersion(Path.Combine(iInstallSetting.WebUIExtensionSourcePath, $"{aExtensionName}_Version.txt"));
+                string aSourceVer = GetVersion(Path.Combine(InstallSetting.WebUIExtensionSourcePath, $"{aExtensionName}_Version.txt"));
                 if (Directory.Exists(aInstallPath))//Installed
                 {
                     Debug.Log($"Extension:{aExtensionName}, Installed");
