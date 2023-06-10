@@ -51,7 +51,8 @@ namespace SDU
             }
 
             var aSDUWebUIRequiredExtensions = SDU_FileInstall.SDU_WebUIRequiredExtensions.Ins;
-            aSDUWebUIRequiredExtensions.OnGUI(m_Dic.GetSubDic("SDU_WebUIRequiredExtensions"));
+            UCL.Core.UI.UCL_GUILayout.DrawObjectData(aSDUWebUIRequiredExtensions, m_Dic.GetSubDic("SDU_WebUIRequiredExtensions"));
+            //aSDUWebUIRequiredExtensions.OnGUI(m_Dic.GetSubDic("SDU_WebUIRequiredExtensions"));
         }
 
     }

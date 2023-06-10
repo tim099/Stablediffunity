@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using UCL.Core;
 using UCL.Core.JsonLib;
 using UCL.Core.UI;
 using UnityEngine;
@@ -55,7 +56,7 @@ namespace SDU
                 return true;
             }
         }
-        public class SDU_WebUIRequiredExtensions : UnityJsonSerializable
+        public class SDU_WebUIRequiredExtensions : UnityJsonSerializable, UCLI_FieldOnGUI, UCLI_NameOnGUI
         {
             #region static
             public static string SavePath => Path.Combine(InstallSetting.WebUIExtensionSourcePath, "WebUIRequiredExtensions.json");
@@ -90,35 +91,53 @@ namespace SDU
             #endregion
 
             public List<SDUWebUIExtensionData> m_Extensions = new List<SDUWebUIExtensionData>();
-
-            public void OnGUI(UCL.Core.UCL_ObjectDictionary iDataDic)
+            public void NameOnGUI(UCL_ObjectDictionary iDataDic, string iDisplayName)
             {
-                using(var aScope = new GUILayout.VerticalScope("box"))
+                using (var aScope2 = new GUILayout.HorizontalScope())
                 {
-                    using (var aScope2 = new GUILayout.HorizontalScope())
+                    GUILayout.Label(iDisplayName, UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
+                    if (GUILayout.Button("Save", UCL_GUIStyle.ButtonStyle))
                     {
-                        if (GUILayout.Button("Save", UCL_GUIStyle.ButtonStyle))
-                        {
-                            Save();
-                        }
-                        if (GUILayout.Button("Load", UCL_GUIStyle.ButtonStyle))
-                        {
-                            Load();
-                            iDataDic.Clear();
-                        }
+                        Save();
                     }
-                    if (SDU_Server.ServerReady)
+                    if (GUILayout.Button("Load", UCL_GUIStyle.ButtonStyle))
                     {
-                        if (GUILayout.Button("Check and install required Extensions", UCL_GUIStyle.ButtonStyle))
-                        {
-                            CheckAndInstallRequiredExtensions(RunTimeData.InstallSetting).Forget();
-                        }
+                        Load();
+                        iDataDic.Clear();
                     }
+                }
+            }
+            public object OnGUI(string iFieldName, UCL.Core.UCL_ObjectDictionary iDataDic)
+            {
+                using (var aScope = new GUILayout.VerticalScope("box"))
+                {
 
-                    UCL_GUILayout.DrawField(this, iDataDic.GetSubDic("Data"), "WebUI required Extensions", true);
+                    UCL_GUILayout.DrawField(this, iDataDic, "WebUI required Extensions", false);
+                    if (iDataDic.GetData(UCL_GUILayout.IsShowFieldKey, false))
+                    {
+                        //using (var aScope2 = new GUILayout.HorizontalScope())
+                        //{
+                        //    if (GUILayout.Button("Save", UCL_GUIStyle.ButtonStyle))
+                        //    {
+                        //        Save();
+                        //    }
+                        //    if (GUILayout.Button("Load", UCL_GUIStyle.ButtonStyle))
+                        //    {
+                        //        Load();
+                        //        iDataDic.Clear();
+                        //    }
+                        //}
+                        if (SDU_Server.ServerReady)
+                        {
+                            if (GUILayout.Button("Check and install required Extensions", UCL_GUIStyle.ButtonStyle))
+                            {
+                                CheckAndInstallRequiredExtensions(RunTimeData.InstallSetting).Forget();
+                            }
+                        }
+                    }
                 }
 
-                
+                return this;
             }
             public void Save()
             {
