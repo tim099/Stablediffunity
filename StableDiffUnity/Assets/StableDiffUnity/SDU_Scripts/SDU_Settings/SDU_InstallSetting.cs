@@ -21,6 +21,7 @@ namespace SDU
         CheckPoints,
 
         Lora,
+        VAE,
 
         Tex2ImgPreset,
         Img2ImgPreset,
@@ -80,6 +81,7 @@ namespace SDU
         public string WebUIExtensionInstallPath => Path.Combine(WebUIInstallRoot, "extensions");
         public string WebUIModelsPath => Path.Combine(WebUIModelsRootPath, "Stable-diffusion");
         public string WebUILoraPath => Path.Combine(WebUIModelsRootPath, "Lora");
+        public string WebUIVAEPath => Path.Combine(WebUIModelsRootPath, "VAE");
         #endregion
 
         /// <summary>
@@ -134,6 +136,7 @@ namespace SDU
             {
                 case FolderEnum.CheckPoints: return Path.Combine(DownloadSettingsPath, "CheckPoint");
                 case FolderEnum.Lora: return Path.Combine(DownloadSettingsPath, "Lora");
+                case FolderEnum.VAE: return Path.Combine(DownloadSettingsPath, "VAE");
             }
             return Path.Combine(DownloadSettingsPath, iFolderEnum.ToString());
         }
@@ -146,6 +149,7 @@ namespace SDU
                 case FolderEnum.Python: return PythonInstallRoot;
                 case FolderEnum.CheckPoints: return WebUIModelsPath;
                 case FolderEnum.Lora: return WebUILoraPath;
+                case FolderEnum.VAE: return WebUIVAEPath;
                 case FolderEnum.Tex2ImgPreset: return Path.Combine(EnvInstallRoot, "Preset", "Tex2Img");
                 case FolderEnum.Img2ImgPreset: return Path.Combine(EnvInstallRoot, "Preset", "Img2Img");
                     

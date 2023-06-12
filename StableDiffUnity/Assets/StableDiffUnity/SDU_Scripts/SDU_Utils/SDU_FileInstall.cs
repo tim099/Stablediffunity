@@ -41,7 +41,7 @@ namespace SDU
                     Debug.Log($"CheckAndInstallRequiredExtensions ExtensionName:{m_ExtensionName}, already installed!!");
                     return false;
                 }
-                StablediffunityAPI.GitCloneData m_GitCloneData = new StablediffunityAPI.GitCloneData();
+                StableDiffunityAPI.GitCloneData m_GitCloneData = new StableDiffunityAPI.GitCloneData();
                 m_GitCloneData.m_url = m_Url;
                 m_GitCloneData.m_branch = m_Branch;
                 m_GitCloneData.m_target_dir = aInstallPath;

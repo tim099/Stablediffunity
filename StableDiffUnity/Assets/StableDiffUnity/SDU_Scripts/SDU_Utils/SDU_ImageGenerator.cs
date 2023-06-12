@@ -117,15 +117,16 @@ namespace SDU
             {
                 try
                 {
-                    using (var client = RunTimeData.SD_API.Client_Options)
-                    {
-                        JsonData aJson = new JsonData();
+                    //using (var client = RunTimeData.SD_API.Client_Options)
+                    //{
+                    //    JsonData aJson = new JsonData();
 
-                        aJson["sd_model_checkpoint"] = iSetting.m_CheckPoint.m_CheckPoint;
-                        string aJsonStr = aJson.ToJson();
-                        var aResultJson = await client.SendWebRequestStringAsync(aJsonStr);
-                        //Debug.LogWarning($"aResultJson:{aResultJson}");
-                    }
+                    //    aJson["sd_model_checkpoint"] = iSetting.m_CheckPoint.m_CheckPoint;
+                    //    var aResultJson = await client.SendWebRequestStringAsync(aJson.ToJson());
+                    //    //Debug.LogWarning($"aResultJson:{aResultJson}");
+                    //}
+                    await iSetting.m_CheckPoint.ApplyToServer();
+                    //SetCheckPointAsync
                     using (var aClient = iSetting.Client)
                     {
                         var aImageOutputSetting = iSetting.m_ImageOutputSetting;

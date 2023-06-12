@@ -28,7 +28,7 @@ namespace SDU
         public SDU_CheckPointSetting m_CheckPoint = new SDU_CheckPointSetting();
 
         public SDU_SamplerSetting m_Sampler = new SDU_SamplerSetting();
-
+        public SDU_VAESettings m_VAE = new SDU_VAESettings();
         public string m_Prompt = "masterpiece, best quality, ultra-detailed,((black background)),1girl,";
         public string m_NegativePrompt = "(low quality, worst quality:1.4), ((bad fingers))";
         public int m_Width = 512;

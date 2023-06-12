@@ -9,7 +9,7 @@ using UnityEngine;
 namespace SDU
 {
     [System.Serializable]
-    public class WebUISetting : UCL.Core.UI.UCLI_FieldOnGUI
+    public class WebUISetting : UnityJsonSerializable, UCL.Core.UI.UCLI_FieldOnGUI
     {
         [System.Serializable]
         public class SdModels : UCL.Core.UCLI_ShortName
@@ -23,6 +23,14 @@ namespace SDU
 
             public string GetShortName() => model_name;
         }
+        [System.Serializable]
+        public class SdVAE : UCL.Core.UCLI_ShortName
+        {
+            public string name;
+            public string path;
+
+            public string GetShortName() => name;
+        }
 
         [System.Serializable]
         public class ControlNetData
@@ -34,6 +42,7 @@ namespace SDU
 
         public List<string> m_ModelNames = new List<string>();
         public List<string> m_LoraNames = new List<string>();
+        public List<SdVAE> m_SdVAEs = new List<SdVAE>();
         public List<string> m_Samplers = new List<string>
             {
                 "Euler a",
@@ -79,7 +88,30 @@ namespace SDU
             aTasks.Add(RefreshSamplers());
             aTasks.Add(RefreshLora());
             aTasks.Add(RefreshControlNetModels());
+            aTasks.Add(RefreshVAEs());
             await UniTask.WhenAll(aTasks);
+        }
+        public async UniTask RefreshVAEs()
+        {
+            try
+            {
+                using (var aClient = RunTimeData.Stablediffunity_API.Client_GetVAEs)
+                {
+                    var aResponsesStr = await aClient.SendWebRequestStringAsync();
+                    Debug.LogWarning($"RefreshVAEs:{aResponsesStr}");
+                    JsonData aJson = JsonData.ParseJson(aResponsesStr);
+                    if (aJson.Contains("VAE"))
+                    {
+                        m_SdVAEs.Clear();
+                        JsonConvert.LoadDataFromJson(m_SdVAEs, aJson["VAE"]);
+                    }
+
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
         public async UniTask RefreshSamplers()
         {

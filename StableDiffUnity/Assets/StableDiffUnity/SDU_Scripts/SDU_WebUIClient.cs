@@ -2,10 +2,12 @@
 AutoHeader Test
 to change the auto header please go to RCG_AutoHeader.cs
 */
+using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using UCL.Core.JsonLib;
 using UnityEngine;
@@ -120,6 +122,33 @@ namespace SDU
                 WebRequest.downloadHandler = new DownloadHandlerBuffer();
 
                 await WebRequest.SendWebRequest();
+                if (WebRequest.result == UnityWebRequest.Result.Success)
+                {
+                    return WebRequest.downloadHandler.text;
+                }
+                else
+                {
+                    //Debug.LogError($"WebRequest.error:{WebRequest.error},URL:{WebRequest.url}");
+                    throw new WebRequestException($"WebRequest.method:{WebRequest.method},error:{WebRequest.error},URL:{WebRequest.url}");
+                }
+            }
+            public async UniTask<string> SendAsyncUniTask(CancellationToken iCancellationToken, string iJson = null)
+            {
+                CheckDone();
+
+                if (iJson != null)
+                {
+                    byte[] bytes = Encoding.UTF8.GetBytes(iJson);
+                    WebRequest.uploadHandler = new UploadHandlerRaw(bytes);
+                }
+
+                WebRequest.downloadHandler = new DownloadHandlerBuffer();
+                UnityWebRequestAsyncOperation aAsyncOperation = WebRequest.SendWebRequest();
+                await UniTask.WaitUntil(()=>
+                {
+                    return aAsyncOperation.isDone;
+                }, cancellationToken: iCancellationToken);
+                iCancellationToken.ThrowIfCancellationRequested();
                 if (WebRequest.result == UnityWebRequest.Result.Success)
                 {
                     return WebRequest.downloadHandler.text;

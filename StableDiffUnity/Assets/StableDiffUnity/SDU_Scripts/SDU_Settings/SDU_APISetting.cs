@@ -9,14 +9,14 @@ namespace SDU
     public class APISetting
     {
         public ControlNetAPI m_ControlNetAPI = new ControlNetAPI();
-        public StablediffunityAPI m_StablediffunityAPI = new StablediffunityAPI();
+        public StableDiffunityAPI m_StablediffunityAPI = new StableDiffunityAPI();
         public StableDiffusionAPI m_StableDiffusionAPI = new StableDiffusionAPI();
         public OpenWebURL m_OpenWebURL = new OpenWebURL();
     }
     [System.Serializable]
     public class OpenWebURL : UCL.Core.UI.UCLI_FieldOnGUI
     {
-        public StablediffunityAPI.GitCloneData m_GitCloneData = new StablediffunityAPI.GitCloneData();
+        //public StableDiffunityAPI.GitCloneData m_GitCloneData = new StableDiffunityAPI.GitCloneData();
 
         public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {
@@ -29,12 +29,17 @@ namespace SDU
             {
                 TestAPI(RunTimeData.Stablediffunity_API.Client_GetVersion).Forget();
             }
-            if (GUILayout.Button("Test StablediffunityAPI Git Clone", UCL_GUIStyle.ButtonStyle))
+            if (GUILayout.Button("Test StablediffunityAPI VAE", UCL_GUIStyle.ButtonStyle))
             {
-                string aJson = m_GitCloneData.SerializeToJson().ToJson();
-                Debug.LogError($"aJson:{aJson}");
-                TestAPI(RunTimeData.Stablediffunity_API.Client_PostGitClone, aJson).Forget();
+                RunTimeData.WebUISetting.RefreshVAEs().Forget();
+                //TestAPI(RunTimeData.Stablediffunity_API.Client_GetVAEs).Forget();
             }
+            //if (GUILayout.Button("Test StablediffunityAPI Git Clone", UCL_GUIStyle.ButtonStyle))
+            //{
+            //    string aJson = m_GitCloneData.SerializeToJson().ToJson();
+            //    Debug.LogError($"aJson:{aJson}");
+            //    TestAPI(RunTimeData.Stablediffunity_API.Client_PostGitClone, aJson).Forget();
+            //}
             if (GUILayout.Button("Test ControlNetAPI", UCL_GUIStyle.ButtonStyle))
             {
                 TestAPI(RunTimeData.ControlNet_API.Client_GetVersion).Forget();
@@ -101,6 +106,13 @@ namespace SDU
             new SDU_WebUIClient.SDU_WebRequest(URL_Img2img, SDU_WebRequest.Method.Post);
         public SDU_WebUIClient.SDU_WebRequest Client_Interrupt =>
             new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/sdapi/v1/interrupt", SDU_WebRequest.Method.Post);
+        /// <summary>
+        /// Not in WebUI master branch yet, currently in api-quit-restart branch
+        /// </summary>
+        public SDU_WebUIClient.SDU_WebRequest Client_RestartWebUI =>
+            new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/sdapi/v1/restart-webui", SDU_WebRequest.Method.Post);
+
+
 
         public SDU_WebUIClient.SDU_WebRequest Client_AppID =>
             new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/app_id", SDU_WebRequest.Method.Get);
@@ -120,13 +132,15 @@ namespace SDU
     /// https://github.com/Mikubill/sd-webui-controlnet/wiki/API
     /// </summary>
     [System.Serializable]
-    public class StablediffunityAPI
+    public class StableDiffunityAPI
     {
         public static string ServerUrl => RunTimeData.ServerUrl;
 
         #region Client Get
         public SDU_WebUIClient.SDU_WebRequest Client_GetVersion => 
             new SDU_WebUIClient.SDU_WebRequest(ServerUrl+"/stablediffunity/version", SDU_WebRequest.Method.Get);
+        public SDU_WebUIClient.SDU_WebRequest Client_GetVAEs =>
+            new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/stablediffunity/sd-vae", SDU_WebRequest.Method.Get);
         #endregion
 
         #region Client Post
