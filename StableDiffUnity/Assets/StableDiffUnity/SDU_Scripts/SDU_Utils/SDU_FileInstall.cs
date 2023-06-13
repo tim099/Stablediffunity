@@ -345,12 +345,7 @@ namespace SDU
                         }
                     }
                 }
-                //return iInstallRoot;
             }
-            //if (aRequireInstall)
-            //{
-            //    Install(iInstallData);
-            //}
             
             return aRequireInstall;
         }

@@ -65,7 +65,8 @@ namespace SDU
 
         public string OutputPath => Path.Combine(EnvInstallRoot, "Output");
         #region DownloadSettings
-        public string DownloadSettingsPath => Path.Combine(EnvInstallRoot, "InstallSettings");
+        public string DownloadSettingsPath => Path.Combine(Application.streamingAssetsPath , "InstallStableDiffUnity", ".Env", "InstallSettings");
+            //Path.Combine(EnvInstallRoot, "InstallSettings");
 
         #endregion
         //public string ConfigFilePath => Path.Combine(EnvInstallRoot, "Config.json");
@@ -158,25 +159,27 @@ namespace SDU
             }
             return string.Empty;
         }
-        public void OpenDownloadSettingsFolder(FolderEnum iFolderEnum)
-        {
-            string aPath = GetDownloadSettingsFolderPath(iFolderEnum);
-            if (string.IsNullOrEmpty(aPath))
-            {
-                Debug.LogError($"OpenDownloadSettingsFolder iFolderEnum:{iFolderEnum},string.IsNullOrEmpty(aPath)");
-                return;
-            }
-            System.Diagnostics.Process.Start(aPath);
-        }
         public void OpenFolder(FolderEnum iFolderEnum)
         {
             string aPath = GetFolderPath(iFolderEnum);
-            if (string.IsNullOrEmpty(aPath))
+            OpenFolder(aPath);
+        }
+
+        #region static
+        public static void OpenFolder(string iPath)
+        {
+            if (string.IsNullOrEmpty(iPath))
             {
-                Debug.LogError($"OpenEnvFolder iFolderEnum:{iFolderEnum},string.IsNullOrEmpty(aPath)");
+                Debug.LogError($"OpenFolder string.IsNullOrEmpty(iPath)!!");
                 return;
             }
-            System.Diagnostics.Process.Start(aPath);
+            if (!Directory.Exists(iPath))
+            {
+                Debug.LogError($"OpenFolder !Directory.Exists Path:{iPath},string.IsNullOrEmpty(aPath)");
+                return;
+            }
+            System.Diagnostics.Process.Start(iPath);
         }
+        #endregion
     }
 }

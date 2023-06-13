@@ -91,6 +91,32 @@ namespace SDU
             aTasks.Add(RefreshVAEs());
             await UniTask.WhenAll(aTasks);
         }
+        public async UniTask Refresh(FolderEnum iFolderEnum)
+        {
+            switch(iFolderEnum)
+            {
+                case FolderEnum.VAE:
+                    {
+                        await RefreshVAEs();
+                        break;
+                    }
+                case FolderEnum.Lora:
+                    {
+                        await RefreshLora();
+                        break;
+                    }
+                case FolderEnum.CheckPoints:
+                    {
+                        await RefreshCheckpoints();
+                        break;
+                    }
+                case FolderEnum.ControlNetModel:
+                    {
+                        await RefreshControlNetModels();
+                        break;
+                    }
+            }
+        }
         public async UniTask RefreshVAEs()
         {
             try

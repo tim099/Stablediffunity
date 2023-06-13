@@ -144,6 +144,9 @@ namespace SDU
         #endregion
 
         #region Client Post
+        public SDU_WebUIClient.SDU_WebRequest Client_SetVAE =>
+            new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/stablediffunity/set-sd-vae", SDU_WebRequest.Method.Post);
+
         public SDU_WebUIClient.SDU_WebRequest Client_PostGitClone => 
             new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/stablediffunity/git_clone", SDU_WebRequest.Method.Post);
         #endregion

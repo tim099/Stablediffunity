@@ -12,7 +12,7 @@ namespace SDU
 {
     public class SDU_CheckPointSetting : UCL.Core.JsonLib.UnityJsonSerializable, UCL.Core.UI.UCLI_FieldOnGUI
     {
-        static private SDU_CancellationTokenSource s_SetCheckPointAsyncCTS = new SDU_CancellationTokenSource();
+        static private SDU_CancellationTokenSource s_CTS = new SDU_CancellationTokenSource();
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public string m_CheckPoint;
         
@@ -29,12 +29,12 @@ namespace SDU
         {
             RequireClearDic = true;
             m_CheckPoint = iCheckPoint;
-            ApplyToServer().Forget();
+            //ApplyToServer().Forget();
         }
         public async UniTask ApplyToServer()//CancellationToken? iCancellationToken = null
         {
             string aCheckPoint = m_CheckPoint;
-            var aCTS = s_SetCheckPointAsyncCTS.Create();
+            var aCTS = s_CTS.Create();
             try
             {
                 await SetCheckPointAsync(aCheckPoint, aCTS.Token);
@@ -43,7 +43,7 @@ namespace SDU
             {
                 Debug.LogWarning($"ApplyToServer CheckPoint:{aCheckPoint},Exception:{e.Message}");
             }
-            s_SetCheckPointAsyncCTS.TryCancel(aCTS);
+            s_CTS.TryCancel(aCTS);
 
         }
         private static async UniTask SetCheckPointAsync(string iCheckPoint, CancellationToken iCancellationToken)

@@ -12,7 +12,7 @@ namespace SDU
     public class SDU_DownloadFileSetting : UnityJsonSerializable, UCLI_FieldOnGUI, UCLI_ShortName
     {
         public string m_URL;
-        public SDU_FolderSetting m_FolderSetting = new SDU_FolderSetting();
+        public SDU_InstallFolderSetting m_FolderSetting = new SDU_InstallFolderSetting();
 
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public string m_FileName = "NewFile";
@@ -23,7 +23,7 @@ namespace SDU
         [UCL.Core.ATTR.UCL_HideOnGUI] 
         public string m_WebPageURL;
 
-        public string FolderPath => m_FolderSetting.Path;
+        public string FolderPath => m_FolderSetting.Path();
         public string FilePath => Path.Combine(FolderPath, $"{m_FileName}.{m_FileExtension}");
         public SDU_FileDownloader.DownloadHandle DownloadHandle => SDU_FileDownloader.GetDownloadFileHandle(m_URL, FilePath);
         public string GetShortName() => $"DownloadFileSetting({m_FileName})";
@@ -42,12 +42,13 @@ namespace SDU
                 iDataDic.Clear();
                 m_Loaded = false;
             }
-            string aDownloadFileSettingPath = RunTimeData.InstallSetting.GetDownloadSettingsFolderPath(m_FolderSetting.m_Folder);
+            string aDownloadFileSettingPath = m_FolderSetting.GetDownloadSettingsFolderPath();
 
 
             if (!Directory.Exists(aDownloadFileSettingPath))
             {
-                SDU_FileInstall.CheckInstallEnv(aDownloadFileSettingPath);
+                UCL.Core.FileLib.Lib.CreateDirectory(aDownloadFileSettingPath);
+                //SDU_FileInstall.CheckInstallEnv(aDownloadFileSettingPath);
             }
             using (var aScope = new GUILayout.HorizontalScope())
             {
@@ -72,7 +73,7 @@ namespace SDU
                                 m_FileName = GUILayout.TextField(m_FileName);
                                 if (GUILayout.Button("Open Folder", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
                                 {
-                                    RunTimeData.InstallSetting.OpenDownloadSettingsFolder(m_FolderSetting.m_Folder);
+                                    m_FolderSetting.OpenDownloadSettingsFolder();
                                 }
                             }
 

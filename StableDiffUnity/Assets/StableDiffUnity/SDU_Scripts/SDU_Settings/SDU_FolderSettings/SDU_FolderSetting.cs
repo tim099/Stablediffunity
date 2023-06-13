@@ -8,21 +8,44 @@ using UnityEngine;
 
 namespace SDU
 {
+    public static partial class SDUI_FolderSettingExtensions
+    {
+        public static string Path(this SDUI_FolderSetting iFolderSetting)
+        {
+            return RunTimeData.InstallSetting.GetFolderPath(iFolderSetting.Folder);
+        }
+        public static string GetDownloadSettingsFolderPath(this SDUI_FolderSetting iFolderSetting)
+        {
+            return RunTimeData.InstallSetting.GetDownloadSettingsFolderPath(iFolderSetting.Folder);
+        }
+        public static void OpenDownloadSettingsFolder(this SDUI_FolderSetting iFolderSetting)
+        {
+            InstallSetting.OpenFolder(iFolderSetting.GetDownloadSettingsFolderPath());
+        }
+    }
+    public interface SDUI_FolderSetting
+    {
+        FolderEnum Folder { get; }
+    }
+
+
     [System.Serializable]
-    public class SDU_FolderSetting : UCL.Core.JsonLib.UnityJsonSerializable, UCL.Core.UI.UCLI_FieldOnGUI
+    public class SDU_FolderSetting : UnityJsonSerializable, SDUI_FolderSetting, UCLI_FieldOnGUI
     {
         public SDU_FolderSetting() { }
         //public SDU_FolderSetting(FolderEnum iFolderEnum) { m_Folder = iFolderEnum; }
         public FolderEnum m_Folder = FolderEnum.CheckPoints;
 
-        public string Path => RunTimeData.InstallSetting.GetFolderPath(m_Folder);
+
+        virtual public FolderEnum Folder => m_Folder;
+        //virtual public string Path => RunTimeData.InstallSetting.GetFolderPath(Folder);
 
         public override void DeserializeFromJson(JsonData iJson)
         {
             base.DeserializeFromJson(iJson);
             //Debug.LogError($"m_Folder:{m_Folder}");
         }
-        public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
+        virtual public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {
             using(var aScope = new GUILayout.HorizontalScope())
             {
