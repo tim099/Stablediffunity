@@ -28,6 +28,39 @@ namespace SDU
 
         ControlNetModel,
     }
+    public enum CMDArg
+    {
+        /// <summary>
+        /// --api
+        /// </summary>
+        Api,
+        /// <summary>
+        /// --xformers
+        /// </summary>
+        Xformers,
+        /// <summary>
+        /// --no-half-vae
+        /// </summary>
+        NoHalfVae,
+    }
+    public static class CMDArgExtensions
+    {
+        public static string ArgToString(this CMDArg iArg)
+        {
+            switch (iArg)
+            {
+                case CMDArg.Api: return "--api";
+                case CMDArg.Xformers: return "--xformers";
+                case CMDArg.NoHalfVae: return "--no-half-vae";
+            }
+            return string.Empty;
+        }
+        public static string ArgsToString(this List<CMDArg> iArgs)
+        {
+            if (iArgs.IsNullOrEmpty()) return string.Empty;
+            return " " + iArgs.ConcatString(iArg=>iArg.ArgToString(), " ");
+        }
+    }
     [System.Serializable]
     public class InstallSetting : UCL.Core.UI.UCLI_FieldOnGUI
     {
@@ -49,8 +82,10 @@ namespace SDU
         public string WebUIInstallRoot = Path.Combine(DefaultInstallRoot, "WebUI");
         public string PythonInstallRoot = Path.Combine(DefaultInstallRoot, "Python");
         public string CommandlindArgs = "--api --xformers";
+        public List<CMDArg> m_CMDArgs = new List<CMDArg>();
         public string PythonArgs;//-Xfrozen_modules=off
-
+        
+        public string GetCommandlindArgs => CommandlindArgs + m_CMDArgs.ArgsToString();
 
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public bool m_ShowOpenFolderToggle = false;

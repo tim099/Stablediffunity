@@ -131,7 +131,7 @@ namespace SDU
 
             File.WriteAllText(aInstallSetting.PythonInstallPathFilePath, aInstallSetting.PythonInstallRoot);
             File.WriteAllText(aInstallSetting.WebUIInstallPathFilePath, aInstallSetting.WebUIInstallRoot);
-            File.WriteAllText(aInstallSetting.CommandlindArgsFilePath, aInstallSetting.CommandlindArgs);
+            File.WriteAllText(aInstallSetting.CommandlindArgsFilePath, aInstallSetting.GetCommandlindArgs);
             File.WriteAllText(aInstallSetting.RunBatFilePath, aBatPath);
             SDU_ProcessList.PreCheckProcessEvent();//check current exist process
             var aProcess = new System.Diagnostics.Process();
