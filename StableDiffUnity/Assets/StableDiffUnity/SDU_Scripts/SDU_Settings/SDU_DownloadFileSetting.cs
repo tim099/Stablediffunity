@@ -6,6 +6,7 @@ using UnityEngine;
 using System.IO;
 using UCL.Core.JsonLib;
 using UCL.Core.UI;
+using System.Linq;
 
 namespace SDU
 {
@@ -28,22 +29,30 @@ namespace SDU
         public SDU_FileDownloader.DownloadHandle DownloadHandle => SDU_FileDownloader.GetDownloadFileHandle(m_URL, FilePath);
         public string GetShortName() => $"DownloadFileSetting({m_FileName})";
         private bool m_Show = false;
-        private bool m_Loaded = false;
+        private bool RequireClearDic { get; set; } = false;
         private string m_LoadSettingName;
         public override void DeserializeFromJson(JsonData iJson)
         {
             base.DeserializeFromJson(iJson);
-            m_Loaded = true;
+            RequireClearDic = true;
         }
         public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {
-            if (m_Loaded)
+            string aDownloadFileSettingPath = m_FolderSetting.GetDownloadSettingsFolderPath();
+            const string KeyDownloadFileSettingPath = "DownloadFileSettingPath";
+            bool aIsUpdatePath = aDownloadFileSettingPath != iDataDic.GetData(KeyDownloadFileSettingPath, aDownloadFileSettingPath);
+            if (aIsUpdatePath)
+            {
+                RequireClearDic = true;
+                m_LoadSettingName = string.Empty;
+            }
+            if (RequireClearDic)
             {
                 iDataDic.Clear();
-                m_Loaded = false;
+                RequireClearDic = false;
             }
-            string aDownloadFileSettingPath = m_FolderSetting.GetDownloadSettingsFolderPath();
 
+            iDataDic.SetData(KeyDownloadFileSettingPath, aDownloadFileSettingPath);
 
             if (!Directory.Exists(aDownloadFileSettingPath))
             {
@@ -79,26 +88,25 @@ namespace SDU
 
                             using (var aScope4 = new GUILayout.HorizontalScope())
                             {
-                                var aFiles = UCL.Core.FileLib.Lib.GetFilesName(aDownloadFileSettingPath, "*.json", SearchOption.TopDirectoryOnly);
-                                if (!aFiles.IsNullOrEmpty())
+                                var aFiles = UCL.Core.FileLib.Lib.GetFilesName(aDownloadFileSettingPath, "*.json", SearchOption.TopDirectoryOnly).ToList();
+                                if (aFiles.Count == 0) aFiles.Add(string.Empty);
+                                if (string.IsNullOrEmpty(m_LoadSettingName))
                                 {
-                                    if (string.IsNullOrEmpty(m_LoadSettingName))
-                                    {
-                                        m_LoadSettingName = aFiles[0];
-                                    }
-                                    var aPath = Path.Combine(aDownloadFileSettingPath, m_LoadSettingName);
-                                    if (File.Exists(aPath))
-                                    {
-                                        if (GUILayout.Button("Load Setting", GUILayout.ExpandWidth(false)))
-                                        {
-                                            var aJsonStr = File.ReadAllText(aPath);
-                                            JsonData aJson = JsonData.ParseJson(aJsonStr);
-                                            DeserializeFromJson(aJson);
-                                        }
-                                    }
-                                    m_LoadSettingName = UCL.Core.UI.UCL_GUILayout.PopupAuto(m_LoadSettingName, aFiles, iDataDic.GetSubDic("LoadSettingName"), "PopupAuto");
+                                    m_LoadSettingName = aFiles[0];
                                 }
-
+                                var aPath = Path.Combine(aDownloadFileSettingPath, m_LoadSettingName);
+                                bool aIsFileExist = File.Exists(aPath);
+                                if (GUILayout.Button("Load Setting",
+                                    UCL_GUIStyle.GetButtonStyle(aIsFileExist ? Color.white : Color.red), GUILayout.ExpandWidth(false)))
+                                {
+                                    if (aIsFileExist)
+                                    {
+                                        var aJsonStr = File.ReadAllText(aPath);
+                                        JsonData aJson = JsonData.ParseJson(aJsonStr);
+                                        DeserializeFromJson(aJson);
+                                    }
+                                }
+                                m_LoadSettingName = UCL.Core.UI.UCL_GUILayout.PopupAuto(m_LoadSettingName, aFiles, iDataDic.GetSubDic("LoadSettingName"), "PopupAuto");
                             }
                         }
                         if (!string.IsNullOrEmpty(m_URL) && !string.IsNullOrEmpty(m_FileName))
