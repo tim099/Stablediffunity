@@ -113,6 +113,7 @@ namespace SDU
             int aProcessID = -1;
             SDU_ProcessList.s_ProcessID = aProcessID;
             var aInstallSetting = RunTimeData.InstallSetting;
+            var aBootSetting = RunTimeData.Ins.m_BootSetting;
             SDU_FileInstall.CheckAndInstall(aInstallSetting);
 
             var aPythonExePath = aInstallSetting.PythonExePath;//System.IO.Path.Combine(aEnvInstallRoot, Data.PythonExePath);
@@ -131,7 +132,7 @@ namespace SDU
 
             File.WriteAllText(aInstallSetting.PythonInstallPathFilePath, aInstallSetting.PythonInstallRoot);
             File.WriteAllText(aInstallSetting.WebUIInstallPathFilePath, aInstallSetting.WebUIInstallRoot);
-            File.WriteAllText(aInstallSetting.CommandlindArgsFilePath, aInstallSetting.GetCommandlindArgs);
+            File.WriteAllText(aInstallSetting.CommandlindArgsFilePath, aBootSetting.CommandlineArgs);
             File.WriteAllText(aInstallSetting.RunBatFilePath, aBatPath);
             SDU_ProcessList.PreCheckProcessEvent();//check current exist process
             var aProcess = new System.Diagnostics.Process();
@@ -142,9 +143,10 @@ namespace SDU
 
             aProcess.StartInfo.FileName = aPythonExePath;
             string aArguments = string.Empty;
-            if (!string.IsNullOrEmpty(aInstallSetting.PythonArgs))
+            string aPythonArgs = aBootSetting.PythonArgs;
+            if (!string.IsNullOrEmpty(aPythonArgs))
             {
-                aArguments = $"{aInstallSetting.PythonArgs} {aRunPythonPath}";
+                aArguments = $"{aPythonArgs} {aRunPythonPath}";
             }
             else
             {

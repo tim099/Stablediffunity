@@ -67,7 +67,7 @@ namespace SDU
         protected bool m_Show = true;
         public bool RequireClearDic { get; set; } = false;
         virtual public SDU_WebUIClient.SDU_WebRequest Client => RunTimeData.SD_API.Client_Txt2img;
-        virtual public FolderEnum PresetFolder => FolderEnum.Tex2ImgPreset;
+        virtual public FolderEnum PresetFolder => FolderEnum.Txt2ImgPreset;
         public ControlNetSettings GetControlNetSetting(int iTargetControlNetID)
         {
             if (iTargetControlNetID < 0)

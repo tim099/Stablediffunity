@@ -9,67 +9,22 @@ using UnityEngine;
 
 namespace SDU
 {
-    public enum FolderEnum
-    {
-        Env,
-        WebUI,
-        Python,
-
-        /// <summary>
-        /// CheckPoint
-        /// </summary>
-        CheckPoints,
-
-        Lora,
-        VAE,
-
-        Tex2ImgPreset,
-        Img2ImgPreset,
-
-        ControlNetModel,
-    }
-    public enum CMDArg
-    {
-        /// <summary>
-        /// --api
-        /// </summary>
-        Api,
-        /// <summary>
-        /// --xformers
-        /// </summary>
-        Xformers,
-        /// <summary>
-        /// --no-half-vae
-        /// </summary>
-        NoHalfVae,
-    }
-    public static class CMDArgExtensions
-    {
-        public static string ArgToString(this CMDArg iArg)
-        {
-            switch (iArg)
-            {
-                case CMDArg.Api: return "--api";
-                case CMDArg.Xformers: return "--xformers";
-                case CMDArg.NoHalfVae: return "--no-half-vae";
-            }
-            return string.Empty;
-        }
-        public static string ArgsToString(this List<CMDArg> iArgs)
-        {
-            if (iArgs.IsNullOrEmpty()) return string.Empty;
-            return " " + iArgs.ConcatString(iArg=>iArg.ArgToString(), " ");
-        }
-    }
     [System.Serializable]
     public class InstallSetting : UCL.Core.UI.UCLI_FieldOnGUI
     {
-        public static string DefaultInstallRoot => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments), "StableDiffUnity_V1");
-        public static List<string> EnvRequiredFiles = new List<string>() { RunBatName, RunPythonName, "environment.bat",
-            "webui-user.bat"};
-        public static List<string> PythonRequiredFiles = new List<string>() { PythonExeName };
-        public static List<string> WebUIRequiredFiles = new List<string>() { "webui.bat", "webui.py", "launch.py",
-            "webui.sh"};
+        public string EnvInstallRoot = Path.Combine(DefaultInstallRoot, "Env");
+        public string WebUIInstallRoot = Path.Combine(DefaultInstallRoot, "WebUI");
+        public string PythonInstallRoot = Path.Combine(DefaultInstallRoot, "Python");
+
+        public static string DefaultInstallRoot => Path.Combine(Environment.GetFolderPath(
+            Environment.SpecialFolder.CommonDocuments), "StableDiffUnity_V1");
+        public static List<string> EnvRequiredFiles = new List<string>() { 
+            RunBatName, RunPythonName, "environment.bat", "webui-user.bat"};
+        public static List<string> PythonRequiredFiles = new List<string>() { 
+            PythonExeName };
+        public static List<string> WebUIRequiredFiles = new List<string>() { 
+            "webui.bat", "webui.py", "launch.py", "webui.sh"};
+
         public const string PythonExeName = "python.exe";
         public const string RunBatName = "run.bat";
         public const string RunPythonName = "run.py";
@@ -78,17 +33,7 @@ namespace SDU
         public const string WebUIZipFileName = "WebUI1.2.1.zip";
         public const string PythonZipFileName = "Python_310.zip";
 
-        public string EnvInstallRoot = Path.Combine(DefaultInstallRoot, "Env");
-        public string WebUIInstallRoot = Path.Combine(DefaultInstallRoot, "WebUI");
-        public string PythonInstallRoot = Path.Combine(DefaultInstallRoot, "Python");
-        public string CommandlindArgs = "--api --xformers";
-        public List<CMDArg> m_CMDArgs = new List<CMDArg>();
-        public string PythonArgs;//-Xfrozen_modules=off
-        
-        public string GetCommandlindArgs => CommandlindArgs + m_CMDArgs.ArgsToString();
 
-        [UCL.Core.ATTR.UCL_HideOnGUI]
-        public bool m_ShowOpenFolderToggle = false;
         public static string InstallStableDiffusionRoot => Path.Combine(Application.streamingAssetsPath, "InstallStableDiffUnity");
         public static string EnvZipPath => Path.Combine(InstallStableDiffusionRoot, EnvZipFileName);
         public static string WebUIZipPath => Path.Combine(InstallStableDiffusionRoot, WebUIZipFileName);
@@ -141,12 +86,12 @@ namespace SDU
                 bool IsShow = aDic.GetData(UCL_GUILayout.IsShowFieldKey, false);
                 if (IsShow)
                 {
-                    m_ShowOpenFolderToggle = UCL.Core.UI.UCL_GUILayout.Toggle(m_ShowOpenFolderToggle);
+                    var aIsShowOpenFolder = UCL.Core.UI.UCL_GUILayout.Toggle(iDataDic, "ShowOpenFolder");
 
                     using (var aScope2 = new GUILayout.VerticalScope("box"))
                     {
                         GUILayout.Label("Open Folder", GUILayout.ExpandWidth(false));
-                        if (m_ShowOpenFolderToggle)
+                        if (aIsShowOpenFolder)
                         {
                             foreach (FolderEnum aEnum in Enum.GetValues(typeof(FolderEnum)))
                             {
@@ -186,7 +131,7 @@ namespace SDU
                 case FolderEnum.CheckPoints: return WebUIModelsPath;
                 case FolderEnum.Lora: return WebUILoraPath;
                 case FolderEnum.VAE: return WebUIVAEPath;
-                case FolderEnum.Tex2ImgPreset: return Path.Combine(EnvInstallRoot, "Preset", "Tex2Img");
+                case FolderEnum.Txt2ImgPreset: return Path.Combine(EnvInstallRoot, "Preset", "Txt2Img");
                 case FolderEnum.Img2ImgPreset: return Path.Combine(EnvInstallRoot, "Preset", "Img2Img");
                     
                 //case FolderEnum.ControlNetModel: return Path.Combine(WebUIInstallRoot, "extensions", "sd-webui-controlnet", "models");

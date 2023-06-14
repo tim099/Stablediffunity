@@ -6,6 +6,18 @@
 			"ExtensionName":"sd-webui-controlnet",
 			"Url":"https://github.com/Mikubill/sd-webui-controlnet",
 			"Branch":"main"
+		},
+		{
+			"AutoInstall":"True",
+			"ExtensionName":"a1111-sd-webui-lycoris",
+			"Url":"https://github.com/KohakuBlueleaf/a1111-sd-webui-lycoris",
+			"Branch":"main"
+		},
+		{
+			"AutoInstall":"True",
+			"ExtensionName":"a1111-sd-webui-tagcomplete",
+			"Url":"https://github.com/DominikDoom/a1111-sd-webui-tagcomplete",
+			"Branch":"main"
 		}
 	]
 }

@@ -18,7 +18,7 @@ namespace SDU
 {
     [UCL.Core.ATTR.EnableUCLEditor]
     [System.Serializable]
-    public class Tex2ImgSetting : SDU_ImgSetting
+    public class Txt2ImgSetting : SDU_ImgSetting
     {
         override public JsonData GetConfigJson()
         {
@@ -27,7 +27,7 @@ namespace SDU
         }
 
         override public SDU_WebUIClient.SDU_WebRequest Client => RunTimeData.SD_API.Client_Txt2img;
-        override public FolderEnum PresetFolder => FolderEnum.Tex2ImgPreset;
+        override public FolderEnum PresetFolder => FolderEnum.Txt2ImgPreset;
         public override void DeserializeFromJson(JsonData iJson)
         {
             base.DeserializeFromJson(iJson);

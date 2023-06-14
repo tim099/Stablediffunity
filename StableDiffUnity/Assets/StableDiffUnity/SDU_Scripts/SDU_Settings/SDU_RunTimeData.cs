@@ -9,11 +9,6 @@ using UnityEngine;
 namespace SDU
 {
     [System.Serializable]
-    public class Tex2ImgResults
-    {
-        public Dictionary<string, string> m_Infos = new Dictionary<string, string>();
-    }
-    [System.Serializable]
     public class HideOnGUIData
     {
         public SDU_DownloadFileSetting m_DownloadFileSetting = new SDU_DownloadFileSetting();
@@ -118,17 +113,18 @@ namespace SDU
 
         public enum GenerateMode
         {
-            Tex2Img,
+            Txt2Img,
             Img2Img,
         }
 
         public InstallSetting m_InstallSetting = new InstallSetting();
+        public BootSetting m_BootSetting = new BootSetting();
         public ResolutionSetting m_ResolutionSetting = new ResolutionSetting();
         public APISetting m_APISetting = new APISetting();
         public WebUISetting m_WebUISetting = new WebUISetting();
 
         [UCL.Core.ATTR.UCL_HideOnGUI]
-        public GenerateMode m_GenerateMode = GenerateMode.Tex2Img;
+        public GenerateMode m_GenerateMode = GenerateMode.Txt2Img;
 
         public SDU_ImgSetting CurImgSetting
         {
@@ -138,18 +134,15 @@ namespace SDU
                 {
                     case GenerateMode.Img2Img: return m_Img2ImgSetting;
                 }
-                return m_Tex2ImgSettings;
+                return m_Txt2ImgSettings;
             }
         }
 
         [UCL.Core.ATTR.UCL_HideOnGUI]
-        public Tex2ImgSetting m_Tex2ImgSettings = new Tex2ImgSetting();
+        public Txt2ImgSetting m_Txt2ImgSettings = new Txt2ImgSetting();
 
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public SDU_Img2ImgSetting m_Img2ImgSetting = new SDU_Img2ImgSetting();
-
-        [UCL.Core.ATTR.UCL_HideOnGUI]
-        public Tex2ImgResults m_Tex2ImgResults = new Tex2ImgResults();
 
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public HideOnGUIData m_HideOnGUIData = new HideOnGUIData();
@@ -170,9 +163,9 @@ namespace SDU
                 
             switch (m_GenerateMode)
             {
-                case GenerateMode.Tex2Img:
+                case GenerateMode.Txt2Img:
                     {
-                        UCL_GUILayout.DrawObjectData(m_Tex2ImgSettings, iDataDic.GetSubDic("Tex2Img"), "Tex2Img", false);
+                        UCL_GUILayout.DrawObjectData(m_Txt2ImgSettings, iDataDic.GetSubDic("Txt2Img"), "Txt2Img", false);
                         break;
                     }
                 case GenerateMode.Img2Img:

@@ -8,6 +8,25 @@ using UnityEngine;
 
 namespace SDU
 {
+    public enum FolderEnum
+    {
+        Env,
+        WebUI,
+        Python,
+
+        /// <summary>
+        /// CheckPoint
+        /// </summary>
+        CheckPoints,
+
+        Lora,
+        VAE,
+
+        Txt2ImgPreset,
+        Img2ImgPreset,
+
+        ControlNetModel,
+    }
     public static partial class SDUI_FolderSettingExtensions
     {
         public static string Path(this SDUI_FolderSetting iFolderSetting)
