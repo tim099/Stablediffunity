@@ -42,6 +42,7 @@ namespace SDU
 
         public List<string> m_ModelNames = new List<string>();
         public List<string> m_LoraNames = new List<string>();
+        public JsonData m_LoraDatas = new JsonData();
         public List<SdVAE> m_SdVAEs = new List<SdVAE>();
         public List<string> m_Samplers = new List<string>
             {
@@ -187,11 +188,6 @@ namespace SDU
                     }
                     Debug.LogWarning($"ModelNames:{RunTimeData.Ins.m_WebUISetting.m_ModelNames.ConcatString()}");
                 }
-                //using(var aClient = RunTimeData.SD_API.Client_Docs)
-                //{
-                //    var responses = await aClient.SendWebRequestStringAsync();
-                //    Debug.LogWarning($"Docs:{responses}");
-                //}
             }
             catch (System.Exception e)
             {
@@ -203,29 +199,56 @@ namespace SDU
         {
             try
             {
-                using (var client = new SDU_WebUIClient.SDU_WebRequest(RunTimeData.SD_API.URL_CmdFlags, SDU_WebRequest.Method.Get))
+                using (var client = RunTimeData.SD_API.Client_RefreshLoras)
+                {
+                    var responses = await client.SendWebRequestStringAsync();
+                    //Debug.LogWarning($"Client_RefreshLoras responses:{responses}");
+                }
+                using (var client = RunTimeData.SD_API.Client_Loras)
+                {
+                    var responses = await client.SendWebRequestStringAsync();
+                    Debug.LogWarning($"responses:{responses}");
+                    m_LoraDatas = JsonData.ParseJson(responses);
+                    m_LoraNames.Clear();
+                    foreach (JsonData aLora in m_LoraDatas)
+                    {
+                        if (aLora.Contains("name"))
+                        {
+                            m_LoraNames.Add(aLora["name"].GetString());
+                        }
+                    }
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogException(e);
+            }
+
+            try
+            {
+
+                using (var client = new SDU_Client.WebRequest(RunTimeData.SD_API.URL_CmdFlags, SDU_Client.Method.Get))
                 {
                     var responses = await client.SendWebRequestAsync();
                     m_CmdFlags = responses;
-                    if (m_CmdFlags.Contains("lora_dir"))
-                    {
-                        string aLoraDir = m_CmdFlags["lora_dir"].GetString();
-                        //var aLoraDir = m_CmdFlags.lora_dir;
-                        if (Directory.Exists(aLoraDir))
-                        {
-                            var aLoras = Directory.GetFiles(aLoraDir, "*", SearchOption.TopDirectoryOnly);
-                            m_LoraNames.Clear();
-                            foreach (var aLora in aLoras)
-                            {
-                                if (!aLora.Contains(".txt") && !aLora.Contains(".png"))
-                                {
-                                    m_LoraNames.Add(Path.GetFileNameWithoutExtension(aLora));
-                                }
-                            }
-                        }
-                        Debug.LogWarning($"_modelNamesForLora:{m_LoraNames.ConcatString()}");
-                    }
-
+                    //if (m_CmdFlags.Contains("lora_dir"))
+                    //{
+                    //    string aLoraDir = m_CmdFlags["lora_dir"].GetString();
+                    //    //var aLoraDir = m_CmdFlags.lora_dir;
+                    //    if (Directory.Exists(aLoraDir))
+                    //    {
+                    //        var aLoras = Directory.GetFiles(aLoraDir, "*", SearchOption.TopDirectoryOnly);
+                    //        m_LoraNames.Clear();
+                    //        foreach (var aLora in aLoras)
+                    //        {
+                    //            if (!aLora.Contains(".txt") && !aLora.Contains(".png"))
+                    //            {
+                    //                m_LoraNames.Add(Path.GetFileNameWithoutExtension(aLora));
+                    //            }
+                    //        }
+                    //    }
+                    //    Debug.LogWarning($"_modelNamesForLora:{m_LoraNames.ConcatString()}");
+                    //}
                 }
             }
             catch (System.Exception e)

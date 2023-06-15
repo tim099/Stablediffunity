@@ -194,7 +194,7 @@ namespace SDU
         }
         private async UniTask TestURL(string iURL)
         {
-            using (var client = new SDU_WebUIClient.SDU_WebRequest(iURL, SDU_WebRequest.Method.Get))
+            using (var client = new SDU_Client.WebRequest(iURL, SDU_Client.Method.Get))
             {
                 var responses = await client.SendWebRequestStringAsync();
                 GUIUtility.systemCopyBuffer = responses;

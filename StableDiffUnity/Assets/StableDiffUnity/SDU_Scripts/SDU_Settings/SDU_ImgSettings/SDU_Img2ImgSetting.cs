@@ -24,7 +24,7 @@ namespace SDU
         public float DenoisingStrength = 0.75f;//Denoising strength
         public SDU_InputImage m_InputImage = new SDU_InputImage();
         override public FolderEnum PresetFolder => FolderEnum.Img2ImgPreset;
-        public override SDU_WebUIClient.SDU_WebRequest Client => RunTimeData.SD_API.Client_Img2img;
+        public override SDU_Client.WebRequest Client => RunTimeData.SD_API.Client_Img2img;
         public override JsonData GetConfigJson()
         {
             var aJson = base.GetConfigJson();

@@ -47,12 +47,12 @@ namespace SDU
             //m_StablediffunityAPI
             return this;
         }
-        public async UniTask TestAPI(SDU_WebUIClient.SDU_WebRequest iClient, string iJson = "")
+        public async UniTask TestAPI(SDU_Client.WebRequest iClient, string iJson = "")
         {
             using (iClient)
             {
                 string aResult = await iClient.SendWebRequestStringAsync(iJson);
-                Debug.LogError($"TestAPI URL:{iClient.WebRequest.url} ,Result:{aResult}");
+                Debug.LogError($"TestAPI URL:{iClient.URL} ,Result:{aResult}");
             }
         }
     }
@@ -66,65 +66,53 @@ namespace SDU
         
         public string m_ApiTxt2img = "/sdapi/v1/txt2img";
         public string m_ApiImg2img = "/sdapi/v1/img2img";
-        public string m_ApiPngInfo = "/sdapi/v1/png-info";
         #region Get
-        public string m_ApiSdModels = "/sdapi/v1/sd-models";
         public string m_Docs = "/docs";
-
-        public string URL_SdModels => ServerUrl + m_ApiSdModels;
         public string URL_Docs => ServerUrl + m_Docs;
         #endregion
 
-        #region Post
-        public string m_ApiOptions = "/sdapi/v1/options";
-        public string m_RefreshCheckpoints = "/sdapi/v1/refresh-checkpoints";
-
-        public string URL_Options => ServerUrl + m_ApiOptions;
-
-
-        public string URL_RefreshCheckpoints => ServerUrl + m_RefreshCheckpoints;
-        #endregion
 
 
         public string URL_CmdFlags => ServerUrl + m_ApiCmdFlags;
         
         public string URL_Txt2img => ServerUrl + m_ApiTxt2img;
         public string URL_Img2img => ServerUrl + m_ApiImg2img;
-        public string URL_PngInfo => ServerUrl + m_ApiPngInfo;
+        public string URL_PngInfo => ServerUrl + "/sdapi/v1/png-info";
 
         #region Client
-        public SDU_WebUIClient.SDU_WebRequest Client_Options =>
-            new SDU_WebUIClient.SDU_WebRequest(URL_Options, SDU_WebRequest.Method.Post);
+        public SDU_Client.WebRequest Client_Options =>
+            new SDU_Client.WebRequest(ServerUrl + "/sdapi/v1/options", SDU_Client.Method.Post);
 
-        public SDU_WebUIClient.SDU_WebRequest Client_RefreshCheckpoints => 
-            new SDU_WebUIClient.SDU_WebRequest(URL_RefreshCheckpoints, SDU_WebRequest.Method.Post);
+        public SDU_Client.WebRequest Client_RefreshCheckpoints => 
+            new SDU_Client.WebRequest(ServerUrl + "/sdapi/v1/refresh-checkpoints", SDU_Client.Method.Post);
+        public SDU_Client.WebRequest Client_RefreshLoras =>
+            new SDU_Client.WebRequest(ServerUrl + "/sdapi/v1/refresh-loras", SDU_Client.Method.Post);
 
-
-        public SDU_WebUIClient.SDU_WebRequest Client_Txt2img =>
-            new SDU_WebUIClient.SDU_WebRequest(URL_Txt2img, SDU_WebRequest.Method.Post);
-        public SDU_WebUIClient.SDU_WebRequest Client_Img2img =>
-            new SDU_WebUIClient.SDU_WebRequest(URL_Img2img, SDU_WebRequest.Method.Post);
-        public SDU_WebUIClient.SDU_WebRequest Client_Interrupt =>
-            new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/sdapi/v1/interrupt", SDU_WebRequest.Method.Post);
+        public SDU_Client.WebRequest Client_Txt2img =>
+            new SDU_Client.WebRequest(URL_Txt2img, SDU_Client.Method.Post);
+        public SDU_Client.WebRequest Client_Img2img =>
+            new SDU_Client.WebRequest(URL_Img2img, SDU_Client.Method.Post);
+        public SDU_Client.WebRequest Client_Interrupt =>
+            new SDU_Client.WebRequest(ServerUrl + "/sdapi/v1/interrupt", SDU_Client.Method.Post);
         /// <summary>
         /// Not in WebUI master branch yet, currently in api-quit-restart branch
         /// </summary>
-        public SDU_WebUIClient.SDU_WebRequest Client_RestartWebUI =>
-            new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/sdapi/v1/restart-webui", SDU_WebRequest.Method.Post);
+        public SDU_Client.WebRequest Client_RestartWebUI =>
+            new SDU_Client.WebRequest(ServerUrl + "/sdapi/v1/restart-webui", SDU_Client.Method.Post);
 
 
 
-        public SDU_WebUIClient.SDU_WebRequest Client_AppID =>
-            new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/app_id", SDU_WebRequest.Method.Get);
-        public SDU_WebUIClient.SDU_WebRequest Client_Progress =>
-            new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/sdapi/v1/progress", SDU_WebRequest.Method.Get);
-        public SDU_WebUIClient.SDU_WebRequest Client_Samplers =>
-            new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/sdapi/v1/samplers", SDU_WebRequest.Method.Get);
-        public SDU_WebUIClient.SDU_WebRequest Client_SdModels =>
-            new SDU_WebUIClient.SDU_WebRequest(URL_SdModels, SDU_WebRequest.Method.Get);
+        public SDU_Client.WebRequest Client_AppID =>
+            new SDU_Client.WebRequest(ServerUrl + "/app_id", SDU_Client.Method.Get);
+        public SDU_Client.WebRequest Client_Progress =>
+            new SDU_Client.WebRequest(ServerUrl + "/sdapi/v1/progress", SDU_Client.Method.Get);
+        public SDU_Client.WebRequest Client_Samplers =>
+            new SDU_Client.WebRequest(ServerUrl + "/sdapi/v1/samplers", SDU_Client.Method.Get);
 
-        //public SDU_WebUIClient.SDU_WebRequest Client_Docs =>
-        //    new SDU_WebUIClient.SDU_WebRequest(URL_Docs, SDU_WebRequest.Method.Get);
+        public SDU_Client.WebRequest Client_SdModels =>
+            new SDU_Client.WebRequest(ServerUrl + "/sdapi/v1/sd-models", SDU_Client.Method.Get);
+        public SDU_Client.WebRequest Client_Loras =>
+            new SDU_Client.WebRequest(ServerUrl + "/sdapi/v1/loras", SDU_Client.Method.Get);
         #endregion
     }
     ///
@@ -137,18 +125,18 @@ namespace SDU
         public static string ServerUrl => RunTimeData.ServerUrl;
 
         #region Client Get
-        public SDU_WebUIClient.SDU_WebRequest Client_GetVersion => 
-            new SDU_WebUIClient.SDU_WebRequest(ServerUrl+"/stablediffunity/version", SDU_WebRequest.Method.Get);
-        public SDU_WebUIClient.SDU_WebRequest Client_GetVAEs =>
-            new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/stablediffunity/sd-vae", SDU_WebRequest.Method.Get);
+        public SDU_Client.WebRequest Client_GetVersion => 
+            new SDU_Client.WebRequest(ServerUrl+"/stablediffunity/version", SDU_Client.Method.Get);
+        public SDU_Client.WebRequest Client_GetVAEs =>
+            new SDU_Client.WebRequest(ServerUrl + "/stablediffunity/sd-vae", SDU_Client.Method.Get);
         #endregion
 
         #region Client Post
-        public SDU_WebUIClient.SDU_WebRequest Client_SetVAE =>
-            new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/stablediffunity/set-sd-vae", SDU_WebRequest.Method.Post);
+        public SDU_Client.WebRequest Client_SetVAE =>
+            new SDU_Client.WebRequest(ServerUrl + "/stablediffunity/set-sd-vae", SDU_Client.Method.Post);
 
-        public SDU_WebUIClient.SDU_WebRequest Client_PostGitClone => 
-            new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/stablediffunity/git_clone", SDU_WebRequest.Method.Post);
+        public SDU_Client.WebRequest Client_PostGitClone => 
+            new SDU_Client.WebRequest(ServerUrl + "/stablediffunity/git_clone", SDU_Client.Method.Post);
         #endregion
 
         [System.Serializable]
@@ -190,8 +178,8 @@ namespace SDU
         #endregion
 
         #region Client
-        public SDU_WebUIClient.SDU_WebRequest Client_ModelLists => new SDU_WebUIClient.SDU_WebRequest(URL_ModelLists, SDU_WebRequest.Method.Get);
-        public SDU_WebUIClient.SDU_WebRequest Client_GetVersion => new SDU_WebUIClient.SDU_WebRequest(ServerUrl + "/controlnet/version", SDU_WebRequest.Method.Get);
+        public SDU_Client.WebRequest Client_ModelLists => new SDU_Client.WebRequest(URL_ModelLists, SDU_Client.Method.Get);
+        public SDU_Client.WebRequest Client_GetVersion => new SDU_Client.WebRequest(ServerUrl + "/controlnet/version", SDU_Client.Method.Get);
         #endregion
     }
 }

@@ -66,7 +66,7 @@ namespace SDU
 
         protected bool m_Show = true;
         public bool RequireClearDic { get; set; } = false;
-        virtual public SDU_WebUIClient.SDU_WebRequest Client => RunTimeData.SD_API.Client_Txt2img;
+        virtual public SDU_Client.WebRequest Client => RunTimeData.SD_API.Client_Txt2img;
         virtual public FolderEnum PresetFolder => FolderEnum.Txt2ImgPreset;
         public ControlNetSettings GetControlNetSetting(int iTargetControlNetID)
         {
@@ -83,6 +83,16 @@ namespace SDU
             }
             return m_MultiControlNetSettings[iTargetControlNetID];
         }
+        public JsonData OptionsToJson()
+        {
+            JsonData aJson = new JsonData();
+
+            aJson["sd_model_checkpoint"] = m_CheckPoint.m_CheckPoint;
+            aJson["sd_vae"] = m_VAE.m_VAE;
+
+            return aJson;
+        }
+
         public override JsonData SerializeToJson()
         {
             return base.SerializeToJson();

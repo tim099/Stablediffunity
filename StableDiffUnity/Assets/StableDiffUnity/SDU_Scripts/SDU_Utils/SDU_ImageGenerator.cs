@@ -117,9 +117,16 @@ namespace SDU
             {
                 try
                 {
-                    await iSetting.m_CheckPoint.ApplyToServer();
-                    await iSetting.m_VAE.ApplyToServer();
-                    //SetCheckPointAsync
+                    using (var client = RunTimeData.SD_API.Client_Options)
+                    {
+                        JsonData aJson = iSetting.OptionsToJson();
+
+                        string aResult = await client.SendAsyncUniTask(iCancellationToken, aJson.ToJson());
+                    }
+                    //await iSetting.m_CheckPoint.ApplyToServer();
+
+                    //await iSetting.m_VAE.ApplyToServer();
+
                     using (var aClient = iSetting.Client)
                     {
                         var aImageOutputSetting = iSetting.m_ImageOutputSetting;

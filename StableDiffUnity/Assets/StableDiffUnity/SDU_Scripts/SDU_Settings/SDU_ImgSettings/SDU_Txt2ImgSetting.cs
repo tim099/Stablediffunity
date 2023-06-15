@@ -26,7 +26,7 @@ namespace SDU
             return aJson;
         }
 
-        override public SDU_WebUIClient.SDU_WebRequest Client => RunTimeData.SD_API.Client_Txt2img;
+        override public SDU_Client.WebRequest Client => RunTimeData.SD_API.Client_Txt2img;
         override public FolderEnum PresetFolder => FolderEnum.Txt2ImgPreset;
         public override void DeserializeFromJson(JsonData iJson)
         {
