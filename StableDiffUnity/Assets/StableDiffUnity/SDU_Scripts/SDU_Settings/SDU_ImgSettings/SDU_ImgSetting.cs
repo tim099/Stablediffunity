@@ -151,12 +151,23 @@ namespace SDU
             Debug.LogWarning($"m_Width:{m_Width},m_Height:{m_Height}");
 
             List<ControlNetSettings> aControlNetSettings = GetEnabledControlNetSettings();
-
+            JsonData aAlwayson = new JsonData();
+            aJson["alwayson_scripts"] = aAlwayson;
+            {
+                JsonData aStableDiffUnity = new JsonData();
+                aAlwayson["stablediffunity"] = aStableDiffUnity;
+                JsonData aArgs = new JsonData();
+                aStableDiffUnity["args"] = aArgs;
+                {
+                    JsonData aArg = new JsonData();
+                    aArgs.Add(aArg);
+                    //aArgs.Add(aArg);
+                    //aArgs.Add(aArg);
+                }
+            }
             if (!aControlNetSettings.IsNullOrEmpty())
             {
                 Debug.LogWarning($"aControlNetSettings:{aControlNetSettings.Count}");
-                JsonData aAlwayson = new JsonData();
-                aJson["alwayson_scripts"] = aAlwayson;
                 {
                     JsonData aControlnet = new JsonData();
                     aAlwayson["controlnet"] = aControlnet;
