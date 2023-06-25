@@ -159,8 +159,13 @@ namespace SDU
                 JsonData aArgs = new JsonData();
                 aStableDiffUnity["args"] = aArgs;
                 {
-                    JsonData aArg = new JsonData();
-                    aArgs.Add(aArg);
+                    {
+                        JsonData aArg = new JsonData();
+                        aArgs.Add(aArg);
+                        aArg["stablediffunity"] = "ArgTest";
+                        aArg["arg2"] = 123;
+                    }
+
                     //aArgs.Add(aArg);
                     //aArgs.Add(aArg);
                 }
