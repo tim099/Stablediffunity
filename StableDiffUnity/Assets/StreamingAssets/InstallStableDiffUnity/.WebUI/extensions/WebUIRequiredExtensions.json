@@ -18,6 +18,12 @@
 			"ExtensionName":"a1111-sd-webui-tagcomplete",
 			"Url":"https://github.com/DominikDoom/a1111-sd-webui-tagcomplete",
 			"Branch":"main"
+		},
+		{
+			"AutoInstall":"False",
+			"ExtensionName":"sd-webui-additional-networks",
+			"Url":"https://github.com/kohya-ss/sd-webui-additional-networks",
+			"Branch":"main"
 		}
 	]
 }

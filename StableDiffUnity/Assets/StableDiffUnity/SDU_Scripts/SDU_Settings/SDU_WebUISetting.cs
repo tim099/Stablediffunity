@@ -102,6 +102,7 @@ namespace SDU
                         break;
                     }
                 case FolderEnum.Lora:
+                case FolderEnum.LyCORIS:
                     {
                         await RefreshLora();
                         break;

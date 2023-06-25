@@ -130,6 +130,7 @@ namespace SDU
                 case FolderEnum.Python: return PythonInstallRoot;
                 case FolderEnum.CheckPoints: return WebUIModelsPath;
                 case FolderEnum.Lora: return WebUILoraPath;
+                case FolderEnum.LyCORIS: return Path.Combine(WebUIModelsRootPath, "LyCORIS");
                 case FolderEnum.VAE: return WebUIVAEPath;
                 case FolderEnum.Txt2ImgPreset: return Path.Combine(EnvInstallRoot, "Preset", "Txt2Img");
                 case FolderEnum.Img2ImgPreset: return Path.Combine(EnvInstallRoot, "Preset", "Img2Img");

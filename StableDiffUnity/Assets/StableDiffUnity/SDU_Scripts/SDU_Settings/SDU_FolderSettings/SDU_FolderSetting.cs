@@ -20,6 +20,7 @@ namespace SDU
         CheckPoints,
 
         Lora,
+        LyCORIS,
         VAE,
 
         Txt2ImgPreset,

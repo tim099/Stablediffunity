@@ -21,6 +21,7 @@ namespace SDU
             CheckPoints,
 
             Lora,
+            LyCORIS,
 
             VAE,
 
