@@ -54,7 +54,7 @@ namespace SDU
 
         public List<ControlNetSettings> m_MultiControlNetSettings = new();
         public SDU_ImageOutputSetting m_ImageOutputSetting = new SDU_ImageOutputSetting();
-
+        public SDU_WebUIExtensionSetting m_WebUIExtensionSetting = new SDU_WebUIExtensionSetting();
         public JsonData m_ResultInfo = new JsonData();
         #region Hide
         [UCL.Core.ATTR.UCL_HideOnGUI]
@@ -160,10 +160,10 @@ namespace SDU
                 aStableDiffUnity["args"] = aArgs;
                 {
                     {
-                        JsonData aArg = new JsonData();
+                        JsonData aArg = m_WebUIExtensionSetting.SerializeToJson();//new JsonData();
                         aArgs.Add(aArg);
-                        aArg["stablediffunity"] = "ArgTest";
-                        aArg["arg2"] = 123;
+                        //aArg["stablediffunity"] = "ArgTest";
+                        //aArg["arg2"] = 123;
                     }
 
                     //aArgs.Add(aArg);
