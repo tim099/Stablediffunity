@@ -160,7 +160,7 @@ namespace SDU
                 aStableDiffUnity["args"] = aArgs;
                 {
                     {
-                        JsonData aArg = m_WebUIExtensionSetting.SerializeToJson();//new JsonData();
+                        JsonData aArg = m_WebUIExtensionSetting.GetConfigJson();//new JsonData();
                         aArgs.Add(aArg);
                         //aArg["stablediffunity"] = "ArgTest";
                         //aArg["arg2"] = 123;
