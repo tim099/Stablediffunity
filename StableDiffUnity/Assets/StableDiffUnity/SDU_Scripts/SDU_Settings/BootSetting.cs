@@ -17,6 +17,10 @@ namespace SDU
         /// --no-half-vae
         /// </summary>
         NoHalfVae,
+        /// <summary>
+        /// --reinstall-xformers
+        /// </summary>
+        ReinstallXformers,
     }
     public enum PythonArg
     {
@@ -35,6 +39,7 @@ namespace SDU
                 case CMDArg.Api: return "--api";
                 case CMDArg.Xformers: return "--xformers";
                 case CMDArg.NoHalfVae: return "--no-half-vae";
+                case CMDArg.ReinstallXformers: return "--reinstall-xformers";
             }
             return string.Empty;
         }
