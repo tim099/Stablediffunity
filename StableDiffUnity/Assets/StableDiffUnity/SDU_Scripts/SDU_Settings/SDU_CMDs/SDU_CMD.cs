@@ -32,9 +32,11 @@ namespace SDU
             }
             return s_Types;
         }
+        
         virtual public string GetTypeName(string iName) => iName.Replace("SDU_CMD", string.Empty);
         virtual public string GetShortName() => GetTypeName(GetType().Name);
         virtual public List<SDU_CMD> GetCMDList() => new List<SDU_CMD>() { this };
+
         virtual public async Task TriggerCMD(SDU_ImgSetting iTex2ImgSetting, System.Threading.CancellationToken iCancellationToken)
         {
             await Task.Delay(1);

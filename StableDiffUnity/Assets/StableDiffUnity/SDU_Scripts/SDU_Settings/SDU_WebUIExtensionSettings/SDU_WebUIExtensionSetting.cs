@@ -15,7 +15,7 @@ namespace SDU
         public class ConfigData
         {
             public string FolderPath;
-            public bool OutputTensors = false;
+            //public bool OutputTensors = false;
 
             /// <summary>
             /// Load Tensor from file
@@ -33,11 +33,6 @@ namespace SDU
         public List<SDU_WebUICMD> m_WebUICMDs = new List<SDU_WebUICMD>();
         public override JsonData SerializeToJson()
         {
-            
-            if (string.IsNullOrEmpty(m_ConfigData.FolderPath))
-            {
-                m_ConfigData.FolderPath = System.IO.Path.Combine(RunTimeData.Ins.CurImgSetting.m_ImageOutputSetting.OutputFolderPath, "tensors");
-            }
             return base.SerializeToJson();
         }
         /// <summary>
@@ -46,6 +41,10 @@ namespace SDU
         /// <returns></returns>
         public JsonData GetConfigJson()
         {
+            if (string.IsNullOrEmpty(m_ConfigData.FolderPath))
+            {
+                m_ConfigData.FolderPath = System.IO.Path.Combine(RunTimeData.Ins.CurImgSetting.m_ImageOutputSetting.OutputFolderPath, "tensors");
+            }
             var aJson = JsonConvert.SaveFieldsToJsonUnityVer(m_ConfigData);
             if (m_WebUICMDs.Count > 0)
             {
@@ -54,7 +53,10 @@ namespace SDU
                 for (int i = 0; i < m_WebUICMDs.Count; i++)
                 {
                     var aWebUICMD = m_WebUICMDs[i];
-                    aWebUICMDs.Add(aWebUICMD.GetConfigJson());
+                    if(aWebUICMD.IsEnable)
+                    {
+                        aWebUICMDs.Add(aWebUICMD.GetConfigJson());
+                    }
                 }
             }
 
@@ -80,7 +82,7 @@ namespace SDU
                             m_ConfigData.LoadTensorFileName = UCL_GUILayout.PopupAuto(m_ConfigData.LoadTensorFileName, aFiles, iDataDic, "LoadTensorFileName");
                         }
                     }
-                    UCL.Core.UI.UCL_GUILayout.DrawObjectData(m_WebUICMDs, iDataDic.GetSubDic("WebUICMDs"), iFieldName);
+                    UCL.Core.UI.UCL_GUILayout.DrawObjectData(m_WebUICMDs, iDataDic.GetSubDic("WebUICMDs"), "WebUI CMDs");
                 }
             };
 

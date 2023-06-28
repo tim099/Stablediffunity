@@ -16,7 +16,7 @@ namespace SDU
             EveryNSteps,
         }
         public OutputTensorType m_OutputTensorType = OutputTensorType.EveryNSteps;
-
+        public string m_FolderPath;
         /// <summary>
         /// output tensor every N steps, N = m_OutputStepInterval
         /// </summary>
@@ -25,8 +25,12 @@ namespace SDU
 
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public List<int> m_OutputAtSteps = new List<int>();
-        public override JsonData SerializeToJson()
+        public override JsonData GetConfigJson()
         {
+            if (string.IsNullOrEmpty(m_FolderPath))
+            {
+                m_FolderPath = System.IO.Path.Combine(RunTimeData.Ins.CurImgSetting.m_ImageOutputSetting.OutputFolderPath, "tensors");
+            }
             switch (m_OutputTensorType)
             {
                 case OutputTensorType.EveryNSteps:
@@ -43,6 +47,11 @@ namespace SDU
                         break;
                     }
             }
+            return base.GetConfigJson();
+        }
+        public override JsonData SerializeToJson()
+        {
+            m_OutputAtSteps.Clear();
             return base.SerializeToJson();
         }
     }
