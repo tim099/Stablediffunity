@@ -32,8 +32,8 @@ MonoBehaviour:
     m_KeyaliasName: 
     m_KeyaliasPass: 
   m_VersionSetting:
-    m_BundleVersion: 1.0.9
-    m_BundleVersionCode: 9
-    m_BuildNumber: 9
+    m_BundleVersion: 1.1.0
+    m_BundleVersionCode: 10
+    m_BuildNumber: 10
   m_ScriptingDefineSymbols: 
   m_PreBuildProcess: []
