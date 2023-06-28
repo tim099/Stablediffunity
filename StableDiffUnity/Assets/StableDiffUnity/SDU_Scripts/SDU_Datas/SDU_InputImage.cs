@@ -190,7 +190,7 @@ namespace SDU
         {
             if (Texture != null)
             {
-                GameObject.DestroyImmediate(Texture);
+                GameObject.Destroy(Texture);
                 Texture = null;
             }
         }
