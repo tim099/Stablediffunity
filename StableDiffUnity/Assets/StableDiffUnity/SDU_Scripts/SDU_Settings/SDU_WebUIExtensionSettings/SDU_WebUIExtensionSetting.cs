@@ -20,13 +20,13 @@ namespace SDU
             /// <summary>
             /// Load Tensor from file
             /// </summary>
-            public bool LoadTensor = false;
+            //public bool LoadTensor = false;
             /// <summary>
             /// FilePath = System.IO.Path.Combine(FolderPath, LoadTensorFileName)
             /// </summary>
             //[UCL.Core.PA.Conditional("LoadTensor", false, true)]
-            [UCL.Core.ATTR.UCL_HideOnGUI]
-            public string LoadTensorFileName = string.Empty;
+            //[UCL.Core.ATTR.UCL_HideOnGUI]
+            //public string LoadTensorFileName = string.Empty;
         }
         public ConfigData m_ConfigData = new ConfigData();
 
@@ -68,20 +68,6 @@ namespace SDU
             {
                 OnShowField = () =>
                 {
-                    if (m_ConfigData.LoadTensor)
-                    {
-                        string aPath = m_ConfigData.FolderPath;
-                        IList<string> aFiles = new List<string>();
-                        if (Directory.Exists(aPath))
-                        {
-                            aFiles = UCL.Core.FileLib.Lib.GetFilesName(aPath, "*.pt");
-                        }
-                        using (var aScope = new GUILayout.HorizontalScope())
-                        {
-                            GUILayout.Label("LoadTensorFileName", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
-                            m_ConfigData.LoadTensorFileName = UCL_GUILayout.PopupAuto(m_ConfigData.LoadTensorFileName, aFiles, iDataDic, "LoadTensorFileName");
-                        }
-                    }
                     UCL.Core.UI.UCL_GUILayout.DrawObjectData(m_WebUICMDs, iDataDic.GetSubDic("WebUICMDs"), "WebUI CMDs");
                 }
             };
