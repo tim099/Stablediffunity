@@ -61,6 +61,9 @@ namespace SDU
                             m_LoadTensorFileName = UCL_GUILayout.PopupAuto(m_LoadTensorFileName, aFiles, iDataDic, "LoadTensorFileName");
                         }
                     }
+                    GUILayout.Space(10);
+                    
+                    GUILayout.Label("====Testing Tensor====");
                     {
                         IList<string> aFiles = new List<string>();
                         if (Directory.Exists(aPath))
@@ -69,7 +72,7 @@ namespace SDU
                         }
                         using (var aScope = new GUILayout.HorizontalScope())
                         {
-                            GUILayout.Label("LoadTensorFileName", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
+                            GUILayout.Label("LoadJsonTensorName", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
                             m_LoadJsonTensorName = UCL_GUILayout.PopupAuto(m_LoadJsonTensorName, aFiles, iDataDic, "LoadJsonTensorName");
                         }
                         if (!string.IsNullOrEmpty(m_LoadJsonTensorName))
@@ -86,30 +89,60 @@ namespace SDU
                                         SDU_InputImage = new SDU_InputImage();
                                     }
                                     JsonData aImageArr = TensorJsonData[0];
-                                    JsonData aImageArrX = aImageArr[0];
-                                    JsonData aImageArrY = aImageArr[1];
-                                    JsonData aImageArrZ = aImageArr[2];
-                                    JsonData aImageArrW = aImageArr[3];
-                                    int aHeight = aImageArrX.Count;
-                                    int aWidth = aImageArrX[0].Count;
+
+                                    int aHeight = aImageArr[0].Count;
+                                    int aWidth = aImageArr[0][0].Count;
 
                                     SDU_InputImage.Clear();
                                     UCL_Texture2D aTexture = new UCL_Texture2D(aWidth, aHeight);
+                                    float aMax = float.MinValue;
+                                    float aMin = float.MaxValue;
                                     for (int x = 0; x < aWidth; x++)
                                     {
                                         for (int y = 0; y < aHeight; y++)
                                         {
+                                            float[] aArr = new float[4];
+                                            for (int z = 0; z < 4; z++)
+                                            {
+                                                aArr[z] = aImageArr[z][y][x];
+                                                aMax = Mathf.Max(aMax, aArr[z]);
+                                                aMin = Mathf.Min(aMin, aArr[z]);
+                                            }
+                                        }
+                                    }
+                                    float aAbsMax = Mathf.Max(Mathf.Abs(aMin), aMax);
+                                    float aDiv = 0.5f / aAbsMax;
+                                    for (int x = 0; x < aWidth; x++)
+                                    {
+                                        for (int y = 0; y < aHeight; y++)
+                                        {
+                                            float[] aArr = new float[4];
+                                            for(int z = 0; z < 4; z++)
+                                            {
+                                                aArr[z] = aImageArr[z][y][x];
+                                                aMax = Mathf.Max(aMax, aArr[z]);
+                                                aMin = Mathf.Min(aMin, aArr[z]);
+                                            }
+                                            Vector4 aVec = new Vector4(aArr[0], aArr[1], aArr[2], aArr[3]);
+                                            //aVec += 64f * Vector4.one;
+                                            //aVec /= 128f;
+                                            //aVec += aAbsMax * Vector4.one;
+                                            aVec *= aDiv;//Range -0.5f ~ 0.5f
+                                            aVec += 0.5f * Vector4.one;//Range
+                                            //aVec.x = Mathf.Log(aVec.x, 2f) / 7.0f;
+                                            //aVec.y = Mathf.Log(aVec.y, 2f) / 7.0f;
+                                            //aVec.z = Mathf.Log(aVec.z, 2f) / 7.0f;
 
-                                            Vector3 aVec = new Vector3(aImageArrX[y][x], aImageArrY[y][x], aImageArrZ[y][x]);
-                                            aVec += 64f * Vector3.one;
-                                            aVec /= 128f;
+                                            //aVec *= (0.5f + aVec.w);
+                                            //aVec.Scale(aVec);
                                             if (aVec.x < 0 || aVec.y < 0 || aVec.z < 0)
                                             {
                                                 Debug.LogError("aVec:" + aVec.ToString());
                                             }
-                                            aTexture.SetPixel(new Vector2Int(x, aHeight - y - 1), new Color(aVec.x, aVec.y, aVec.z, 1));
+                                            aTexture.SetPixel(new Vector2Int(x, aHeight - y - 1), new Color(aVec.x, aVec.y, aVec.z, aVec.w));
                                         }
                                     }
+                                    Debug.LogWarning($"aMax:{aMax},aMin:{aMin}");
                                     //UCL_Texture2D aTexture = new UCL_Texture2D(2 * aWidth, 2 * aHeight);
                                     //for (int x = 0; x < aWidth; x++)
                                     //{
