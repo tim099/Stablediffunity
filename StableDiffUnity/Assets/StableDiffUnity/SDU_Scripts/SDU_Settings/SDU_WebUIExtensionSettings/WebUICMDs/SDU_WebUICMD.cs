@@ -26,8 +26,12 @@ namespace SDU
         {
             JsonData aData = new JsonData();
             aData["Class"] = this.GetType().Name;
-            aData["Data"] = JsonConvert.SaveFieldsToJsonUnityVer(this);
+            aData["Data"] = GetConfigJsonData();
             return aData;
+        }
+        virtual protected JsonData GetConfigJsonData()
+        {
+            return JsonConvert.SaveFieldsToJsonUnityVer(this);
         }
         virtual public object OnGUI(string iFieldName, UCL_ObjectDictionary iDataDic)
         {

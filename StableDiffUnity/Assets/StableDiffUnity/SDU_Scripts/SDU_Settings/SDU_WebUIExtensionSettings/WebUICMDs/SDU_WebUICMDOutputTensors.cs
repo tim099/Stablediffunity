@@ -22,7 +22,7 @@ namespace SDU
         /// </summary>
         [UCL.Core.PA.UCL_IntSlider(1, 20)]
         public int m_OutputStepInterval = 1;
-
+        public bool m_OutputJsonTensor = false;
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public List<int> m_OutputAtSteps = new List<int>();
         public override JsonData GetConfigJson()
@@ -48,6 +48,10 @@ namespace SDU
                     }
             }
             return base.GetConfigJson();
+        }
+        protected override JsonData GetConfigJsonData()
+        {
+            return JsonConvert.SaveFieldsToJsonUnityVer(this);
         }
         public override JsonData SerializeToJson()
         {

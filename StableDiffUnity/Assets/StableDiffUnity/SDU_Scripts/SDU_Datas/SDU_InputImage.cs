@@ -190,7 +190,11 @@ namespace SDU
         {
             if (Texture != null)
             {
+#if UNITY_EDITOR
+                GameObject.DestroyImmediate(Texture);
+#else
                 GameObject.Destroy(Texture);
+#endif
                 Texture = null;
             }
         }

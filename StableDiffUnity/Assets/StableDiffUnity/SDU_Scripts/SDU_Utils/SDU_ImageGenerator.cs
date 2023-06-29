@@ -17,6 +17,7 @@ namespace SDU
     {
         public static bool IsAvaliable => SDU_Server.ServerReady && !GeneratingImage;
         public static SDU_InputImage PrevGeneratedImage { get; private set; } = null;
+        public static string CurOutputImageName { get; private set; } = string.Empty;
         public static bool GeneratingImage { get; private set; } = false;
         public static string ProgressStr = string.Empty;
         public static float ProgressVal = 0;
@@ -132,6 +133,10 @@ namespace SDU
                         var aImageOutputSetting = iSetting.m_ImageOutputSetting;
                         int aEnabledControlNetCount = iSetting.GetEnabledControlNetSettings().Count;
                         bool aRemoveControlNetInputImage = !aImageOutputSetting.m_OutputControlNetInputImage && aEnabledControlNetCount > 0;
+                        var aSavePath = GetSaveImagePath(aImageOutputSetting);
+                        string aFolderPath = aImageOutputSetting.OutputFolderPath;//aSavePath.Item1;
+                        string aFileName = aSavePath.Item2;
+                        CurOutputImageName = aFileName;
                         JsonData aJson = iSetting.GetConfigJson();
                         iSetting.m_ResultInfo = aJson;
                         string aJsonStr = aJson.ToJson();
@@ -235,9 +240,7 @@ namespace SDU
                             Debug.LogError("!aResultJson.Contains(\"info\")");
                         }
                         
-                        var aSavePath = GetSaveImagePath(aImageOutputSetting);
-                        string aFolderPath = aImageOutputSetting.OutputFolderPath;//aSavePath.Item1;
-                        string aFileName = aSavePath.Item2;
+
 
                         var aFileTasks = new List<Task>();
                         var aImages = aResultJson["images"];

@@ -14,19 +14,8 @@ namespace SDU
     {
         public class ConfigData
         {
-            public string FolderPath;
-            //public bool OutputTensors = false;
-
-            /// <summary>
-            /// Load Tensor from file
-            /// </summary>
-            //public bool LoadTensor = false;
-            /// <summary>
-            /// FilePath = System.IO.Path.Combine(FolderPath, LoadTensorFileName)
-            /// </summary>
-            //[UCL.Core.PA.Conditional("LoadTensor", false, true)]
-            //[UCL.Core.ATTR.UCL_HideOnGUI]
-            //public string LoadTensorFileName = string.Empty;
+            //public string FolderPath;
+            [UCL.Core.ATTR.UCL_HideOnGUI] public string CurOutputImageName;
         }
         public ConfigData m_ConfigData = new ConfigData();
 
@@ -41,10 +30,11 @@ namespace SDU
         /// <returns></returns>
         public JsonData GetConfigJson()
         {
-            if (string.IsNullOrEmpty(m_ConfigData.FolderPath))
-            {
-                m_ConfigData.FolderPath = System.IO.Path.Combine(RunTimeData.Ins.CurImgSetting.m_ImageOutputSetting.OutputFolderPath, "tensors");
-            }
+            //if (string.IsNullOrEmpty(m_ConfigData.FolderPath))
+            //{
+            //    m_ConfigData.FolderPath = System.IO.Path.Combine(RunTimeData.Ins.CurImgSetting.m_ImageOutputSetting.OutputFolderPath, "tensors");
+            //}
+            m_ConfigData.CurOutputImageName = SDU_ImageGenerator.CurOutputImageName;
             var aJson = JsonConvert.SaveFieldsToJsonUnityVer(m_ConfigData);
             if (m_WebUICMDs.Count > 0)
             {

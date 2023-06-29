@@ -25,20 +25,20 @@ namespace SDU
         }
         protected override void ContentOnGUI()
         {
-#if UNITY_EDITOR
-            if(GUILayout.Button("Save InstallSettings to StreamingAssets"))
-            {
-                string aPath = Path.Combine(RunTimeData.InstallSetting.EnvInstallRoot, "InstallSettings");
-                SDU_FileInstall.SaveInstallEnvToStreammingAssets(aPath);
-                //Application.streamingAssetsPath
-            }
-            if (GUILayout.Button("Load InstallSettings from StreamingAssets"))
-            {
-                string aPath = Path.Combine(RunTimeData.InstallSetting.EnvInstallRoot, "InstallSettings");
-                SDU_FileInstall.LoadInstallEnvFromStreammingAssets(aPath);
-                //Application.streamingAssetsPath
-            }
-#endif
+//#if UNITY_EDITOR
+//            if(GUILayout.Button("Save InstallSettings to StreamingAssets"))
+//            {
+//                string aPath = Path.Combine(RunTimeData.InstallSetting.EnvInstallRoot, "InstallSettings");
+//                SDU_FileInstall.SaveInstallEnvToStreammingAssets(aPath);
+//                //Application.streamingAssetsPath
+//            }
+//            if (GUILayout.Button("Load InstallSettings from StreamingAssets"))
+//            {
+//                string aPath = Path.Combine(RunTimeData.InstallSetting.EnvInstallRoot, "InstallSettings");
+//                SDU_FileInstall.LoadInstallEnvFromStreammingAssets(aPath);
+//                //Application.streamingAssetsPath
+//            }
+//#endif
 
             using (var aScope = new GUILayout.VerticalScope("box"))
             {
