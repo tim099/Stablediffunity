@@ -16,6 +16,8 @@ namespace SDU
                 s_Types = new List<System.Type>();
                 s_Types.Add(typeof(SDU_WebUICMDOutputTensors));
                 s_Types.Add(typeof(SDU_WebUICMDLoadTensor));
+                s_Types.Add(typeof(SDU_WebUICMDLoadJsonTensor));
+                //
             }
             return s_Types;
         }

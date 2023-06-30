@@ -37,7 +37,7 @@ namespace SDU
                     {
                         m_OutputAtSteps.Clear();
                         int aTotalSteps = RunTimeData.Ins.CurImgSetting.m_Steps;
-                        for (int i = 0; i < aTotalSteps; i++)
+                        for (int i = 0; i <= aTotalSteps; i++)
                         {
                             if (i % m_OutputStepInterval == 0)
                             {

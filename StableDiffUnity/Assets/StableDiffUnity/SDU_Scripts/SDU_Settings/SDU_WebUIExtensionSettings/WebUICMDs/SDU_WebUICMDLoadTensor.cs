@@ -20,11 +20,6 @@ namespace SDU
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public string m_LoadTensorFileName = string.Empty;
 
-        [UCL.Core.ATTR.UCL_HideOnGUI]
-        public string m_LoadJsonTensorName = string.Empty;
-
-        public JsonData TensorJsonData { get; set; }
-        public SDU_InputImage SDU_InputImage { get; set; }
         public override JsonData GetConfigJson()
         {
             CheckFolderPath();
@@ -59,48 +54,6 @@ namespace SDU
                         {
                             GUILayout.Label("LoadTensorFileName", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
                             m_LoadTensorFileName = UCL_GUILayout.PopupAuto(m_LoadTensorFileName, aFiles, iDataDic, "LoadTensorFileName");
-                        }
-                    }
-                    GUILayout.Space(10);
-                    
-                    GUILayout.Label("====Testing Tensor====");
-                    {
-                        IList<string> aFiles = new List<string>();
-                        if (Directory.Exists(aPath))
-                        {
-                            aFiles = UCL.Core.FileLib.Lib.GetFilesName(aPath, "*.json");
-                        }
-                        using (var aScope = new GUILayout.HorizontalScope())
-                        {
-                            GUILayout.Label("LoadJsonTensorName", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
-                            m_LoadJsonTensorName = UCL_GUILayout.PopupAuto(m_LoadJsonTensorName, aFiles, iDataDic, "LoadJsonTensorName");
-                        }
-                        if (!string.IsNullOrEmpty(m_LoadJsonTensorName))
-                        {
-                            string aJsonPath = Path.Combine(m_FolderPath, m_LoadJsonTensorName);
-                            if (File.Exists(aJsonPath))
-                            {
-                                if (GUILayout.Button("Read Json"))
-                                {
-                                    string aJson = File.ReadAllText(aJsonPath);
-                                    TensorJsonData = JsonData.ParseJson(aJson);
-                                    if(SDU_InputImage == null)
-                                    {
-                                        SDU_InputImage = new SDU_InputImage();
-                                    }
-                                    JsonData aImageArr = TensorJsonData[0];
-                                    UCL_Texture2D aTexture = SDU_TensorUtil.TensorToTexture(aImageArr);
-                                    SDU_InputImage.Texture = aTexture.GetTexture();
-                                }
-                            }
-                        }
-                        if(TensorJsonData != null)
-                        {
-                            UCL_GUILayout.DrawObjectData(TensorJsonData, iDataDic.GetSubDic("TensorJsonData"), "TensorJsonData");
-                        }
-                        if(SDU_InputImage != null)
-                        {
-                            UCL_GUILayout.DrawObjectData(SDU_InputImage, iDataDic.GetSubDic("SDU_InputImage"), "SDU_InputImage");
                         }
                     }
                 }
