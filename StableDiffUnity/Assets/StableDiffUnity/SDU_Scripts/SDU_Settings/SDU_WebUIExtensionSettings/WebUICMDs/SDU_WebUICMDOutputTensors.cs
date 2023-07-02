@@ -14,17 +14,27 @@ namespace SDU
             /// output tensor every N steps
             /// </summary>
             EveryNSteps,
+            /// <summary>
+            /// output tensor at specify steps
+            /// </summary>
+            OutputAtSteps,
         }
         public OutputTensorType m_OutputTensorType = OutputTensorType.EveryNSteps;
         public string m_FolderPath;
         /// <summary>
         /// output tensor every N steps, N = m_OutputStepInterval
         /// </summary>
+        [UCL.Core.PA.Conditional("m_OutputTensorType", false, OutputTensorType.EveryNSteps)]
         [UCL.Core.PA.UCL_IntSlider(1, 20)]
         public int m_OutputStepInterval = 1;
-        public bool m_OutputJsonTensor = false;
-        [UCL.Core.ATTR.UCL_HideOnGUI]
+
+        [UCL.Core.PA.Conditional("m_OutputTensorType", false, OutputTensorType.OutputAtSteps)]
         public List<int> m_OutputAtSteps = new List<int>();
+
+        public bool m_OutputJsonTensor = false;
+        //[UCL.Core.ATTR.UCL_HideOnGUI]
+
+
         public override JsonData GetConfigJson()
         {
             if (string.IsNullOrEmpty(m_FolderPath))
@@ -55,7 +65,15 @@ namespace SDU
         }
         public override JsonData SerializeToJson()
         {
-            m_OutputAtSteps.Clear();
+            switch (m_OutputTensorType)
+            {
+                case OutputTensorType.EveryNSteps:
+                    {
+                        m_OutputAtSteps.Clear();
+                        break;
+                    }
+            }
+            
             return base.SerializeToJson();
         }
     }
