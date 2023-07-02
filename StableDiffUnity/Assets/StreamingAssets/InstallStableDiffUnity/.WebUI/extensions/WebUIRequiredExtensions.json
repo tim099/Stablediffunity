@@ -21,6 +21,12 @@
 		},
 		{
 			"AutoInstall":"False",
+			"ExtensionName":"TemporalKit",
+			"Url":"https://github.com/CiaraStrawberry/TemporalKit.git",
+			"Branch":"main"
+		},
+		{
+			"AutoInstall":"False",
 			"ExtensionName":"sd-webui-additional-networks",
 			"Url":"https://github.com/kohya-ss/sd-webui-additional-networks",
 			"Branch":"main"
