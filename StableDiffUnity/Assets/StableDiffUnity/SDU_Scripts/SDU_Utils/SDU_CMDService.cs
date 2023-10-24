@@ -102,7 +102,7 @@ namespace SDU
                     }
                     else
                     {
-                        UCL_GUILayout.DrawList(s_CMDs, aSubDic, "Triggering CMDs");
+                        UCL_GUILayout.DrawList(s_CMDs, aSubDic, "Triggering CMDs", false);
                     }
 
                 }

@@ -29,6 +29,7 @@ namespace SDU
 
         public SDU_SamplerSetting m_Sampler = new SDU_SamplerSetting();
         public SDU_VAESettings m_VAE = new SDU_VAESettings();
+        public SDU_PromptSegment m_PromptSegment = new SDU_PromptSegment();
         public string m_Prompt = "masterpiece, best quality, ultra-detailed,((black background)),1girl,";
         public string m_NegativePrompt = "(low quality, worst quality:1.4), ((bad fingers))";
         public int m_Width = 512;
@@ -59,6 +60,10 @@ namespace SDU
         #region Hide
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public string m_SelectedLoraModel;
+
+        [UCL.Core.ATTR.UCL_HideOnGUI]
+        public List<SDU_LoraSetting> m_LoraSettings = new List<SDU_LoraSetting>();
+
 
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public List<SDU_CMD> m_CMDs = new List<SDU_CMD>();
@@ -121,6 +126,60 @@ namespace SDU
             }
             return aControlNetSettings;
         }
+        virtual public string Prompt
+        {
+            get
+            {
+                System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+
+                if(!m_PromptSegment.IsEmpty)
+                {
+                    sb.Append(m_PromptSegment.Prompt);
+                    sb.Append(',');
+                }
+                if (!string.IsNullOrEmpty(m_Prompt))
+                {
+                    int aLen = m_Prompt.Length;
+                    for (int i = m_Prompt.Length - 1; i >= 0; i--)//remove ' ' or ',' in last part of Prompt
+                    {
+                        var aChar = m_Prompt[i];
+                        if (aChar is not ' ' or ',')
+                        {
+                            break;
+                        }
+                        aLen = i;
+                    }
+                    if (aLen < m_Prompt.Length)
+                    {
+                        if (aLen > 1)
+                        {
+                            string aPrompt = m_Prompt.Substring(0, aLen - 1);
+                            //Debug.LogError($"m_Prompt.LastElement() == ',', aPrompt:{aPrompt}");
+                            sb.Append(aPrompt);
+                        }
+                    }
+                    else
+                    {
+                        sb.Append(m_Prompt);
+                    }
+                }
+                if (!m_LoraSettings.IsNullOrEmpty())
+                {
+                    foreach (var aLora in m_LoraSettings)
+                    {
+                        if (aLora.IsEnable)
+                        {
+                            sb.Append(',');
+                            sb.Append(aLora.Prompt);
+                        }
+                    }
+                }
+
+
+                return sb.ToString();
+            }
+        }
         virtual public JsonData GetConfigJson()
         {
             const int MaxRes = 2048;
@@ -139,7 +198,7 @@ namespace SDU
             }
 
             aJson["sampler_index"] = m_Sampler.m_SelectedSampler;//m_SelectedSampler;
-            aJson["prompt"] = m_Prompt;
+            aJson["prompt"] = Prompt;
             aJson["steps"] = m_Steps;
             aJson["negative_prompt"] = m_NegativePrompt;
             aJson["seed"] = m_Seed;
@@ -279,12 +338,14 @@ namespace SDU
                 {
                     m_SelectedLoraModel = UCL_GUILayout.PopupAuto(m_SelectedLoraModel, aLoraNames, iSubDic, "Lora", 8);
                 }
+                
 
                 if (GUILayout.Button("Open Folder", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
                 {
                     RunTimeData.InstallSetting.OpenFolder(FolderEnum.Lora);
                 }
             }
+            UCL_GUILayout.DrawList(m_LoraSettings, iSubDic.GetSubDic("LoraSettings"), "LoraSettings", false);
         }
         virtual public object TexSettingOnGUI(string iFieldName, UCL_ObjectDictionary iSubDic, UCL_ObjectDictionary iDataDic)
         {

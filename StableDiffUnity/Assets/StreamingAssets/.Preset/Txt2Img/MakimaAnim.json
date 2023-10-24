@@ -1,0 +1,218 @@
+{
+	"ID":"MakimaAnim",
+	"LoadID":"MakimaAnim",
+	"CheckPoint":{
+		"CheckPoint":"01.meinamix_meinaV9"
+	},
+	"Sampler":{
+		"SelectedSampler":"DPM++ 2M Karras"
+	},
+	"VAE":{
+		"VAE":"Automatic"
+	},
+	"Prompt":"(mamasterpiece, best quality, ultra-detailed),<lora:Makima:0.6>,1girl,makima \\(chainsaw man\\),yellow eyes,red hair, ",
+	"NegativePrompt":"(low quality, worst quality:1.4), ((bad fingers))",
+	"Width":512,
+	"Height":512,
+	"Steps":25,
+	"CfgScale":7,
+	"Seed":-1,
+	"BatchCount":1,
+	"BatchSize":1,
+	"MultiControlNetSettings":
+	[
+		{
+			"EnableControlNet":"False",
+			"SelectedModel":"control_v11f1p_sd15_depth_fp16 [4b72d323]",
+			"InputImage":{
+				"LoadImageSetting":{
+					"FolderPath":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\06_08_2023\\Depth",
+					"FileName":"Input_12191426_151.png"
+				},
+				"ImageSetting":{
+					"ShowImageDetail":"False",
+					"SaveImageAfterCapture":"True"
+				},
+				"AutoCaptureSetting":{
+					"SaveAutoCaptureImage":"True",
+					"AutoCaptureInterval":0.10000000149011612,
+					"AutoCaptureModes":
+					[
+						"Normal"
+					]
+				},
+				"CaptureMode":"Depth",
+				"ShowImageDetail":"True"
+			},
+			"ControlWeight":1,
+			"StartingControlStep":0.05000000074505806,
+			"EndingControlStep":0.40000000596046448
+		},
+		{
+			"EnableControlNet":"False",
+			"SelectedModel":"control_sd15_normal [fef5e48e]",
+			"InputImage":{
+				"LoadImageSetting":{
+					"FolderPath":"C:/Users/Public/Documents/StableDiffUnity_V1/Env/Output/06_08_2023/Normal",
+					"FileName":"Input_14531580_204.png"
+				},
+				"ImageSetting":{
+					"ShowImageDetail":"False",
+					"SaveImageAfterCapture":"True"
+				},
+				"AutoCaptureSetting":{
+					"SaveAutoCaptureImage":"True",
+					"AutoCaptureInterval":0.10000000149011612
+				},
+				"CaptureMode":"Normal",
+				"ShowImageDetail":"True"
+			},
+			"ControlWeight":1,
+			"StartingControlStep":0,
+			"EndingControlStep":1
+		},
+		{
+			"EnableControlNet":"False",
+			"SelectedModel":"control_sd15_canny [fef5e48e]",
+			"InputImage":{
+				"LoadImageSetting":{
+					"FolderPath":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\06_08_2023\\Canny",
+					"FileName":"Input_14531585_204.png"
+				},
+				"ImageSetting":{
+					"ShowImageDetail":"False",
+					"SaveImageAfterCapture":"True"
+				},
+				"AutoCaptureSetting":{
+					"SaveAutoCaptureImage":"True",
+					"AutoCaptureInterval":0.10000000149011612,
+					"AutoCaptureModes":
+					[
+						"Depth",
+						"Normal",
+						"Canny"
+					]
+				},
+				"CaptureMode":"Canny",
+				"ShowImageDetail":"True"
+			},
+			"ControlWeight":1,
+			"StartingControlStep":0,
+			"EndingControlStep":1
+		}
+	],
+	"ImageOutputSetting":{
+		"OutputFolder":"Default",
+		"CustomOutputFolder":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\Depth",
+		"OutputControlNetInputImage":"False",
+		"OutputGenerateImageSetting":"False",
+		"OutPutFileID":330
+	},
+	"ResultInfo":{
+		"prompt":"(mamasterpiece, best quality, ultra-detailed),<lora:Makima:0.6>,1girl,makima \\(chainsaw man\\),yellow eyes,red hair, ",
+		"all_prompts":
+		[
+			"(mamasterpiece, best quality, ultra-detailed),<lora:Makima:0.6>,1girl,makima \\(chainsaw man\\),yellow eyes,red hair, "
+		],
+		"negative_prompt":"(low quality, worst quality:1.4), ((bad fingers))",
+		"all_negative_prompts":
+		[
+			"(low quality, worst quality:1.4), ((bad fingers))"
+		],
+		"seed":3273392329,
+		"all_seeds":
+		[
+			3273392329
+		],
+		"subseed":2628911781,
+		"all_subseeds":
+		[
+			2628911781
+		],
+		"subseed_strength":0,
+		"width":512,
+		"height":512,
+		"sampler_name":"DPM++ 2M Karras",
+		"cfg_scale":7,
+		"steps":25,
+		"batch_size":1,
+		"restore_faces":false,
+		"face_restoration_model":null,
+		"sd_model_hash":"eac6c08a19",
+		"seed_resize_from_w":-1,
+		"seed_resize_from_h":-1,
+		"denoising_strength":0,
+		"extra_generation_params":{
+			"Lora hashes":"Makima: 44ed933d26f3"
+		},
+		"index_of_first_image":0,
+		"infotexts":
+		[
+			"(mamasterpiece, best quality, ultra-detailed),<lora:Makima:0.6>,1girl,makima \\(chainsaw man\\),yellow eyes,red hair, \nNegative prompt: (low quality, worst quality:1.4), ((bad fingers))\nSteps: 25, Sampler: DPM++ 2M Karras, CFG scale: 7.0, Seed: 3273392329, Size: 512x512, Model hash: eac6c08a19, Model: 01.meinamix_meinaV9, Seed resize from: -1x-1, Denoising strength: 0, Lora hashes: \"Makima: 44ed933d26f3\", Version: v1.3.2-1-gf68b1026"
+		],
+		"styles":
+		[
+
+		],
+		"job_timestamp":"20230616094937",
+		"clip_skip":1,
+		"is_using_inpainting_conditioning":false
+	},
+	"SelectedLoraModel":"maid",
+	"CMDs":
+	[
+		{
+			"ClassName":"SDU.SDU_CMDForeach, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+			"ClassData":{
+				"Enumerables":
+				[
+					{
+						"ClassName":"SDU.SDU_EnumGroup, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+						"ClassData":{
+							"CMDs":
+							[
+								{
+									"ClassName":"SDU.SDU_CMDSetPrompt, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+									"ClassData":{
+										"Prompt":"(mamasterpiece, best quality, ultra-detailed),1girl,makima \\(chainsaw man\\),yellow eyes,red hair, <lora:Makima:0.6>"
+									}
+								},
+								{
+									"ClassName":"SDU.SDU_CMDSetPrompt, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+									"ClassData":{
+										"Prompt":"(mamasterpiece, best quality, ultra-detailed),1girl,makima \\(chainsaw man\\),yellow eyes,<lora:Makima:0.6>,red hair, "
+									}
+								},
+								{
+									"ClassName":"SDU.SDU_CMDSetPrompt, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+									"ClassData":{
+										"Prompt":"(mamasterpiece, best quality, ultra-detailed),1girl,makima \\(chainsaw man\\),<lora:Makima:0.6>,yellow eyes,red hair, "
+									}
+								},
+								{
+									"ClassName":"SDU.SDU_CMDSetPrompt, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+									"ClassData":{
+										"Prompt":"(mamasterpiece, best quality, ultra-detailed),1girl,<lora:Makima:0.6>,makima \\(chainsaw man\\),yellow eyes,red hair, "
+									}
+								},
+								{
+									"ClassName":"SDU.SDU_CMDSetPrompt, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+									"ClassData":{
+										"Prompt":"(mamasterpiece, best quality, ultra-detailed),<lora:Makima:0.6>,1girl,makima \\(chainsaw man\\),yellow eyes,red hair, "
+									}
+								}
+							]
+						}
+					}
+				],
+				"CMDs":
+				[
+					{
+						"ClassName":"SDU.SDU_CMDGenerateImage, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+						"ClassData":null
+					}
+				]
+			}
+		}
+	]
+}

@@ -1,0 +1,273 @@
+{
+	"ID":"SNESEarthboundEnemies_hooker",
+	"LoadID":"M_PixelKnight",
+	"CheckPoint":{
+		"CheckPoint":"04.facebombmix_v1Bakedvae"
+	},
+	"Sampler":{
+		"SelectedSampler":"DPM++ 2M Karras"
+	},
+	"VAE":{
+		"VAE":"Automatic"
+	},
+	"Prompt":"Earthbound_enemy, neutral grey background, pixelart, drop shadow, 1girl, hooker, fishnet stockings, cleavage, large breasts, seductive demeanor,<lora:SNESEarthboundEnemies:0.8>",
+	"NegativePrompt":"\u200b\u200blowres, bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,",
+	"Width":512,
+	"Height":512,
+	"Steps":20,
+	"CfgScale":7,
+	"Seed":-1,
+	"BatchCount":8,
+	"BatchSize":2,
+	"MultiControlNetSettings":
+	[
+		{
+			"EnableControlNet":"False",
+			"SelectedModel":"control_v11f1p_sd15_depth_fp16 [4b72d323]",
+			"InputImage":{
+				"LoadImageSetting":{
+					"FolderPath":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\06_20_2023\\Depth",
+					"FileName":"Input_14173550_531.png"
+				},
+				"ImageSetting":{
+					"ShowImageDetail":"False",
+					"SaveImageAfterCapture":"True"
+				},
+				"AutoCaptureSetting":{
+					"SaveAutoCaptureImage":"True",
+					"AutoCaptureInterval":0.10000000149011612,
+					"AutoCaptureModes":
+					[
+						"Normal"
+					]
+				},
+				"CaptureMode":"Depth",
+				"ShowImageDetail":"False"
+			},
+			"ControlWeight":1,
+			"StartingControlStep":0.10000000149011612,
+			"EndingControlStep":1
+		},
+		{
+			"EnableControlNet":"False",
+			"SelectedModel":"control_sd15_normal [fef5e48e]",
+			"InputImage":{
+				"LoadImageSetting":{
+					"FolderPath":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\06_20_2023\\Normal",
+					"FileName":"Input_14173924_532.png"
+				},
+				"ImageSetting":{
+					"ShowImageDetail":"False",
+					"SaveImageAfterCapture":"True"
+				},
+				"AutoCaptureSetting":{
+					"SaveAutoCaptureImage":"True",
+					"AutoCaptureInterval":0.10000000149011612
+				},
+				"CaptureMode":"Normal",
+				"ShowImageDetail":"True"
+			},
+			"ControlWeight":1,
+			"StartingControlStep":0,
+			"EndingControlStep":1
+		},
+		{
+			"EnableControlNet":"False",
+			"SelectedModel":"control_sd15_canny [fef5e48e]",
+			"InputImage":{
+				"LoadImageSetting":{
+					"FolderPath":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\06_20_2023\\Canny",
+					"FileName":"Input_14174157_533.png"
+				},
+				"ImageSetting":{
+					"ShowImageDetail":"False",
+					"SaveImageAfterCapture":"True"
+				},
+				"AutoCaptureSetting":{
+					"SaveAutoCaptureImage":"True",
+					"AutoCaptureInterval":0.10000000149011612,
+					"AutoCaptureModes":
+					[
+						"Depth",
+						"Normal",
+						"Canny"
+					]
+				},
+				"CaptureMode":"Canny",
+				"ShowImageDetail":"True"
+			},
+			"ControlWeight":1,
+			"StartingControlStep":0,
+			"EndingControlStep":1
+		}
+	],
+	"ImageOutputSetting":{
+		"OutputFolder":"Custom",
+		"CustomOutputFolder":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\PixelArt",
+		"OutputControlNetInputImage":"False",
+		"OutputGenerateImageSetting":"False",
+		"OutPutFileID":824
+	},
+	"WebUIExtensionSetting":{
+		"ConfigData":{
+			"CurOutputImageName":"14160670_824"
+		},
+		"WebUICMDs":
+		[
+			{
+				"ClassName":"SDU.SDU_WebUICMDOutputTensors, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+				"ClassData":{
+					"OutputTensorType":"EveryNSteps",
+					"FolderPath":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\06_30_2023\\tensors",
+					"OutputStepInterval":1,
+					"OutputJsonTensor":"False",
+					"Enable":"False"
+				}
+			},
+			{
+				"ClassName":"SDU.SDU_WebUICMDOutputTensors, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+				"ClassData":{
+					"OutputTensorType":"OutputAtSteps",
+					"FolderPath":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\06_28_2023\\tensors",
+					"OutputStepInterval":5,
+					"OutputAtSteps":
+					[
+						6
+					],
+					"OutputJsonTensor":"False",
+					"Enable":"True"
+				}
+			},
+			{
+				"ClassName":"SDU.SDU_WebUICMDLoadTensor, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+				"ClassData":{
+					"FolderPath":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\06_28_2023\\tensors",
+					"LoadAtStep":6,
+					"LoadTensorFileName":"15405509_745__006.pt",
+					"Enable":"False"
+				}
+			},
+			{
+				"ClassName":"SDU.SDU_WebUICMDLoadJsonTensor, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+				"ClassData":{
+					"FolderPath":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\06_30_2023\\tensors",
+					"LoadJsonTensorName":"18283418_733__019.json",
+					"Enable":"False"
+				}
+			}
+		]
+	},
+	"ResultInfo":{
+		"prompt":"Earthbound_enemy, neutral grey background, pixelart, drop shadow, 1girl, hooker, fishnet stockings, cleavage, large breasts, seductive demeanor,<lora:SNESEarthboundEnemies:0.8>",
+		"all_prompts":
+		[
+			"Earthbound_enemy, neutral grey background, pixelart, drop shadow, 1girl, hooker, fishnet stockings, cleavage, large breasts, seductive demeanor,<lora:SNESEarthboundEnemies:0.8>",
+			"Earthbound_enemy, neutral grey background, pixelart, drop shadow, 1girl, hooker, fishnet stockings, cleavage, large breasts, seductive demeanor,<lora:SNESEarthboundEnemies:0.8>"
+		],
+		"negative_prompt":"\u200b\u200blowres, bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,",
+		"all_negative_prompts":
+		[
+			"\u200b\u200blowres, bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,",
+			"\u200b\u200blowres, bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,"
+		],
+		"seed":433531310,
+		"all_seeds":
+		[
+			433531310,
+			433531311
+		],
+		"subseed":414370653,
+		"all_subseeds":
+		[
+			414370653,
+			414370654
+		],
+		"subseed_strength":0,
+		"width":512,
+		"height":512,
+		"sampler_name":"DPM++ 2M Karras",
+		"cfg_scale":7,
+		"steps":20,
+		"batch_size":2,
+		"restore_faces":false,
+		"face_restoration_model":null,
+		"sd_model_hash":"7364c31aac",
+		"seed_resize_from_w":-1,
+		"seed_resize_from_h":-1,
+		"denoising_strength":0,
+		"extra_generation_params":{
+			"Lora hashes":"SNESEarthboundEnemies: e43be5f51eca"
+		},
+		"index_of_first_image":0,
+		"infotexts":
+		[
+			"Earthbound_enemy, neutral grey background, pixelart, drop shadow, 1girl, hooker, fishnet stockings, cleavage, large breasts, seductive demeanor,<lora:SNESEarthboundEnemies:0.8>\nNegative prompt: \u200b\u200blowres, bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,\nSteps: 20, Sampler: DPM++ 2M Karras, CFG scale: 7.0, Seed: 433531310, Size: 512x512, Model hash: 7364c31aac, Model: 04.facebombmix_v1Bakedvae, Denoising strength: 0, Lora hashes: \"SNESEarthboundEnemies: e43be5f51eca\", Version: v1.5.1",
+			"Earthbound_enemy, neutral grey background, pixelart, drop shadow, 1girl, hooker, fishnet stockings, cleavage, large breasts, seductive demeanor,<lora:SNESEarthboundEnemies:0.8>\nNegative prompt: \u200b\u200blowres, bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,\nSteps: 20, Sampler: DPM++ 2M Karras, CFG scale: 7.0, Seed: 433531311, Size: 512x512, Model hash: 7364c31aac, Model: 04.facebombmix_v1Bakedvae, Denoising strength: 0, Lora hashes: \"SNESEarthboundEnemies: e43be5f51eca\", Version: v1.5.1"
+		],
+		"styles":
+		[
+
+		],
+		"job_timestamp":"20231024141606",
+		"clip_skip":1,
+		"is_using_inpainting_conditioning":false
+	},
+	"SelectedLoraModel":"SNESEarthboundEnemies",
+	"CMDs":
+	[
+		{
+			"ClassName":"SDU.SDU_CMDForeach, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+			"ClassData":{
+				"Enumerables":
+				[
+					{
+						"ClassName":"SDU.SDU_EnumGroup, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+						"ClassData":{
+							"CMDs":
+							[
+								{
+									"ClassName":"SDU.SDU_CMDSetCheckPoint, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+									"ClassData":{
+										"CheckPointSetting":{
+											"CheckPoint":"03.darkSushiMixMix_colorful"
+										}
+									}
+								},
+								{
+									"ClassName":"SDU.SDU_CMDSetCheckPoint, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+									"ClassData":{
+										"CheckPointSetting":{
+											"CheckPoint":"04.facebombmix_v1Bakedvae"
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"CMDs":
+				[
+					{
+						"ClassName":"SDU.SDU_CMDForeach, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+						"ClassData":{
+							"Enumerables":
+							[
+								{
+									"ClassName":"SDU.SDU_EnumControlNetInputImages, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+									"ClassData":null
+								}
+							],
+							"CMDs":
+							[
+								{
+									"ClassName":"SDU.SDU_CMDGenerateImage, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+									"ClassData":null
+								}
+							]
+						}
+					}
+				]
+			}
+		}
+	]
+}

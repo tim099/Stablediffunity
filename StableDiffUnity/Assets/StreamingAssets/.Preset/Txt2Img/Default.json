@@ -1,0 +1,30 @@
+{
+	"ID":"Default",
+	"SelectedModel":"04.facebombmix_v1Bakedvae",
+	"SelectedSampler":"DPM++ 2M Karras",
+	"SelectedLoraModel":"PixelArt",
+	"Prompt":"masterpiece, best quality, ultra-detailed,1girl,",
+	"NegativePrompt":"\u200b\u200blowres, bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,",
+	"Width":800,
+	"Height":800,
+	"Steps":22,
+	"CfgScale":7,
+	"Seed":-1,
+	"BatchCount":1,
+	"BatchSize":1,
+	"ControlNetSettings":{
+		"EnableControlNet":"True",
+		"SelectedModel":"control_sd15_depth [fef5e48e]",
+		"InputImage":{
+			"LoadImageSetting":{
+				"FolderPath":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\05_25_2023",
+				"FileName":"Input_0_14240527.png"
+			},
+			"ImageSetting":{
+				"ShowImageDetail":"True",
+				"SaveImageAfterCapture":"True"
+			},
+			"ShowImageDetail":"True"
+		}
+	}
+}

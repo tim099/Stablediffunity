@@ -25,7 +25,20 @@ namespace SDU
         public string m_WebPageURL;
 
         public string FolderPath => m_FolderSetting.Path();
-        public string FilePath => Path.Combine(FolderPath, $"{m_FileName}.{m_FileExtension}");
+        public string FilePath { 
+            get 
+            {
+                try
+                {
+                    return Path.Combine(FolderPath, $"{m_FileName}.{m_FileExtension}");
+                }
+                catch(System.Exception e)
+                {
+                    Debug.LogException(e);
+                }
+                return string.Empty;
+            } 
+        }
         public SDU_FileDownloader.DownloadHandle DownloadHandle => SDU_FileDownloader.GetDownloadFileHandle(m_URL, FilePath);
         public string GetShortName() => $"DownloadFileSetting({m_FileName})";
         private bool m_Show = false;

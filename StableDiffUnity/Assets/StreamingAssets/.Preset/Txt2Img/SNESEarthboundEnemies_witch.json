@@ -1,0 +1,90 @@
+{
+	"ID":"SNESEarthboundEnemies_witch",
+	"LoadID":"SNESEarthboundEnemies_witch",
+	"CheckPoint":{
+		"CheckPoint":"04.facebombmix_v1Bakedvae"
+	},
+	"Sampler":{
+		"SelectedSampler":"DPM++ 2M Karras"
+	},
+	"VAE":{
+		"VAE":"Automatic"
+	},
+	"Prompt":"Earthbound_enemy, pixelart, drop shadow, 1girl, witch,wand,<lora:SNESEarthboundEnemies:0.8>",
+	"NegativePrompt":"\u200b\u200blowres, bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,",
+	"Width":512,
+	"Height":512,
+	"Steps":20,
+	"CfgScale":7,
+	"Seed":-1,
+	"BatchCount":8,
+	"BatchSize":2,
+	"ImageOutputSetting":{
+		"OutputFolder":"Custom",
+		"CustomOutputFolder":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\PixelArt",
+		"OutputControlNetInputImage":"False",
+		"OutputGenerateImageSetting":"False",
+		"OutPutFileID":840
+	},
+	"WebUIExtensionSetting":{
+		"ConfigData":{
+			"CurOutputImageName":"14220242_840"
+		}
+	},
+	"ResultInfo":{
+		"prompt":"Earthbound_enemy, pixelart, drop shadow, 1girl, witch,wand,<lora:SNESEarthboundEnemies:0.8>",
+		"all_prompts":
+		[
+			"Earthbound_enemy, pixelart, drop shadow, 1girl, witch,wand,<lora:SNESEarthboundEnemies:0.8>",
+			"Earthbound_enemy, pixelart, drop shadow, 1girl, witch,wand,<lora:SNESEarthboundEnemies:0.8>"
+		],
+		"negative_prompt":"\u200b\u200blowres, bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,",
+		"all_negative_prompts":
+		[
+			"\u200b\u200blowres, bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,",
+			"\u200b\u200blowres, bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,"
+		],
+		"seed":1462400550,
+		"all_seeds":
+		[
+			1462400550,
+			1462400551
+		],
+		"subseed":1466654241,
+		"all_subseeds":
+		[
+			1466654241,
+			1466654242
+		],
+		"subseed_strength":0,
+		"width":512,
+		"height":512,
+		"sampler_name":"DPM++ 2M Karras",
+		"cfg_scale":7,
+		"steps":20,
+		"batch_size":2,
+		"restore_faces":false,
+		"face_restoration_model":null,
+		"sd_model_hash":"7364c31aac",
+		"seed_resize_from_w":-1,
+		"seed_resize_from_h":-1,
+		"denoising_strength":0,
+		"extra_generation_params":{
+			"Lora hashes":"SNESEarthboundEnemies: e43be5f51eca"
+		},
+		"index_of_first_image":0,
+		"infotexts":
+		[
+			"Earthbound_enemy, pixelart, drop shadow, 1girl, witch,wand,<lora:SNESEarthboundEnemies:0.8>\nNegative prompt: \u200b\u200blowres, bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,\nSteps: 20, Sampler: DPM++ 2M Karras, CFG scale: 7.0, Seed: 1462400550, Size: 512x512, Model hash: 7364c31aac, Model: 04.facebombmix_v1Bakedvae, Denoising strength: 0, Lora hashes: \"SNESEarthboundEnemies: e43be5f51eca\", Version: v1.5.1",
+			"Earthbound_enemy, pixelart, drop shadow, 1girl, witch,wand,<lora:SNESEarthboundEnemies:0.8>\nNegative prompt: \u200b\u200blowres, bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,\nSteps: 20, Sampler: DPM++ 2M Karras, CFG scale: 7.0, Seed: 1462400551, Size: 512x512, Model hash: 7364c31aac, Model: 04.facebombmix_v1Bakedvae, Denoising strength: 0, Lora hashes: \"SNESEarthboundEnemies: e43be5f51eca\", Version: v1.5.1"
+		],
+		"styles":
+		[
+
+		],
+		"job_timestamp":"20231024142202",
+		"clip_skip":1,
+		"is_using_inpainting_conditioning":false
+	},
+	"SelectedLoraModel":"SNESEarthboundEnemies"
+}

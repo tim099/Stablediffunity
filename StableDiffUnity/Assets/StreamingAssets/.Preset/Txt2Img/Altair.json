@@ -1,0 +1,80 @@
+{
+	"ID":"Altair",
+	"LoadID":"FaceBomb",
+	"CheckPoint":{
+		"CheckPoint":"03.darkSushiMixMix_colorful"
+	},
+	"Sampler":{
+		"SelectedSampler":"DPM++ 2M Karras"
+	},
+	"SelectedLoraModel":"altair_v20",
+	"Prompt":"(masterpiece, best quality, ultra-detailed),1girl,altair, <lora:altair_v20:0.8>",
+	"NegativePrompt":"\u200b\u200blowres, bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,",
+	"Width":512,
+	"Height":880,
+	"Steps":20,
+	"CfgScale":7,
+	"Seed":-1,
+	"BatchCount":1,
+	"BatchSize":1,
+	"ControlNetSettings":{
+		"EnableControlNet":"True",
+		"SelectedModel":"control_sd15_depth [fef5e48e]",
+		"InputImage":{
+			"LoadImageSetting":{
+				"FolderPath":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\05_31_2023",
+				"FileName":"Input_09360489_211.png"
+			},
+			"ImageSetting":{
+				"ShowImageDetail":"False",
+				"SaveImageAfterCapture":"True"
+			},
+			"AutoCaptureMode":"Off",
+			"ShowImageDetail":"True"
+		}
+	},
+	"ImageOutputSetting":{
+		"OutputFolder":"Default",
+		"CustomOutputFolder":"",
+		"OutputControlNetInputImage":"False"
+	},
+	"CMDs":
+	[
+		{
+			"ClassName":"SDU.SDU_CMDSetCheckPoint, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+			"ClassData":{
+				"CheckPointSetting":{
+					"CheckPoint":"01.meinamix_meinaV9"
+				}
+			}
+		},
+		{
+			"ClassName":"SDU.SDU_CMDGenerateImage, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+			"ClassData":null
+		},
+		{
+			"ClassName":"SDU.SDU_CMDSetCheckPoint, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+			"ClassData":{
+				"CheckPointSetting":{
+					"CheckPoint":"03.darkSushiMixMix_colorful"
+				}
+			}
+		},
+		{
+			"ClassName":"SDU.SDU_CMDGenerateImage, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+			"ClassData":null
+		},
+		{
+			"ClassName":"SDU.SDU_CMDSetCheckPoint, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+			"ClassData":{
+				"CheckPointSetting":{
+					"CheckPoint":"04.facebombmix_v1Bakedvae"
+				}
+			}
+		},
+		{
+			"ClassName":"SDU.SDU_CMDGenerateImage, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+			"ClassData":null
+		}
+	]
+}

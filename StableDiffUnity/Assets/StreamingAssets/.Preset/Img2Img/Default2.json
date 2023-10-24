@@ -1,0 +1,111 @@
+{
+	"DenoisingStrength":0.30000001192092896,
+	"InputImage":{
+		"LoadImageSetting":{
+			"FolderPath":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output",
+			"FileName":"2_15445504_0.png"
+		},
+		"ImageSetting":{
+			"ShowImageDetail":"True",
+			"SaveImageAfterCapture":"True"
+		},
+		"AutoCaptureMode":"Off",
+		"CaptureMode":"Depth",
+		"ShowImageDetail":"True"
+	},
+	"ID":"Default2",
+	"LoadID":"Default",
+	"CheckPoint":{
+		"CheckPoint":"01.meinamix_meinaV9"
+	},
+	"Sampler":{
+		"SelectedSampler":"DPM++ 2M Karras"
+	},
+	"Prompt":"masterpiece, best quality, ultra-detailed,((black background)),1girl,",
+	"NegativePrompt":"(low quality, worst quality:1.4), ((bad fingers))",
+	"Width":512,
+	"Height":800,
+	"Steps":20,
+	"CfgScale":7,
+	"Seed":-1,
+	"BatchCount":1,
+	"BatchSize":1,
+	"ControlNetSettings":{
+		"EnableControlNet":"True",
+		"SelectedModel":"control_sd15_depth [fef5e48e]",
+		"InputImage":{
+			"LoadImageSetting":{
+				"FolderPath":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\Depth",
+				"FileName":"Input_17264010_329.png"
+			},
+			"ImageSetting":{
+				"ShowImageDetail":"False",
+				"SaveImageAfterCapture":"True"
+			},
+			"AutoCaptureMode":"Off",
+			"CaptureMode":"Depth",
+			"ShowImageDetail":"True"
+		},
+		"ControlWeight":1,
+		"StartingControlStep":0,
+		"EndingControlStep":1
+	},
+	"ImageOutputSetting":{
+		"OutputFolder":"Default",
+		"CustomOutputFolder":"",
+		"OutputControlNetInputImage":"False",
+		"OutputGenerateImageSetting":"False",
+		"OutPutFileID":5
+	},
+	"ResultInfo":{
+		"prompt":"masterpiece, best quality, ultra-detailed,((black background)),1girl,",
+		"all_prompts":
+		[
+			"masterpiece, best quality, ultra-detailed,((black background)),1girl,"
+		],
+		"negative_prompt":"(low quality, worst quality:1.4), ((bad fingers))",
+		"all_negative_prompts":
+		[
+			"(low quality, worst quality:1.4), ((bad fingers))"
+		],
+		"seed":1206531396,
+		"all_seeds":
+		[
+			1206531396
+		],
+		"subseed":3588833834,
+		"all_subseeds":
+		[
+			3588833834
+		],
+		"subseed_strength":0,
+		"width":800,
+		"height":800,
+		"sampler_name":"DPM++ 2M Karras",
+		"cfg_scale":7,
+		"steps":20,
+		"batch_size":1,
+		"restore_faces":false,
+		"face_restoration_model":null,
+		"sd_model_hash":"eac6c08a19",
+		"seed_resize_from_w":-1,
+		"seed_resize_from_h":-1,
+		"denoising_strength":0.30000001192092896,
+		"extra_generation_params":{
+			"ControlNet":"preprocessor: None, model: control_sd15_depth [fef5e48e], weight: 1, starting/ending: (0, 1), resize mode: ResizeMode.INNER_FIT, pixel perfect: False, control mode: ControlMode.BALANCED, preprocessor params: (512, 64, 64)"
+		},
+		"index_of_first_image":0,
+		"infotexts":
+		[
+			"masterpiece, best quality, ultra-detailed,((black background)),1girl,\nNegative prompt: (low quality, worst quality:1.4), ((bad fingers))\nSteps: 20, Sampler: DPM++ 2M Karras, CFG scale: 7.0, Seed: 1206531396, Size: 800x800, Model hash: eac6c08a19, Model: 01.meinamix_meinaV9, Seed resize from: -1x-1, Denoising strength: 0.30000001192092896, ControlNet: \"preprocessor: None, model: control_sd15_depth [fef5e48e], weight: 1, starting/ending: (0, 1), resize mode: ResizeMode.INNER_FIT, pixel perfect: False, control mode: ControlMode.BALANCED, preprocessor params: (512, 64, 64)\""
+		],
+		"styles":
+		[
+
+		],
+		"job_timestamp":"20230602175244",
+		"clip_skip":1,
+		"is_using_inpainting_conditioning":false
+	},
+	"SelectedLoraModel":"add_detail"
+}

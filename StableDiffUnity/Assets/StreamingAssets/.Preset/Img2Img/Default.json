@@ -1,0 +1,61 @@
+{
+	"DenoisingStrength":0.75,
+	"InputImage":{
+		"LoadImageSetting":{
+			"FolderPath":"",
+			"FileName":"InputImage.png"
+		},
+		"ImageSetting":{
+			"ShowImageDetail":"False",
+			"SaveImageAfterCapture":"True"
+		},
+		"AutoCaptureMode":"Off",
+		"CaptureMode":"Depth",
+		"ShowImageDetail":"False"
+	},
+	"ID":"Default",
+	"LoadID":"",
+	"CheckPoint":{
+		"CheckPoint":"01.meinamix_meinaV9"
+	},
+	"Sampler":{
+		"SelectedSampler":"DPM++ 2M Karras"
+	},
+	"Prompt":"masterpiece, best quality, ultra-detailed,((black background)),1girl,",
+	"NegativePrompt":"(low quality, worst quality:1.4), ((bad fingers))",
+	"Width":512,
+	"Height":512,
+	"Steps":20,
+	"CfgScale":7,
+	"Seed":-1,
+	"BatchCount":1,
+	"BatchSize":1,
+	"ControlNetSettings":{
+		"EnableControlNet":"False",
+		"InputImage":{
+			"LoadImageSetting":{
+				"FolderPath":"",
+				"FileName":"InputImage.png"
+			},
+			"ImageSetting":{
+				"ShowImageDetail":"False",
+				"SaveImageAfterCapture":"True"
+			},
+			"AutoCaptureMode":"Off",
+			"CaptureMode":"Depth",
+			"ShowImageDetail":"False"
+		},
+		"ControlWeight":1,
+		"StartingControlStep":0,
+		"EndingControlStep":1
+	},
+	"ImageOutputSetting":{
+		"OutputFolder":"Default",
+		"CustomOutputFolder":"",
+		"OutputControlNetInputImage":"False",
+		"OutputGenerateImageSetting":"False",
+		"OutPutFileID":0
+	},
+	"ResultInfo":null,
+	"SelectedLoraModel":"add_detail"
+}

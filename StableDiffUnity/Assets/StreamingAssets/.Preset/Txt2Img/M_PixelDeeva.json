@@ -1,0 +1,268 @@
+{
+	"ID":"M_PixelDeeva",
+	"LoadID":"M_PixelKnight",
+	"CheckPoint":{
+		"CheckPoint":"03.darkSushiMixMix_colorful"
+	},
+	"Sampler":{
+		"SelectedSampler":"DPM++ 2M Karras"
+	},
+	"VAE":{
+		"VAE":"Automatic"
+	},
+	"Prompt":"(Detailed eye description), (Detailed face description), colorful, pixel art, 1girl, full body, white background, anatomically correct,transparent background, a girl standing, red hair, short hair, red dress, hair between eyes, black thighhighs, medium breasts, Deeva \\(overwatch 1 version\\),<lora:M_Pixel:0.5>",
+	"NegativePrompt":"bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,",
+	"Width":512,
+	"Height":512,
+	"Steps":20,
+	"CfgScale":7,
+	"Seed":-1,
+	"BatchCount":2,
+	"BatchSize":1,
+	"MultiControlNetSettings":
+	[
+		{
+			"EnableControlNet":"False",
+			"SelectedModel":"control_v11f1p_sd15_depth_fp16 [4b72d323]",
+			"InputImage":{
+				"LoadImageSetting":{
+					"FolderPath":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\PixelArt\\Depth",
+					"FileName":"Input_12020672_835.png"
+				},
+				"ImageSetting":{
+					"ShowImageDetail":"False",
+					"SaveImageAfterCapture":"True"
+				},
+				"AutoCaptureSetting":{
+					"SaveAutoCaptureImage":"True",
+					"AutoCaptureInterval":0.10000000149011612,
+					"AutoCaptureModes":
+					[
+						"Normal"
+					]
+				},
+				"CaptureMode":"Depth",
+				"ShowImageDetail":"False"
+			},
+			"ControlWeight":1,
+			"StartingControlStep":0.10000000149011612,
+			"EndingControlStep":1
+		},
+		{
+			"EnableControlNet":"False",
+			"SelectedModel":"control_sd15_normal [fef5e48e]",
+			"InputImage":{
+				"LoadImageSetting":{
+					"FolderPath":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\06_20_2023\\Normal",
+					"FileName":"Input_14173924_532.png"
+				},
+				"ImageSetting":{
+					"ShowImageDetail":"False",
+					"SaveImageAfterCapture":"True"
+				},
+				"AutoCaptureSetting":{
+					"SaveAutoCaptureImage":"True",
+					"AutoCaptureInterval":0.10000000149011612
+				},
+				"CaptureMode":"Normal",
+				"ShowImageDetail":"True"
+			},
+			"ControlWeight":1,
+			"StartingControlStep":0,
+			"EndingControlStep":1
+		},
+		{
+			"EnableControlNet":"False",
+			"SelectedModel":"control_sd15_canny [fef5e48e]",
+			"InputImage":{
+				"LoadImageSetting":{
+					"FolderPath":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\06_20_2023\\Canny",
+					"FileName":"Input_14174157_533.png"
+				},
+				"ImageSetting":{
+					"ShowImageDetail":"False",
+					"SaveImageAfterCapture":"True"
+				},
+				"AutoCaptureSetting":{
+					"SaveAutoCaptureImage":"True",
+					"AutoCaptureInterval":0.10000000149011612,
+					"AutoCaptureModes":
+					[
+						"Depth",
+						"Normal",
+						"Canny"
+					]
+				},
+				"CaptureMode":"Canny",
+				"ShowImageDetail":"True"
+			},
+			"ControlWeight":1,
+			"StartingControlStep":0,
+			"EndingControlStep":1
+		}
+	],
+	"ImageOutputSetting":{
+		"OutputFolder":"Custom",
+		"CustomOutputFolder":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\PixelArt",
+		"OutputControlNetInputImage":"False",
+		"OutputGenerateImageSetting":"False",
+		"OutPutFileID":843
+	},
+	"WebUIExtensionSetting":{
+		"ConfigData":{
+			"CurOutputImageName":"14342896_843"
+		},
+		"WebUICMDs":
+		[
+			{
+				"ClassName":"SDU.SDU_WebUICMDOutputTensors, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+				"ClassData":{
+					"OutputTensorType":"EveryNSteps",
+					"FolderPath":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\06_30_2023\\tensors",
+					"OutputStepInterval":1,
+					"OutputJsonTensor":"False",
+					"Enable":"False"
+				}
+			},
+			{
+				"ClassName":"SDU.SDU_WebUICMDOutputTensors, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+				"ClassData":{
+					"OutputTensorType":"OutputAtSteps",
+					"FolderPath":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\06_28_2023\\tensors",
+					"OutputStepInterval":5,
+					"OutputAtSteps":
+					[
+						6
+					],
+					"OutputJsonTensor":"False",
+					"Enable":"True"
+				}
+			},
+			{
+				"ClassName":"SDU.SDU_WebUICMDLoadTensor, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+				"ClassData":{
+					"FolderPath":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\06_28_2023\\tensors",
+					"LoadAtStep":6,
+					"LoadTensorFileName":"15405509_745__006.pt",
+					"Enable":"False"
+				}
+			},
+			{
+				"ClassName":"SDU.SDU_WebUICMDLoadJsonTensor, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+				"ClassData":{
+					"FolderPath":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\06_30_2023\\tensors",
+					"LoadJsonTensorName":"18283418_733__019.json",
+					"Enable":"False"
+				}
+			}
+		]
+	},
+	"ResultInfo":{
+		"prompt":"(Detailed eye description), (Detailed face description), colorful, pixel art, 1girl, full body, white background, anatomically correct,transparent background, a girl standing, red hair, short hair, red dress, hair between eyes, black thighhighs, medium breasts, Deeva \\(overwatch 1 version\\),<lora:M_Pixel:0.5>",
+		"all_prompts":
+		[
+			"(Detailed eye description), (Detailed face description), colorful, pixel art, 1girl, full body, white background, anatomically correct,transparent background, a girl standing, red hair, short hair, red dress, hair between eyes, black thighhighs, medium breasts, Deeva \\(overwatch 1 version\\),<lora:M_Pixel:0.5>"
+		],
+		"negative_prompt":"bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,",
+		"all_negative_prompts":
+		[
+			"bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,"
+		],
+		"seed":3938093103,
+		"all_seeds":
+		[
+			3938093103
+		],
+		"subseed":968396597,
+		"all_subseeds":
+		[
+			968396597
+		],
+		"subseed_strength":0,
+		"width":512,
+		"height":512,
+		"sampler_name":"DPM++ 2M Karras",
+		"cfg_scale":7,
+		"steps":20,
+		"batch_size":1,
+		"restore_faces":false,
+		"face_restoration_model":null,
+		"sd_model_hash":"969673ad74",
+		"seed_resize_from_w":-1,
+		"seed_resize_from_h":-1,
+		"denoising_strength":0,
+		"extra_generation_params":{
+			"Lora hashes":"M_Pixel: 9d49ca20880d"
+		},
+		"index_of_first_image":0,
+		"infotexts":
+		[
+			"(Detailed eye description), (Detailed face description), colorful, pixel art, 1girl, full body, white background, anatomically correct,transparent background, a girl standing, red hair, short hair, red dress, hair between eyes, black thighhighs, medium breasts, Deeva \\(overwatch 1 version\\),<lora:M_Pixel:0.5>\nNegative prompt: bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,\nSteps: 20, Sampler: DPM++ 2M Karras, CFG scale: 7.0, Seed: 3938093103, Size: 512x512, Model hash: 969673ad74, Model: 03.darkSushiMixMix_colorful, Denoising strength: 0, Lora hashes: \"M_Pixel: 9d49ca20880d\", Version: v1.5.1"
+		],
+		"styles":
+		[
+
+		],
+		"job_timestamp":"20230908143428",
+		"clip_skip":1,
+		"is_using_inpainting_conditioning":false
+	},
+	"SelectedLoraModel":"M_Pixel",
+	"CMDs":
+	[
+		{
+			"ClassName":"SDU.SDU_CMDForeach, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+			"ClassData":{
+				"Enumerables":
+				[
+					{
+						"ClassName":"SDU.SDU_EnumGroup, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+						"ClassData":{
+							"CMDs":
+							[
+								{
+									"ClassName":"SDU.SDU_CMDSetCheckPoint, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+									"ClassData":{
+										"CheckPointSetting":{
+											"CheckPoint":"03.darkSushiMixMix_colorful"
+										}
+									}
+								},
+								{
+									"ClassName":"SDU.SDU_CMDSetCheckPoint, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+									"ClassData":{
+										"CheckPointSetting":{
+											"CheckPoint":"04.facebombmix_v1Bakedvae"
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"CMDs":
+				[
+					{
+						"ClassName":"SDU.SDU_CMDForeach, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+						"ClassData":{
+							"Enumerables":
+							[
+								{
+									"ClassName":"SDU.SDU_EnumControlNetInputImages, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+									"ClassData":null
+								}
+							],
+							"CMDs":
+							[
+								{
+									"ClassName":"SDU.SDU_CMDGenerateImage, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+									"ClassData":null
+								}
+							]
+						}
+					}
+				]
+			}
+		}
+	]
+}
