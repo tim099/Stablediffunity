@@ -132,9 +132,11 @@ namespace SDU
             {
                 //GUILayout.Space(30);
                 GUILayout.Label($"[{System.DateTime.Now.ToString("HH:mm:ss")}]", UCL_GUIStyle.LabelStyle,GUILayout.Width(80));
+
                 SDU_Server.OnGUI(m_DataDic.GetSubDic("SDU_Server"));
             }
             GUILayout.FlexibleSpace();
+            GUILayout.Label($"[{Application.systemLanguage}]", UCL_GUIStyle.LabelStyle, GUILayout.Width(120));
             if (GUILayout.Button("Download File"))
             {
                 SDU_DownloadFilePage.Create();

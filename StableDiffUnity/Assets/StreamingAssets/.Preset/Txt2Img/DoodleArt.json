@@ -1,5 +1,5 @@
 {
-	"ID":"MakimaAnim",
+	"ID":"DoodleArt",
 	"LoadID":"MakimaAnim",
 	"CheckPoint":{
 		"CheckPoint":"04.facebombmix_v1Bakedvae"
@@ -10,6 +10,7 @@
 	"VAE":{
 		"VAE":"Automatic"
 	},
+	"Prompt":"",
 	"PromptSegment":{
 		"IsEnable":"True",
 		"Mode":"Groups",
@@ -25,7 +26,7 @@
 					{
 						"IsEnable":"True",
 						"Mode":"Prompt",
-						"Prompt":"mamasterpiece"
+						"Prompt":"masterpiece"
 					},
 					{
 						"IsEnable":"True",
@@ -38,38 +39,43 @@
 						"Prompt":"ultra-detailed"
 					},
 					{
-						"IsEnable":"False",
+						"IsEnable":"True",
 						"Mode":"Loras",
 						"Loras":
 						[
 							{
 								"Lora":"maid",
 								"Weight":0.800000011920929,
-								"IsEnable":"True"
+								"IsEnable":"False"
 							}
 						]
 					}
 				]
 			},
 			{
-				"IsEnable":"True",
+				"IsEnable":"False",
 				"Mode":"Prompt",
 				"Prompt":"1girl"
 			},
 			{
-				"IsEnable":"True",
+				"IsEnable":"False",
 				"Mode":"Prompt",
 				"Prompt":"makima \\(chainsaw man\\)"
 			},
 			{
-				"IsEnable":"True",
+				"IsEnable":"False",
 				"Mode":"Prompt",
 				"Prompt":"yellow eyes"
 			},
 			{
-				"IsEnable":"True",
+				"IsEnable":"False",
 				"Mode":"Prompt",
 				"Prompt":"red hair"
+			},
+			{
+				"IsEnable":"True",
+				"Mode":"Prompt",
+				"Prompt":"surrealistic,tuyawang,abstract,doodle art,1girl,"
 			},
 			{
 				"IsEnable":"True",
@@ -77,27 +83,26 @@
 				"Loras":
 				[
 					{
-						"Lora":"Makima",
-						"Weight":0.5,
-						"IsEnable":"True"
+						"Lora":"altair_v20",
+						"Weight":0.1800381988286972,
+						"IsEnable":"False"
 					},
 					{
-						"Lora":"altair_v20",
-						"Weight":0.5,
+						"Lora":"DoodleArt",
+						"Weight":0.800000011920929,
 						"IsEnable":"True"
 					}
 				]
 			}
 		]
 	},
-	"Prompt":"",
 	"NegativePrompt":"(low quality, worst quality:1.4), ((bad fingers))",
 	"Width":512,
 	"Height":800,
 	"Steps":25,
 	"CfgScale":7,
 	"Seed":-1,
-	"BatchCount":1,
+	"BatchCount":8,
 	"BatchSize":1,
 	"MultiControlNetSettings":
 	[
@@ -185,62 +190,33 @@
 		"OutputFolder":"Default",
 		"OutputControlNetInputImage":"False",
 		"OutputGenerateImageSetting":"False",
-		"OutPutFileID":347
+		"OutPutFileID":364
 	},
 	"WebUIExtensionSetting":{
 		"ConfigData":{
-			"CurOutputImageName":"10212850_347"
+			"CurOutputImageName":"14565161_364"
 		}
 	},
 	"ResultInfo":{
-		"prompt":"(mamasterpiece,best quality,ultra-detailed,),1girl,makima \\(chainsaw man\\),yellow eyes,red hair,",
-		"all_prompts":
-		[
-			"(mamasterpiece,best quality,ultra-detailed,),1girl,makima \\(chainsaw man\\),yellow eyes,red hair,"
-		],
+		"sampler_index":"DPM++ 2M Karras",
+		"prompt":"(masterpiece,best quality,ultra-detailed,),1girl,makima \\(chainsaw man\\),yellow eyes,red hair,<lora:altair_v20:0.18>,<lora:DoodleArt:0.61>,",
+		"steps":25,
 		"negative_prompt":"(low quality, worst quality:1.4), ((bad fingers))",
-		"all_negative_prompts":
-		[
-			"(low quality, worst quality:1.4), ((bad fingers))"
-		],
-		"seed":432957171,
-		"all_seeds":
-		[
-			432957171
-		],
-		"subseed":3350385765,
-		"all_subseeds":
-		[
-			3350385765
-		],
-		"subseed_strength":0,
+		"seed":-1,
+		"cfg_scale":7,
 		"width":512,
 		"height":800,
-		"sampler_name":"DPM++ 2M Karras",
-		"cfg_scale":7,
-		"steps":25,
 		"batch_size":1,
-		"restore_faces":false,
-		"face_restoration_model":null,
-		"sd_model_hash":"7364c31aac",
-		"seed_resize_from_w":-1,
-		"seed_resize_from_h":-1,
-		"denoising_strength":0,
-		"extra_generation_params":{
-
-		},
-		"index_of_first_image":0,
-		"infotexts":
-		[
-			"(mamasterpiece,best quality,ultra-detailed,),1girl,makima \\(chainsaw man\\),yellow eyes,red hair,\nNegative prompt: (low quality, worst quality:1.4), ((bad fingers))\nSteps: 25, Sampler: DPM++ 2M Karras, CFG scale: 7.0, Seed: 432957171, Size: 512x800, Model hash: 7364c31aac, Model: 04.facebombmix_v1Bakedvae, Denoising strength: 0, Version: v1.5.1"
-		],
-		"styles":
-		[
-
-		],
-		"job_timestamp":"20231025102128",
-		"clip_skip":1,
-		"is_using_inpainting_conditioning":false
+		"alwayson_scripts":{
+			"stablediffunity":{
+				"args":
+				[
+					{
+						"CurOutputImageName":"14565161_364"
+					}
+				]
+			}
+		}
 	},
 	"SelectedLoraModel":"maid",
 	"CMDs":

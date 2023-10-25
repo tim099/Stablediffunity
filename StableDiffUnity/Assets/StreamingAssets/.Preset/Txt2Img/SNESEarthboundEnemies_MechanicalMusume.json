@@ -1,0 +1,90 @@
+{
+	"ID":"SNESEarthboundEnemies_MechanicalMusume",
+	"LoadID":"SNESEarthboundEnemies_witch",
+	"CheckPoint":{
+		"CheckPoint":"04.facebombmix_v1Bakedvae"
+	},
+	"Sampler":{
+		"SelectedSampler":"DPM++ 2M Karras"
+	},
+	"VAE":{
+		"VAE":"Automatic"
+	},
+	"Prompt":"(masterpiece, top quality, best quality), pixel,pixel art,Earthbound_enemy,1girl,mecha musume,mechanical parts,fullbody, dark,drop shadow, <lora:SNESEarthboundEnemies:0.8><lora:MechaMechanicalMusume:0.4>",
+	"NegativePrompt":"\u200b\u200blowres, bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,",
+	"Width":512,
+	"Height":512,
+	"Steps":20,
+	"CfgScale":7,
+	"Seed":-1,
+	"BatchCount":8,
+	"BatchSize":2,
+	"ImageOutputSetting":{
+		"OutputFolder":"Custom",
+		"CustomOutputFolder":"C:\\Users\\Public\\Documents\\StableDiffUnity_V1\\Env\\Output\\PixelArt",
+		"OutputControlNetInputImage":"False",
+		"OutputGenerateImageSetting":"False",
+		"OutPutFileID":893
+	},
+	"WebUIExtensionSetting":{
+		"ConfigData":{
+			"CurOutputImageName":"14372794_893"
+		}
+	},
+	"ResultInfo":{
+		"prompt":"(masterpiece, top quality, best quality), pixel,pixel art,Earthbound_enemy,1girl,mecha musume,mechanical parts,fullbody, dark,drop shadow, <lora:SNESEarthboundEnemies:0.8><lora:MechaMechanicalMusume:0.4>",
+		"all_prompts":
+		[
+			"(masterpiece, top quality, best quality), pixel,pixel art,Earthbound_enemy,1girl,mecha musume,mechanical parts,fullbody, dark,drop shadow, <lora:SNESEarthboundEnemies:0.8><lora:MechaMechanicalMusume:0.4>",
+			"(masterpiece, top quality, best quality), pixel,pixel art,Earthbound_enemy,1girl,mecha musume,mechanical parts,fullbody, dark,drop shadow, <lora:SNESEarthboundEnemies:0.8><lora:MechaMechanicalMusume:0.4>"
+		],
+		"negative_prompt":"\u200b\u200blowres, bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,",
+		"all_negative_prompts":
+		[
+			"\u200b\u200blowres, bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,",
+			"\u200b\u200blowres, bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,"
+		],
+		"seed":1551051260,
+		"all_seeds":
+		[
+			1551051260,
+			1551051261
+		],
+		"subseed":1757927612,
+		"all_subseeds":
+		[
+			1757927612,
+			1757927613
+		],
+		"subseed_strength":0,
+		"width":512,
+		"height":512,
+		"sampler_name":"DPM++ 2M Karras",
+		"cfg_scale":7,
+		"steps":20,
+		"batch_size":2,
+		"restore_faces":false,
+		"face_restoration_model":null,
+		"sd_model_hash":"7364c31aac",
+		"seed_resize_from_w":-1,
+		"seed_resize_from_h":-1,
+		"denoising_strength":0,
+		"extra_generation_params":{
+			"Lora hashes":"SNESEarthboundEnemies: e43be5f51eca, MechaMechanicalMusume: 76b4400e5e2b"
+		},
+		"index_of_first_image":0,
+		"infotexts":
+		[
+			"(masterpiece, top quality, best quality), pixel,pixel art,Earthbound_enemy,1girl,mecha musume,mechanical parts,fullbody, dark,drop shadow, <lora:SNESEarthboundEnemies:0.8><lora:MechaMechanicalMusume:0.4>\nNegative prompt: \u200b\u200blowres, bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,\nSteps: 20, Sampler: DPM++ 2M Karras, CFG scale: 7.0, Seed: 1551051260, Size: 512x512, Model hash: 7364c31aac, Model: 04.facebombmix_v1Bakedvae, Denoising strength: 0, Lora hashes: \"SNESEarthboundEnemies: e43be5f51eca, MechaMechanicalMusume: 76b4400e5e2b\", Version: v1.5.1",
+			"(masterpiece, top quality, best quality), pixel,pixel art,Earthbound_enemy,1girl,mecha musume,mechanical parts,fullbody, dark,drop shadow, <lora:SNESEarthboundEnemies:0.8><lora:MechaMechanicalMusume:0.4>\nNegative prompt: \u200b\u200blowres, bad anatomy, bad hands, text,error, missing fngers,extra digt ,fewer digits,cropped,\nSteps: 20, Sampler: DPM++ 2M Karras, CFG scale: 7.0, Seed: 1551051261, Size: 512x512, Model hash: 7364c31aac, Model: 04.facebombmix_v1Bakedvae, Denoising strength: 0, Lora hashes: \"SNESEarthboundEnemies: e43be5f51eca, MechaMechanicalMusume: 76b4400e5e2b\", Version: v1.5.1"
+		],
+		"styles":
+		[
+
+		],
+		"job_timestamp":"20231024143727",
+		"clip_skip":1,
+		"is_using_inpainting_conditioning":false
+	},
+	"SelectedLoraModel":"MechaMechanicalMusume"
+}

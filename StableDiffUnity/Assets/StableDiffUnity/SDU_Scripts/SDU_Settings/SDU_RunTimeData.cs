@@ -149,6 +149,7 @@ namespace SDU
 
         public bool m_RedirectStandardOutput = false;
         public bool m_AutoOpenWeb = true;
+        [UCL.Core.ATTR.UCL_HideOnGUI]
         public string m_WebURL = "http://127.0.0.1:7860";
         //[UCL.Core.ATTR.UCL_HideOnGUI] public int m_OutPutFileID = 0;
 
@@ -160,7 +161,16 @@ namespace SDU
                 GUILayout.Label("Generate Mode", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
                 m_GenerateMode = UCL_GUILayout.PopupAuto(m_GenerateMode, iDataDic.GetSubDic("GenerateMode"), "GenerateMode");
             }
-                
+            using (var aScope = new GUILayout.HorizontalScope())
+            {
+                if (GUILayout.Button("Open Webpage", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+                {
+                    System.Diagnostics.Process.Start(m_WebURL);
+                }
+                GUILayout.Label("WebURL", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
+                m_WebURL = GUILayout.TextField(m_WebURL);
+            }
+
             switch (m_GenerateMode)
             {
                 case GenerateMode.Txt2Img:

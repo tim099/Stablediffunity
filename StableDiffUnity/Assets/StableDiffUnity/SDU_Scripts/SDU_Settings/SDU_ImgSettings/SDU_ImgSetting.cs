@@ -29,8 +29,12 @@ namespace SDU
 
         public SDU_SamplerSetting m_Sampler = new SDU_SamplerSetting();
         public SDU_VAESettings m_VAE = new SDU_VAESettings();
-        public SDU_PromptSegment m_PromptSegment = new SDU_PromptSegment();
+        
         public string m_Prompt = "masterpiece, best quality, ultra-detailed,((black background)),1girl,";
+        /// <summary>
+        /// Extension for Prompt
+        /// </summary>
+        public SDU_PromptSegment m_PromptSegment = new SDU_PromptSegment();
         public string m_NegativePrompt = "(low quality, worst quality:1.4), ((bad fingers))";
         public int m_Width = 512;
         public int m_Height = 512;
@@ -60,9 +64,6 @@ namespace SDU
         #region Hide
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public string m_SelectedLoraModel;
-
-        [UCL.Core.ATTR.UCL_HideOnGUI]
-        public List<SDU_LoraSetting> m_LoraSettings = new List<SDU_LoraSetting>();
 
 
         [UCL.Core.ATTR.UCL_HideOnGUI]
@@ -162,17 +163,6 @@ namespace SDU
                     else
                     {
                         sb.Append(m_Prompt);
-                    }
-                }
-                if (!m_LoraSettings.IsNullOrEmpty())
-                {
-                    foreach (var aLora in m_LoraSettings)
-                    {
-                        if (aLora.IsEnable)
-                        {
-                            sb.Append(',');
-                            sb.Append(aLora.Prompt);
-                        }
                     }
                 }
 
@@ -345,7 +335,6 @@ namespace SDU
                     RunTimeData.InstallSetting.OpenFolder(FolderEnum.Lora);
                 }
             }
-            UCL_GUILayout.DrawList(m_LoraSettings, iSubDic.GetSubDic("LoraSettings"), "LoraSettings", false);
         }
         virtual public object TexSettingOnGUI(string iFieldName, UCL_ObjectDictionary iSubDic, UCL_ObjectDictionary iDataDic)
         {

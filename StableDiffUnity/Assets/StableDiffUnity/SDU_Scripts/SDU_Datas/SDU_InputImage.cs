@@ -153,6 +153,7 @@ namespace SDU
                     if (Texture != null)
                     {
                         var aSize = SDU_Util.GetTextureSize(512, Texture);
+                        GUILayout.Label($"Width:{Texture.width},Height:{Texture.height}");
                         GUILayout.Box(Texture, GUILayout.Width(aSize.x), GUILayout.Height(aSize.y));
                     }
                 }
