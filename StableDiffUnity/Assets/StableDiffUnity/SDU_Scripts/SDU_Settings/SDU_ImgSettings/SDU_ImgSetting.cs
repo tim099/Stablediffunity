@@ -18,6 +18,22 @@ namespace SDU
 {
     public class SDU_ImgSetting : UCL.Core.JsonLib.UnityJsonSerializable, UCL.Core.UI.UCLI_FieldOnGUI
     {
+        public enum RandomSeedType
+        {
+            /// <summary>
+            /// use seed value
+            /// </summary>
+            SeedValue = 0,
+            /// <summary>
+            /// Auto generate when get Seed
+            /// </summary>
+            AutoGenerateSeed,
+            /// <summary>
+            /// Auto set seed to -1
+            /// </summary>
+            WebUIRandom,
+        }
+
         #region Save & Load Setting
         [UCL.Core.ATTR.UCL_HideOnGUI]
         public string m_ID = "Default";
@@ -36,6 +52,8 @@ namespace SDU
         /// </summary>
         public SDU_PromptSegment m_PromptSegment = new SDU_PromptSegment();
         public string m_NegativePrompt = "(low quality, worst quality:1.4), ((bad fingers))";
+
+        public SDU_PromptSegment m_NegativePromptSegment = new SDU_PromptSegment();
         public int m_Width = 512;
         public int m_Height = 512;
 
@@ -45,7 +63,12 @@ namespace SDU
         [UCL.Core.PA.UCL_Slider(1, 30)]
         public float m_CfgScale = 7;
 
+        public RandomSeedType m_RandomSeedType = RandomSeedType.SeedValue;
+
+        //[UCL.Core.PA.Conditional("m_RandomSeedType", false, RandomSeedType.Default)]
         public long m_Seed = -1;
+
+
         //[UCL.Core.PA.UCL_IntSlider(1, 12)] public int m_ClipSkip = 1;
 
         [UCL.Core.PA.UCL_IntSlider(1, 100)]
@@ -127,49 +150,70 @@ namespace SDU
             }
             return aControlNetSettings;
         }
-        virtual public string Prompt
+        virtual public string Prompt => GetPrompt(m_Prompt, m_PromptSegment);
+        virtual public string NegativePrompt => GetPrompt(m_NegativePrompt, m_NegativePromptSegment);
+        private static string GetPrompt(string iPrompt, SDU_PromptSegment iPromptSegment)
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+
+            if (!iPromptSegment.IsEmpty)
+            {
+                sb.Append(iPromptSegment.Prompt);
+                sb.Append(',');
+            }
+            if (!string.IsNullOrEmpty(iPrompt))
+            {
+                int aLen = iPrompt.Length;
+                for (int i = iPrompt.Length - 1; i >= 0; i--)//remove ' ' or ',' in last part of Prompt
+                {
+                    var aChar = iPrompt[i];
+                    if (aChar is not ' ' or ',')
+                    {
+                        break;
+                    }
+                    aLen = i;
+                }
+                if (aLen < iPrompt.Length)
+                {
+                    if (aLen > 1)
+                    {
+                        string aPrompt = iPrompt.Substring(0, aLen - 1);
+                        //Debug.LogError($"m_Prompt.LastElement() == ',', aPrompt:{aPrompt}");
+                        sb.Append(aPrompt);
+                    }
+                }
+                else
+                {
+                    sb.Append(iPrompt);
+                }
+            }
+
+
+            return sb.ToString();
+        }
+        virtual public long Seed
         {
             get
             {
-                System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
-
-                if(!m_PromptSegment.IsEmpty)
+                switch (m_RandomSeedType)
                 {
-                    sb.Append(m_PromptSegment.Prompt);
-                    sb.Append(',');
-                }
-                if (!string.IsNullOrEmpty(m_Prompt))
-                {
-                    int aLen = m_Prompt.Length;
-                    for (int i = m_Prompt.Length - 1; i >= 0; i--)//remove ' ' or ',' in last part of Prompt
-                    {
-                        var aChar = m_Prompt[i];
-                        if (aChar is not ' ' or ',')
+                    case RandomSeedType.AutoGenerateSeed:
                         {
+                            m_Seed = UCL.Core.MathLib.UCL_Random.Instance.NextLong();
                             break;
                         }
-                        aLen = i;
-                    }
-                    if (aLen < m_Prompt.Length)
-                    {
-                        if (aLen > 1)
+                    case RandomSeedType.WebUIRandom:
                         {
-                            string aPrompt = m_Prompt.Substring(0, aLen - 1);
-                            //Debug.LogError($"m_Prompt.LastElement() == ',', aPrompt:{aPrompt}");
-                            sb.Append(aPrompt);
+                            m_Seed = -1;
+                            break;
                         }
-                    }
-                    else
-                    {
-                        sb.Append(m_Prompt);
-                    }
                 }
-
-
-                return sb.ToString();
+                return m_Seed;
             }
         }
+
+
         virtual public JsonData GetConfigJson()
         {
             const int MaxRes = 2048;
@@ -190,8 +234,9 @@ namespace SDU
             aJson["sampler_index"] = m_Sampler.m_SelectedSampler;//m_SelectedSampler;
             aJson["prompt"] = Prompt;
             aJson["steps"] = m_Steps;
-            aJson["negative_prompt"] = m_NegativePrompt;
-            aJson["seed"] = m_Seed;
+            aJson["negative_prompt"] = NegativePrompt;
+
+            aJson["seed"] = Seed;
             //aJson["clip_skip"] = m_ClipSkip;
             aJson["cfg_scale"] = m_CfgScale;
             aJson["width"] = m_Width;
@@ -265,6 +310,11 @@ namespace SDU
         }
         virtual public void PresetOnGUI(UCL_ObjectDictionary iSubDic)
         {
+            //Test Seed
+            //if (GUILayout.Button("Test Seed", UCL.Core.UI.UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
+            //{
+            //    var aSeed = Seed;
+            //}
             using (var aScope = new GUILayout.VerticalScope("box"))
             {
                 string aPresetPath = RunTimeData.InstallSetting.GetFolderPath(PresetFolder);

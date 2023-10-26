@@ -151,16 +151,16 @@ namespace SDU
             RunTimeData.ConfigOnGUI(m_DataDic.GetSubDic("RunTimeData"));
 
             UCL.Core.UI.UCL_GUILayout.DrawObjectData(RunTimeData.Ins, m_DataDic.GetSubDic("RunTimeData"), "Configs", false);
-
-            if (!UnityChan.IdleChanger.s_IdleChangers.IsNullOrEmpty())
+            var aSceneControl = SDU_SceneControl.Ins;
+            if(aSceneControl != null)
             {
-                GUILayout.Space(20);
-                GUILayout.Box($"Change UnityChan Motion");
-                for (int i = 0; i < UnityChan.IdleChanger.s_IdleChangers.Count; i++)
+                try
                 {
-                    var aIdleChanger = UnityChan.IdleChanger.s_IdleChangers[i];
-                    
-                    aIdleChanger.CustomOnGUI(i);
+                    aSceneControl.ContentOnGUI(m_DataDic.GetSubDic("SceneControl"));
+                }
+                catch(Exception ex)
+                {
+                    Debug.LogException(ex);
                 }
             }
             var aTextures = SDU_ImageGenerator.s_Textures;

@@ -158,11 +158,6 @@ namespace SDU
             UCL.Core.UI.UCL_GUILayout.DrawField(this, iDataDic.GetSubDic("RunTimeData"), iFieldName, false);
             using (var aScope = new GUILayout.HorizontalScope())
             {
-                GUILayout.Label("Generate Mode", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
-                m_GenerateMode = UCL_GUILayout.PopupAuto(m_GenerateMode, iDataDic.GetSubDic("GenerateMode"), "GenerateMode");
-            }
-            using (var aScope = new GUILayout.HorizontalScope())
-            {
                 if (GUILayout.Button("Open Webpage", UCL_GUIStyle.ButtonStyle, GUILayout.ExpandWidth(false)))
                 {
                     System.Diagnostics.Process.Start(m_WebURL);
@@ -170,6 +165,13 @@ namespace SDU
                 GUILayout.Label("WebURL", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
                 m_WebURL = GUILayout.TextField(m_WebURL);
             }
+            GUILayout.Space(10);
+            using (var aScope = new GUILayout.HorizontalScope())
+            {
+                GUILayout.Label("Generate Mode", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
+                m_GenerateMode = UCL_GUILayout.PopupAuto(m_GenerateMode, iDataDic.GetSubDic("GenerateMode"), "GenerateMode");
+            }
+
 
             switch (m_GenerateMode)
             {

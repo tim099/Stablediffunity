@@ -1,8 +1,8 @@
 {
-	"ID":"DoodleArt",
-	"LoadID":"DoodleArt",
+	"ID":"DoodleArt3",
+	"LoadID":"DoodleArt2",
 	"CheckPoint":{
-		"CheckPoint":"03.darkSushiMixMix_colorful"
+		"CheckPoint":"05.DreamShaper"
 	},
 	"Sampler":{
 		"SelectedSampler":"DPM++ 2M Karras"
@@ -58,21 +58,21 @@
 				"Loras":
 				[
 					{
-						"Lora":"altair_v20",
-						"Weight":0.30000001192092896,
-						"IsEnable":"False"
+						"Lora":"HeadpatPOV",
+						"Weight":0.5,
+						"IsEnable":"True"
 					},
 					{
 						"Lora":"DoodleArt",
-						"Weight":0.800000011920929,
+						"Weight":0.5,
 						"IsEnable":"True"
 					}
 				]
 			},
 			{
-				"IsEnable":"False",
+				"IsEnable":"True",
 				"Mode":"Prompt",
-				"Prompt":"surrealistic,tuyawang,abstract,doodle art,1girl,"
+				"Prompt":"IncrsHeadpatPOV, headpat, pov,"
 			},
 			{
 				"IsEnable":"True",
@@ -137,13 +137,67 @@
 			}
 		]
 	},
-	"NegativePrompt":"(low quality, worst quality:1.4), ((bad fingers))",
+	"NegativePrompt":"",
+	"NegativePromptSegment":{
+		"IsEnable":"True",
+		"Mode":"Groups",
+		"ShowBrackets":"False",
+		"SubGroups":
+		[
+			{
+				"IsEnable":"False",
+				"Mode":"Prompt",
+				"Prompt":"nude"
+			},
+			{
+				"IsEnable":"False",
+				"Mode":"Prompt",
+				"Prompt":"completely nude"
+			},
+			{
+				"IsEnable":"True",
+				"Mode":"Groups",
+				"ShowBrackets":"True",
+				"SubGroups":
+				[
+					{
+						"IsEnable":"True",
+						"Mode":"Prompt",
+						"Prompt":"low quality"
+					},
+					{
+						"IsEnable":"True",
+						"Mode":"Prompt",
+						"Prompt":"worst quality:1.4"
+					}
+				]
+			},
+			{
+				"IsEnable":"True",
+				"Mode":"Prompt",
+				"Prompt":"(bad fingers)"
+			},
+			{
+				"IsEnable":"False",
+				"Mode":"Loras",
+				"Loras":
+				[
+					{
+						"Lora":"DoodleArt",
+						"Weight":0.800000011920929,
+						"IsEnable":"True"
+					}
+				]
+			}
+		]
+	},
 	"Width":512,
 	"Height":800,
 	"Steps":25,
 	"CfgScale":7,
-	"Seed":-1,
-	"BatchCount":8,
+	"RandomSeedType":"SeedValue",
+	"Seed":1539721591486961780,
+	"BatchCount":1,
 	"BatchSize":1,
 	"MultiControlNetSettings":
 	[
@@ -231,33 +285,62 @@
 		"OutputFolder":"Default",
 		"OutputControlNetInputImage":"False",
 		"OutputGenerateImageSetting":"False",
-		"OutPutFileID":384
+		"OutPutFileID":436
 	},
 	"WebUIExtensionSetting":{
 		"ConfigData":{
-			"CurOutputImageName":"15310354_384"
+			"CurOutputImageName":"17195951_436"
 		}
 	},
 	"ResultInfo":{
-		"sampler_index":"DPM++ 2M Karras",
-		"prompt":"(masterpiece,best quality,ultra-detailed),<lora:DoodleArt:0.8>,surrealistic,tuyawang,abstract,doodle art,1girl,,",
-		"steps":25,
-		"negative_prompt":"(low quality, worst quality:1.4), ((bad fingers))",
-		"seed":-1,
-		"cfg_scale":7,
+		"prompt":"(masterpiece,best quality,ultra-detailed),<lora:HeadpatPOV:0.5>,<lora:DoodleArt:0.5>,IncrsHeadpatPOV, headpat, pov,,surrealistic,tuyawang,abstract,doodle art,1girl,",
+		"all_prompts":
+		[
+			"(masterpiece,best quality,ultra-detailed),<lora:HeadpatPOV:0.5>,<lora:DoodleArt:0.5>,IncrsHeadpatPOV, headpat, pov,,surrealistic,tuyawang,abstract,doodle art,1girl,"
+		],
+		"negative_prompt":"(low quality,worst quality:1.4),(bad fingers),",
+		"all_negative_prompts":
+		[
+			"(low quality,worst quality:1.4),(bad fingers),"
+		],
+		"seed":1539721591486961780,
+		"all_seeds":
+		[
+			1539721591486961780
+		],
+		"subseed":1233653888,
+		"all_subseeds":
+		[
+			1233653888
+		],
+		"subseed_strength":0,
 		"width":512,
 		"height":800,
+		"sampler_name":"DPM++ 2M Karras",
+		"cfg_scale":7,
+		"steps":25,
 		"batch_size":1,
-		"alwayson_scripts":{
-			"stablediffunity":{
-				"args":
-				[
-					{
-						"CurOutputImageName":"15310354_384"
-					}
-				]
-			}
-		}
+		"restore_faces":false,
+		"face_restoration_model":null,
+		"sd_model_hash":"e3edb8a26f",
+		"seed_resize_from_w":-1,
+		"seed_resize_from_h":-1,
+		"denoising_strength":0,
+		"extra_generation_params":{
+			"Lora hashes":"HeadpatPOV: f30e4b9ac084, DoodleArt: 4558377fa8cb"
+		},
+		"index_of_first_image":0,
+		"infotexts":
+		[
+			"(masterpiece,best quality,ultra-detailed),<lora:HeadpatPOV:0.5>,<lora:DoodleArt:0.5>,IncrsHeadpatPOV, headpat, pov,,surrealistic,tuyawang,abstract,doodle art,1girl,\nNegative prompt: (low quality,worst quality:1.4),(bad fingers),\nSteps: 25, Sampler: DPM++ 2M Karras, CFG scale: 7.0, Seed: 1539721591486961780, Size: 512x800, Model hash: e3edb8a26f, Model: 05.DreamShaper, Denoising strength: 0, Lora hashes: \"HeadpatPOV: f30e4b9ac084, DoodleArt: 4558377fa8cb\", Version: v1.5.1"
+		],
+		"styles":
+		[
+
+		],
+		"job_timestamp":"20231026171959",
+		"clip_skip":1,
+		"is_using_inpainting_conditioning":false
 	},
 	"SelectedLoraModel":"maid",
 	"CMDs":

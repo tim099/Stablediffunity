@@ -1,8 +1,8 @@
 {
-	"ID":"DoodleArt",
+	"ID":"HeadpatPOV",
 	"LoadID":"DoodleArt",
 	"CheckPoint":{
-		"CheckPoint":"03.darkSushiMixMix_colorful"
+		"CheckPoint":"05.DreamShaper"
 	},
 	"Sampler":{
 		"SelectedSampler":"DPM++ 2M Karras"
@@ -58,9 +58,9 @@
 				"Loras":
 				[
 					{
-						"Lora":"altair_v20",
-						"Weight":0.30000001192092896,
-						"IsEnable":"False"
+						"Lora":"HeadpatPOV",
+						"Weight":0.5,
+						"IsEnable":"True"
 					},
 					{
 						"Lora":"DoodleArt",
@@ -70,9 +70,9 @@
 				]
 			},
 			{
-				"IsEnable":"False",
+				"IsEnable":"True",
 				"Mode":"Prompt",
-				"Prompt":"surrealistic,tuyawang,abstract,doodle art,1girl,"
+				"Prompt":"IncrsHeadpatPOV, headpat, pov,"
 			},
 			{
 				"IsEnable":"True",
@@ -231,16 +231,16 @@
 		"OutputFolder":"Default",
 		"OutputControlNetInputImage":"False",
 		"OutputGenerateImageSetting":"False",
-		"OutPutFileID":384
+		"OutPutFileID":414
 	},
 	"WebUIExtensionSetting":{
 		"ConfigData":{
-			"CurOutputImageName":"15310354_384"
+			"CurOutputImageName":"15461981_414"
 		}
 	},
 	"ResultInfo":{
 		"sampler_index":"DPM++ 2M Karras",
-		"prompt":"(masterpiece,best quality,ultra-detailed),<lora:DoodleArt:0.8>,surrealistic,tuyawang,abstract,doodle art,1girl,,",
+		"prompt":"(masterpiece,best quality,ultra-detailed),<lora:HeadpatPOV:0.5>,<lora:DoodleArt:0.8>,IncrsHeadpatPOV, headpat, pov,,surrealistic,tuyawang,abstract,doodle art,1girl,",
 		"steps":25,
 		"negative_prompt":"(low quality, worst quality:1.4), ((bad fingers))",
 		"seed":-1,
@@ -253,7 +253,7 @@
 				"args":
 				[
 					{
-						"CurOutputImageName":"15310354_384"
+						"CurOutputImageName":"15461981_414"
 					}
 				]
 			}
