@@ -122,24 +122,6 @@ namespace SDU
                     aRT = CaptureImage(iWidth, iHeight, aMat);
                 }
                 
-                //switch (aCaptureMode)
-                //{
-                //    case CaptureMode.Depth:
-                //        {
-                //            aRT = CaptureImage(iWidth, iHeight, m_DepthMaterial);
-                //            break;
-                //        }
-                //    case CaptureMode.Normal:
-                //        {
-                //            aRT = CaptureImage(iWidth, iHeight, m_NormalMaterial);
-                //            break;
-                //        }
-                //    default:
-                //        {
-                //            aRT = CaptureImage(iWidth, iHeight, m_DepthMaterial);
-                //            break;
-                //        }
-                //}
                 if (aRT != null)
                 {
                     aRenderTextures.Add(new Tuple<CaptureMode, RenderTexture>(aCaptureMode, aRT));

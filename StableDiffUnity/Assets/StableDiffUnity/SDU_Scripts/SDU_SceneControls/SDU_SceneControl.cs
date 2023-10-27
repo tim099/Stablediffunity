@@ -15,6 +15,8 @@ namespace SDU
         public Animation m_RotateAnimation;
         public Animator m_RotateAnimator;
         public Transform m_UnityChanTransform;
+        public Transform m_UnityChanPos;
+        public bool m_CameraLookAtUnityChan = false;
         private void Awake()
         {
             s_Ins = this;
@@ -32,7 +34,7 @@ namespace SDU
 
 
                 m_RotateAnimation.enabled = UCL_GUILayout.CheckBox(m_RotateAnimation.enabled);
-                GUILayout.Label("RotateAnimation", UCL_GUIStyle.LabelStyle);
+                GUILayout.Label("RotateAnimation", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
                 const float PauseSpeed = 0f;//Mathf.Epsilon
                 if (Mathf.Approximately(Time.timeScale, PauseSpeed))
                 {
@@ -63,32 +65,64 @@ namespace SDU
                     }
 
                 }
-                {
-                    var aPos = m_Camera.transform.localPosition;
-                    using (var aScope2 = new GUILayout.HorizontalScope(GUILayout.Width(300)))
-                    {
-                        float aY = m_Camera.transform.localPosition.y;
-                        float aNewVal = UCL_GUILayout.Slider("Camera(Y)", aY, -1f, 2f, iDataDic.GetSubDic("Camera_Y"));
-                        if (!Mathf.Approximately(aNewVal, aY))
-                        {
-                            m_Camera.transform.localPosition = new Vector3(aPos.x, aNewVal, aPos.z);
-                        }
-                    }
-                    using (var aScope2 = new GUILayout.HorizontalScope(GUILayout.Width(300)))
-                    {
-                        float aZ = m_Camera.transform.localPosition.z;
-                        float aNewZ = UCL_GUILayout.Slider("Camera(Z)", aZ, -8.5f, -17f, iDataDic.GetSubDic("Camera_Z"));
-                        if (!Mathf.Approximately(aNewZ, aZ))
-                        {
-                            m_Camera.transform.localPosition = new Vector3(aPos.x, aPos.y, aNewZ);
-                        }
-                    }
-                }
+
 
 
                 GUILayout.FlexibleSpace();
             }
-            
+            using (var aScope = new GUILayout.HorizontalScope())
+            {
+                GUILayout.Label("Camera", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
+                var aPos = m_Camera.transform.localPosition;
+                using (var aScope2 = new GUILayout.HorizontalScope(GUILayout.Width(300)))
+                {
+                    float aY = m_Camera.transform.localPosition.y;
+                    float aNewVal = UCL_GUILayout.Slider("Y", aY, -1f, 2f, iDataDic.GetSubDic("Camera_Y"));
+                    if (!Mathf.Approximately(aNewVal, aY))
+                    {
+                        m_Camera.transform.localPosition = new Vector3(aPos.x, aNewVal, aPos.z);
+                    }
+                }
+                using (var aScope2 = new GUILayout.HorizontalScope(GUILayout.Width(300)))
+                {
+                    float aZ = m_Camera.transform.localPosition.z;
+                    float aNewZ = UCL_GUILayout.Slider("Z", aZ, -8.5f, -17f, iDataDic.GetSubDic("Camera_Z"));
+                    if (!Mathf.Approximately(aNewZ, aZ))
+                    {
+                        m_Camera.transform.localPosition = new Vector3(aPos.x, aPos.y, aNewZ);
+                    }
+                }
+
+                m_CameraLookAtUnityChan = UCL_GUILayout.CheckBox(m_CameraLookAtUnityChan);
+                GUILayout.Label("Look at UnityChan", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
+
+                if (m_CameraLookAtUnityChan)
+                {
+                    m_Camera.transform.LookAt(m_UnityChanPos);
+                }
+            }
+            if (m_CameraLookAtUnityChan)
+            {
+                using (var aScope = new GUILayout.HorizontalScope()) {
+                    GUILayout.Label("Look at Pos", UCL_GUIStyle.LabelStyle, GUILayout.ExpandWidth(false));
+                    var aPos = m_UnityChanPos.localPosition;
+                    using (var aScope2 = new GUILayout.HorizontalScope(GUILayout.Width(300)))
+                    {
+                        float aY = m_UnityChanPos.localPosition.y;
+                        float aNewVal = UCL_GUILayout.Slider("Y", aY, -1f, 2f, iDataDic.GetSubDic("UnityChanPos_Y"));
+                        if (!Mathf.Approximately(aNewVal, aY))
+                        {
+                            m_UnityChanPos.localPosition = new Vector3(aPos.x, aNewVal, aPos.z);
+                        }
+                    }
+                }
+                
+                using (var aScope = new GUILayout.HorizontalScope())
+                {
+                    UCL_GUILayout.DrawObjectData(m_UnityChanPos.transform, iDataDic.GetSubDic("UnityChanPos"));
+                }
+
+            }
             if (!UnityChan.IdleChanger.s_IdleChangers.IsNullOrEmpty())
             {
                 
