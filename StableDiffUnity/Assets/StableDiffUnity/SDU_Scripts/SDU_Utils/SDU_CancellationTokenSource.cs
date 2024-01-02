@@ -17,6 +17,12 @@ namespace SDU
         {
             Cancel();
         }
+        public CancellationTokenSource Create(CancellationToken iToken)
+        {
+            Cancel();//Cancel prev CancellationRequested if exist
+            m_CTS = CancellationTokenSource.CreateLinkedTokenSource(iToken);
+            return m_CTS;
+        }
         public CancellationTokenSource Create()
         {
             Cancel();//Cancel prev CancellationRequested if exist
