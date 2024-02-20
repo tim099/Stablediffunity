@@ -1,0 +1,9 @@
+{
+	"URL":"https://civitai.com/api/download/models/30506?type=Model&format=SafeTensor&size=full&fp=fp16",
+	"FolderSetting":{
+		"Folder":"Lora"
+	},
+	"FileName":"AttackingConcept",
+	"FileExtension":"safetensors",
+	"WebPageURL":"https://civitai.com/models/25483/attacking-concept"
+}
